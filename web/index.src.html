@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Allowance</title>
+<meta name="description" content="Give your AI agent an allowance, not a wallet. Spending rules for agents on Portaldot V3.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f1f0f7;
+  --surface: #ffffff;
+  --ink: #201c3a;
+  --ink-2: #5d587a;
+  --line: #dcd9ea;
+  --violet: #5a3fd6;
+  --violet-soft: #e7e2fb;
+  --paid: #2e7a57;
+  --held: #a8690a;
+  --held-soft: #fbf0dc;
+  --frozen: #2f6e95;
+  --frozen-soft: #e0eef6;
+  --danger: #b03a3a;
+  --gas: #9b8fd6;
+  --radius-lg: 18px;
+  --radius-sm: 9px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #16142a; --surface: #211e3a; --ink: #eceaf7; --ink-2: #a9a4c6; --line: #343053;
+    --violet: #9a86ff; --violet-soft: #2e2856; --paid: #5cc79a; --held: #e8a640; --held-soft: #3a2e1a;
+    --frozen: #6fb2da; --frozen-soft: #1d3342; --danger: #f07a7a; --gas: #6f63ad; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #16142a; --surface: #211e3a; --ink: #eceaf7; --ink-2: #a9a4c6; --line: #343053;
+  --violet: #9a86ff; --violet-soft: #2e2856; --paid: #5cc79a; --held: #e8a640; --held-soft: #3a2e1a;
+  --frozen: #6fb2da; --frozen-soft: #1d3342; --danger: #f07a7a; --gas: #6f63ad; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 400 16px/1.5 "Schibsted Grotesk", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+a { color: var(--violet); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+/* top bar */
+header { display: flex; align-items: center; gap: 12px 16px; padding: 18px 0; flex-wrap: wrap; }
+.net { min-width: 0; }
+@media (max-width: 560px) { .net { order: 3; margin-left: 0; width: 100%; } #connectBtn { margin-left: auto; } }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; letter-spacing: -0.01em; }
+.brand svg { flex: none; }
+.net { margin-left: auto; font-size: 14px; color: var(--ink-2); display: flex; align-items: center; gap: 8px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.dot.on { background: var(--paid); }
+
+.btn {
+  border: 1px solid var(--line); background: var(--surface); padding: 9px 16px; border-radius: 999px;
+  font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.btn:hover { border-color: var(--ink-2); }
+.btn.primary { background: var(--violet); border-color: var(--violet); color: #fff; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.held { border-color: var(--held); color: var(--held); }
+.btn.danger { border-color: var(--danger); color: var(--danger); }
+.btn.ice { background: var(--frozen); border-color: var(--frozen); color: #fff; }
+.btn:disabled { opacity: .5; cursor: progress; }
+.btn.small { padding: 6px 12px; font-size: 14px; }
+
+/* intro */
+.intro { padding: 48px 0 56px; max-width: 760px; }
+.intro h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 800; margin: 0 0 20px; }
+.intro p { font-size: 19px; color: var(--ink-2); max-width: 56ch; margin: 0 0 28px; }
+.rules-preview { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px 28px; margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--line); }
+.rules-preview b { display: block; font-size: 16px; }
+.rules-preview span { color: var(--ink-2); font-size: 15px; }
+
+/* app layout */
+.app { display: grid; grid-template-columns: 300px 1fr; gap: 28px; padding-bottom: 64px; align-items: start; }
+@media (max-width: 860px) { .app { grid-template-columns: 1fr; } }
+.side h2, .section h2 { font-size: 17px; margin: 0 0 12px; font-weight: 700; }
+.acct-list { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 6px; }
+.acct-list button {
+  width: 100%; text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm);
+  padding: 10px 12px; cursor: pointer; display: grid; gap: 6px;
+}
+.acct-list button:hover { background: var(--surface); }
+.acct-list button[aria-current="true"] { background: var(--surface); border-color: var(--line); }
+.acct-list .row { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
+.acct-list .sub { font-size: 13px; color: var(--ink-2); display: flex; justify-content: space-between; }
+.mini { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.mini i { display: block; height: 100%; background: var(--violet); }
+.badge { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+.badge.frozen { background: var(--frozen-soft); color: var(--frozen); }
+.badge.held { background: var(--held-soft); color: var(--held); }
+.empty { color: var(--ink-2); font-size: 15px; margin: 0 0 14px; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 28px; }
+@media (max-width: 560px) { .panel { padding: 20px; } }
+.acct-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.acct-head h2 { margin: 0; font-size: 26px; letter-spacing: -0.02em; }
+.acct-head .who { font-size: 14px; color: var(--ink-2); }
+
+/* the meter: the one memorable thing */
+.meter-block { margin: 26px 0 8px; }
+.left-num { font-size: clamp(44px, 8vw, 76px); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.left-num small { font-size: .38em; font-weight: 600; letter-spacing: 0; color: var(--ink-2); margin-left: 6px; }
+.left-cap { color: var(--ink-2); margin: 8px 0 18px; }
+.meter { display: flex; gap: 3px; height: 34px; padding: 4px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); }
+.meter .seg { border-radius: 7px; background: var(--violet); min-width: 4px; }
+.meter .seg.gas { background: var(--gas); }
+.meter .rest { flex: 1; border-radius: 7px; background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--line) 70%, transparent) 6px 7px); }
+.meter.frozen { background: var(--frozen-soft); border-color: var(--frozen); }
+.meter-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--ink-2); margin-top: 10px; }
+.meter-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin: 26px 0 0; padding: 22px 0 0; border-top: 1px solid var(--line); }
+.facts dt { font-size: 14px; color: var(--ink-2); }
+.facts dd { margin: 2px 0 0; font-weight: 600; }
+
+.section { margin-top: 34px; }
+.inbox { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.req { border: 1px solid var(--held); background: var(--held-soft); border-radius: 14px; padding: 16px; display: grid; gap: 10px; }
+.req .top { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.req .amt { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.req .memo { font-size: 17px; }
+.req .why { font-size: 14px; color: var(--held); font-weight: 600; }
+.req .to { font-size: 13px; color: var(--ink-2); word-break: break-all; }
+.req .acts { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.controls { display: grid; gap: 14px; }
+.freeze-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 16px; border-radius: 14px; border: 1px solid var(--line); }
+.freeze-row.on { border-color: var(--frozen); background: var(--frozen-soft); }
+.freeze-row p { margin: 0; color: var(--ink-2); font-size: 15px; max-width: 46ch; }
+.freeze-row b { display: block; color: var(--ink); font-size: 16px; }
+details { border: 1px solid var(--line); border-radius: 14px; padding: 0 16px; }
+details[open] { padding-bottom: 16px; }
+summary { cursor: pointer; padding: 14px 0; font-weight: 600; }
+
+form.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; align-items: end; }
+label { display: grid; gap: 5px; font-size: 14px; color: var(--ink-2); }
+label.check { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 15px; }
+input[type=text], input[type=number], select {
+  width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+}
+.full { grid-column: 1 / -1; }
+.hint { font-size: 13px; color: var(--ink-2); }
+
+.feed { list-style: none; padding: 0; margin: 0; }
+.feed li { display: grid; grid-template-columns: 20px 1fr auto; gap: 10px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.feed li:last-child { border-bottom: 0; }
+.feed .k { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.feed .k.paid { background: var(--violet); } .feed .k.gas { background: var(--gas); } .feed .k.held { background: var(--held); }
+.feed .k.ok { background: var(--paid); } .feed .k.no { background: var(--danger); } .feed .k.ice { background: var(--frozen); }
+.feed time { font-size: 13px; color: var(--ink-2); }
+.feed a { font-size: 13px; }
+
+/* agent tester */
+.agent { margin-top: 34px; border: 1px dashed var(--violet); border-radius: var(--radius-lg); padding: 22px; background: color-mix(in srgb, var(--violet-soft) 45%, transparent); }
+.agent h2 { margin: 0 0 4px; font-size: 17px; }
+.agent > p { margin: 0 0 16px; color: var(--ink-2); font-size: 15px; }
+.verdict { font-size: 15px; font-weight: 600; min-height: 1.5em; }
+.verdict.now { color: var(--paid); } .verdict.hold { color: var(--held); } .verdict.stop { color: var(--danger); }
+
+dialog { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); padding: 26px; width: min(640px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(20, 16, 40, .45); }
+dialog h2 { margin: 0 0 6px; }
+dialog > p { margin: 0 0 18px; color: var(--ink-2); }
+.dlg-acts { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+#toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 11px 18px; border-radius: 12px; font-size: 15px; max-width: calc(100vw - 32px); box-shadow: 0 8px 30px rgba(0,0,0,.25); display: none; z-index: 10; }
+#toast.show { display: block; }
+#toast.err { background: var(--danger); color: #fff; }
+footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top: 1px solid var(--line); }
+.hidden { display: none !important; }
+@media (prefers-reduced-motion: no-preference) {
+  .meter.fresh .seg { animation: grow .5s ease-out both; transform-origin: left; }
+  @keyframes grow { from { transform: scaleX(0); } }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M3 12h26" stroke="currentColor" stroke-width="2.4"/><rect x="7" y="17" width="9" height="4" rx="2" fill="var(--violet)"/></svg>
+      Allowance
+    </div>
+    <div class="net"><span class="dot" id="netDot"></span><span id="netName">Not connected</span></div>
+    <button class="btn primary" id="connectBtn">Connect wallet</button>
+  </header>
+</div>
+
+<main class="wrap">
+  <section class="intro" id="intro">
+    <h1>Give your AI agent an allowance, not a wallet.</h1>
+    <p>Your agent spends from a budget with rules that live on Portaldot. Small payments go through instantly. Anything outside the rules waits here for your decision.</p>
+    <button class="btn primary" id="connectBtn2">Connect wallet</button>
+    <div class="rules-preview">
+      <div><b>Spending caps</b><span>Per payment and per day, week or month.</span></div>
+      <div><b>Trusted recipients</b><span>Unknown addresses need your approval.</span></div>
+      <div><b>Gas included</b><span>Gas comes from the same POT budget, under the same cap.</span></div>
+      <div><b>Freeze anytime</b><span>One click stops the agent completely.</span></div>
+    </div>
+  </section>
+
+  <section class="hidden" id="deployBox">
+    <div class="panel">
+      <h2>No Allowance contract on this network yet</h2>
+      <p class="hint">Deploy one from your wallet. It's a one-time step; the address is saved in the link so you can share it.</p>
+      <button class="btn primary" id="deployBtn">Deploy Allowance</button>
+    </div>
+  </section>
+
+  <section class="app hidden" id="app">
+    <aside class="side">
+      <h2>Your agents</h2>
+      <ul class="acct-list" id="acctList"></ul>
+      <p class="empty hidden" id="noAccts">You haven't given any agent an allowance yet.</p>
+      <button class="btn primary" id="openBtn">New allowance</button>
+    </aside>
+
+    <div>
+      <div class="panel hidden" id="detail">
+        <div class="acct-head">
+          <h2 id="dName"></h2>
+          <span class="who" id="dWho"></span>
+        </div>
+
+        <div class="meter-block">
+          <div class="left-num" id="dLeft"></div>
+          <p class="left-cap" id="dLeftCap"></p>
+          <div class="meter" id="dMeter" role="img"></div>
+          <div class="meter-legend"><span><i style="background:var(--violet)"></i>Payments</span><span><i style="background:var(--gas)"></i>Gas</span><span id="dReset"></span></div>
+        </div>
+
+        <dl class="facts">
+          <div><dt>Budget left</dt><dd id="fBalance"></dd></div>
+          <div><dt>Per payment</dt><dd id="fPerPay"></dd></div>
+          <div><dt>Recipients</dt><dd id="fTrust"></dd></div>
+          <div><dt>Spent all time</dt><dd id="fTotal"></dd></div>
+        </dl>
+
+        <div class="section">
+          <h2>Waiting for you</h2>
+          <ul class="inbox" id="inbox"></ul>
+          <p class="empty hidden" id="inboxEmpty">Nothing to decide. Payments outside the rules will appear here.</p>
+        </div>
+
+        <div class="section controls">
+          <h2>Controls</h2>
+          <div class="freeze-row" id="freezeRow">
+            <p id="freezeText"></p>
+            <button class="btn ice" id="freezeBtn"></button>
+          </div>
+          <details>
+            <summary>Change the rules</summary>
+            <form class="grid" id="rulesForm">
+              <label><span>Per payment (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="perPayment" required></label>
+              <label><span>Per period (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="perPeriod" required></label>
+              <label>Period<select name="period"><option value="3600">Hour</option><option value="86400">Day</option><option value="604800">Week</option><option value="2592000">30 days</option></select></label>
+              <label>Expires<select name="expires"><option value="keep">Keep current</option><option value="0">Never</option><option value="86400">In 24 hours</option><option value="604800">In 7 days</option></select></label>
+              <label class="check full"><input type="checkbox" name="trustedOnly"> Only trusted recipients get instant payments</label>
+              <div class="full"><button class="btn primary" type="submit">Save rules</button></div>
+            </form>
+          </details>
+          <details>
+            <summary>Add or withdraw budget</summary>
+            <form class="grid" id="fundForm">
+              <label><span>Amount (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="amount" required></label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn primary" type="submit" name="op" value="fund">Add budget</button>
+                <button class="btn" type="submit" name="op" value="withdraw">Withdraw to my wallet</button>
+              </div>
+            </form>
+          </details>
+          <details>
+            <summary>Trusted recipients</summary>
+            <form class="grid" id="trustForm">
+              <label class="full">Address<input type="text" name="addr" placeholder="0x…" required autocomplete="off" spellcheck="false"></label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn primary" type="submit" name="op" value="add">Trust</button>
+                <button class="btn" type="submit" name="op" value="remove">Remove</button>
+              </div>
+            </form>
+          </details>
+        </div>
+
+        <div class="section">
+          <h2>Activity</h2>
+          <ul class="feed" id="feed"></ul>
+          <p class="empty hidden" id="feedEmpty">No activity yet.</p>
+        </div>
+
+        <div class="agent hidden" id="agentBox">
+          <h2>Try it as the agent</h2>
+          <p>This browser holds the agent key for this allowance. Send a payment the way your agent would and watch the rules apply.</p>
+          <form class="grid" id="payForm">
+            <label class="full">Pay to<input type="text" name="to" required autocomplete="off" spellcheck="false"></label>
+            <label><span>Amount (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="amount" value="0.1" required></label>
+            <label>What it's for<input type="text" name="memo" maxlength="140" value="API credits" required></label>
+            <p class="verdict full" id="verdict" aria-live="polite"></p>
+            <div class="full" style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn primary" type="submit">Send as agent</button>
+              <button class="btn" type="button" id="toStrangerBtn">Use an unknown address</button>
+              <button class="btn" type="button" id="toTrustedBtn">Use a trusted address</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="wrap"><footer>Allowance is open source (MIT) and not audited. Keep budgets small. <a href="https://github.com/Oziman13/allowance">Source on GitHub</a></footer></div>
+
+<dialog id="openDlg">
+  <form id="openForm" method="dialog">
+    <h2>New allowance</h2>
+    <p>A fresh agent key is created in this browser. Give it to your agent; your own key never leaves your wallet.</p>
+    <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+      <label class="full">Name<input type="text" name="name" maxlength="64" value="Research agent" required></label>
+      <label><span>Budget to deposit (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="deposit" value="10" required></label>
+      <label><span>Gas to start with (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="gas" value="0.5" required></label>
+      <label><span>Per payment (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="perPayment" value="1" required></label>
+      <label><span>Per period (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="perPeriod" value="5" required></label>
+      <label>Period<select name="period"><option value="3600">Hour</option><option value="86400" selected>Day</option><option value="604800">Week</option><option value="2592000">30 days</option></select></label>
+      <label>Expires<select name="expires"><option value="0">Never</option><option value="86400">In 24 hours</option><option value="604800">In 7 days</option></select></label>
+      <label class="check full"><input type="checkbox" name="trustedOnly" checked> Only trusted recipients get instant payments</label>
+      <label class="full">Trusted recipient (optional)<input type="text" name="trusted" placeholder="0x… defaults to your own address" autocomplete="off" spellcheck="false"></label>
+    </div>
+    <p class="hint">Gas is POT on Portaldot. It's sent to the agent now and counted as spent.</p>
+    <div class="dlg-acts">
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" id="openSubmit" value="ok">Create allowance</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<script>
+"use strict";
+const ABI = __ABI__;
+const BYTECODE = "__BYTECODE__";
+const NETWORKS = __NETWORKS__;      // config/networks.json, keyed by chainId
+const NATIVE = ethers.ZeroAddress;
+const HOLD = ["", "Larger than the per-payment cap", "Over this period's limit", "Recipient isn't trusted"];
+const STATUS = ["", "Pending", "Approved", "Rejected", "Cancelled"];
+const PERIOD_NAME = { 3600: "hour", 86400: "day", 604800: "week", 2592000: "30 days" };
+
+const $ = (s) => document.querySelector(s);
+const S = { provider: null, signer: null, me: null, chainId: null, al: null, address: null, fromBlock: 0, accounts: [], sel: null, meta: {} };
+
+// ---------------------------------------------------------------- small helpers
+function toast(msg, err) {
+  const t = $("#toast"); t.textContent = msg; t.className = "show" + (err ? " err" : "");
+  clearTimeout(toast.t); toast.t = setTimeout(() => (t.className = ""), err ? 7000 : 3500);
+}
+const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+function fmt(v, dec) {
+  const s = ethers.formatUnits(v, dec);
+  const [i, f = ""] = s.split(".");
+  const ff = f.replace(/0+$/, "").slice(0, 4);
+  return Number(i).toLocaleString("en-US") + (ff ? "." + ff : "");
+}
+const parse = (v, dec) => ethers.parseUnits(String(v || "0"), dec);
+const net = () => NETWORKS[String(S.chainId)] || { name: "Chain " + S.chainId, nativeSymbol: "POT", explorer: null };
+const txLink = (h) => net().explorer ? `<a href="${net().explorer}/tx/${h}" target="_blank" rel="noopener">tx</a>` : "";
+function friendly(e) {
+  const data = e?.data || e?.info?.error?.data || e?.error?.data;
+  try { const p = data && S.al.interface.parseError(data); if (p) return errText(p.name, p.args); } catch {}
+  if (e?.revert?.name) return errText(e.revert.name, e.revert.args);
+  if (e?.code === "ACTION_REJECTED" || e?.code === 4001) return "You cancelled the transaction in your wallet.";
+  return e?.shortMessage || e?.message || String(e);
+}
+function errText(name, args) {
+  return ({
+    NotOwner: "Only the owner of this allowance can do that.",
+    NotAgent: "That key isn't the agent for this allowance.",
+    AccountFrozen: "This agent is frozen. Unfreeze it first.",
+    AccountExpired: "This allowance has expired. Extend it under Change the rules.",
+    InsufficientBudget: "Not enough budget left. Add budget first.",
+    InvalidRules: "Rules need a per-payment cap no larger than the per-period cap, and a period of at least an hour.",
+    InvalidAddress: "That address can't be used here.",
+    InvalidAmount: "Check the amount.",
+    NotPending: "That request was already decided.",
+    TransferFailed: "The recipient refused the payment, so nothing moved.",
+    OutsideRules: "Outside the rules: " + (HOLD[Number(args?.[0])] || "").toLowerCase() + ".",
+  })[name] || name;
+}
+async function send(label, fn) {
+  try {
+    toast(label + "… confirm in your wallet");
+    const tx = await fn();
+    toast(label + "… waiting for the block");
+    const r = await tx.wait();
+    toast(label + " done");
+    return r;
+  } catch (e) { toast(friendly(e), true); throw e; }
+}
+
+// ---------------------------------------------------------------- connect
+async function connect() {
+  if (!window.ethereum) { toast("Install a wallet such as MetaMask to continue.", true); return; }
+  S.provider = new ethers.BrowserProvider(window.ethereum, "any");
+  await S.provider.send("eth_requestAccounts", []);
+  S.signer = await S.provider.getSigner();
+  S.me = await S.signer.getAddress();
+  S.chainId = Number((await S.provider.getNetwork()).chainId);
+  $("#netDot").classList.add("on");
+  $("#netName").textContent = net().name;
+  $("#connectBtn").textContent = short(S.me);
+  document.querySelectorAll(".sym").forEach((el) => (el.textContent = net().nativeSymbol));
+  window.ethereum.on?.("chainChanged", () => location.reload());
+  window.ethereum.on?.("accountsChanged", () => location.reload());
+
+  const url = new URL(location.href);
+  S.address = url.searchParams.get("contract") || net().allowance || readStore("contract:" + S.chainId);
+  S.fromBlock = Number(url.searchParams.get("from") || net().allowanceFromBlock || readStore("from:" + S.chainId) || 0);
+  $("#intro").classList.add("hidden");
+  if (!S.address || (await S.provider.getCode(S.address)) === "0x") { $("#deployBox").classList.remove("hidden"); return; }
+  await start();
+}
+
+async function deploy() {
+  const btn = $("#deployBtn"); btn.disabled = true;
+  try {
+    const f = new ethers.ContractFactory(ABI, BYTECODE, S.signer);
+    toast("Deploying… confirm in your wallet");
+    const c = await f.deploy();
+    const rcpt = await c.deploymentTransaction().wait();
+    S.address = await c.getAddress(); S.fromBlock = rcpt.blockNumber;
+    writeStore("contract:" + S.chainId, S.address); writeStore("from:" + S.chainId, String(S.fromBlock));
+    const url = new URL(location.href); url.searchParams.set("contract", S.address); url.searchParams.set("from", S.fromBlock);
+    history.replaceState(null, "", url);
+    toast("Allowance deployed at " + short(S.address));
+    $("#deployBox").classList.add("hidden");
+    await start();
+  } catch (e) { toast(friendly(e), true); } finally { btn.disabled = false; }
+}
+
+async function start() {
+  S.al = new ethers.Contract(S.address, ABI, S.signer);
+  $("#app").classList.remove("hidden");
+  await loadAccounts();
+  // Refresh on new blocks, at most every 5 seconds, so public RPCs aren't flooded with log queries.
+  S.provider.on("block", () => { if (start.t) return; start.t = setTimeout(async () => { await refresh(); start.t = null; }, 5000); });
+}
+
+// ---------------------------------------------------------------- storage (per-browser conveniences only)
+function readStore(k) { try { return localStorage.getItem("allowance:" + k); } catch { return null; } }
+function writeStore(k, v) { try { localStorage.setItem("allowance:" + k, v); } catch {} }
+const agentKey = (id) => readStore(`agent:${S.chainId}:${S.address}:${id}`);
+
+// ---------------------------------------------------------------- data
+async function assetMeta(asset) {
+  if (S.meta[asset]) return S.meta[asset];
+  if (asset === NATIVE) return (S.meta[asset] = { sym: net().nativeSymbol, dec: 18 });
+  const t = new ethers.Contract(asset, ["function symbol() view returns (string)", "function decimals() view returns (uint8)"], S.provider);
+  const [sym, dec] = await Promise.all([t.symbol().catch(() => "TOKEN"), t.decimals().catch(() => 18)]);
+  return (S.meta[asset] = { sym, dec: Number(dec) });
+}
+
+async function loadAccounts() {
+  const ids = (await S.al.accountsOfOwner(S.me)).map(Number);
+  S.accounts = [];
+  for (const id of ids) {
+    const [a, left] = await S.al.getAccount(id);
+    S.accounts.push({ id, a, left, m: await assetMeta(a.asset), pending: await pendingCount(id) });
+  }
+  renderList();
+  if (S.sel == null && S.accounts.length) S.sel = S.accounts[S.accounts.length - 1].id;
+  if (S.sel != null) await renderDetail(S.sel);
+}
+async function refresh() { if (S.al) await loadAccounts().catch(() => {}); }
+
+/** Logs for one account, newest range first, shrinking the window if the node limits ranges. */
+async function logs(filter) {
+  const latest = await S.provider.getBlockNumber();
+  try { return await S.al.queryFilter(filter, S.fromBlock, latest); } catch {}
+  const out = []; let size = 10000, to = latest;
+  while (to >= S.fromBlock && out.length < 200) {
+    const from = Math.max(S.fromBlock, to - size + 1);
+    try { out.unshift(...(await S.al.queryFilter(filter, from, to))); to = from - 1; }
+    catch { if (size <= 500) break; size = Math.floor(size / 4); }
+  }
+  return out;
+}
+async function heldRequests(id) {
+  const evs = await logs(S.al.filters.PaymentHeld(null, id));
+  const reqs = [];
+  for (const ev of evs) {
+    const rid = Number(ev.args.requestId);
+    const r = await S.al.getRequest(rid);
+    reqs.push({ rid, r, ev });
+  }
+  return reqs;
+}
+async function pendingCount(id) { return (await heldRequests(id)).filter((x) => Number(x.r.status) === 1).length; }
+
+// ---------------------------------------------------------------- rendering
+function renderList() {
+  const ul = $("#acctList"); ul.innerHTML = "";
+  $("#noAccts").classList.toggle("hidden", S.accounts.length > 0);
+  for (const { id, a, left, m, pending } of [...S.accounts].reverse()) {
+    const cap = a.rules.perPeriod, used = cap - left, pct = cap ? Number((used * 100n) / cap) : 0;
+    const li = document.createElement("li");
+    li.innerHTML = `<button type="button" aria-current="${id === S.sel}">
+      <span class="row"><span>${esc(a.name || "Agent " + id)}</span>${a.frozen ? '<span class="badge frozen">Frozen</span>' : pending ? `<span class="badge held">${pending} waiting</span>` : ""}</span>
+      <span class="mini"><i style="width:${pct}%"></i></span>
+      <span class="sub"><span>${fmt(left, m.dec)} ${m.sym} left</span><span>per ${PERIOD_NAME[Number(a.rules.period)] || fmtDur(Number(a.rules.period))}</span></span>
+    </button>`;
+    li.firstElementChild.onclick = () => { S.sel = id; renderList(); renderDetail(id); };
+    ul.appendChild(li);
+  }
+}
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]); }
+function fmtDur(s) { if (s >= 86400) return Math.round(s / 86400) + " days"; if (s >= 3600) return Math.round(s / 3600) + " hours"; return Math.max(1, Math.round(s / 60)) + " min"; }
+
+async function renderDetail(id) {
+  const entry = S.accounts.find((x) => x.id === id); if (!entry) return;
+  const { a, left, m } = entry;
+  $("#detail").classList.remove("hidden");
+  $("#dName").textContent = a.name || "Agent " + id;
+  $("#dWho").textContent = (a.asset === NATIVE ? m.sym : m.sym + " (ERC-20)") + " · agent " + short(a.agent);
+  document.querySelectorAll(".sym").forEach((el) => (el.textContent = m.sym));
+
+  const cap = a.rules.perPeriod, period = Number(a.rules.period);
+  $("#dLeft").innerHTML = `${fmt(left, m.dec)}<small>${esc(m.sym)}</small>`;
+  const now = Math.floor(Date.now() / 1000), expired = Number(a.rules.expiresAt) && now >= Number(a.rules.expiresAt);
+  $("#dLeftCap").textContent = a.frozen ? "Frozen. The agent can't spend or ask until you unfreeze it."
+    : expired ? "Expired. The agent's access has ended."
+    : `left to spend without asking you, out of ${fmt(cap, m.dec)} ${m.sym} per ${PERIOD_NAME[period] || fmtDur(period)}`;
+  const resetAt = Number(a.periodStart) + period;
+  $("#dReset").textContent = left === cap ? "Nothing spent this period" : (resetAt > now ? "Resets in " + fmtDur(resetAt - now) : "Resets on the next payment");
+
+  $("#fBalance").textContent = `${fmt(a.balance, m.dec)} ${m.sym}`;
+  $("#fPerPay").textContent = `${fmt(a.rules.perPayment, m.dec)} ${m.sym}`;
+  $("#fTrust").textContent = a.rules.trustedOnly ? "Trusted only" : "Anyone";
+  $("#fTotal").textContent = `${fmt(a.totalSpent, m.dec)} ${m.sym} · ${a.payments} payments`;
+
+  const fr = $("#freezeRow"); fr.classList.toggle("on", a.frozen);
+  $("#freezeText").innerHTML = a.frozen
+    ? "<b>This agent is frozen.</b>It can't pay, refuel gas or ask for approvals."
+    : "<b>Freeze this agent</b>If something looks wrong, stop everything in one transaction. You can unfreeze later.";
+  $("#freezeBtn").textContent = a.frozen ? "Unfreeze" : "Freeze agent";
+  $("#freezeBtn").className = a.frozen ? "btn" : "btn ice";
+
+  const rf = $("#rulesForm");
+  rf.perPayment.value = ethers.formatUnits(a.rules.perPayment, m.dec);
+  rf.perPeriod.value = ethers.formatUnits(cap, m.dec);
+  rf.period.value = String(period) in PERIOD_NAME ? String(period) : "86400";
+  rf.trustedOnly.checked = a.rules.trustedOnly;
+
+  // inbox + activity + meter all come from the same event history
+  const [held, paid, gas, resolved, frozen] = await Promise.all([
+    heldRequests(id),
+    logs(S.al.filters.Paid(id)),
+    logs(S.al.filters.Refueled(id)),
+    logs(S.al.filters.RequestResolved(null, id)),
+    logs(S.al.filters.FrozenSet(id)),
+  ]);
+  // The starting gas is sent when the account is opened and doesn't count against the period limit.
+  const opened = await logs(S.al.filters.AccountOpened(id));
+  const openTx = new Set(opened.map((ev) => ev.transactionHash));
+  for (const ev of gas) ev.seed = openTx.has(ev.transactionHash);
+  renderInbox(held.filter((x) => Number(x.r.status) === 1), m);
+  await renderMeter(entry, paid, gas, resolved);
+  renderFeed(m, held, paid, gas, resolved, frozen);
+  renderAgent(id, a, m);
+}
+
+async function renderMeter({ a, left, m }, paid, gas, resolved) {
+  const cap = a.rules.perPeriod, el = $("#dMeter"); el.innerHTML = ""; el.classList.toggle("frozen", a.frozen);
+  // animate only when a different account is shown, not on every refresh
+  el.classList.toggle("fresh", el.dataset.id !== String(a.id ?? S.sel)); el.dataset.id = String(a.id ?? S.sel);
+  const used = cap - left;
+  el.setAttribute("aria-label", `${fmt(used, m.dec)} of ${fmt(cap, m.dec)} ${m.sym} used this period`);
+  if (used > 0n) {
+    // Segments are the instant payments and gas refuels of the current period.
+    // Owner-approved payments don't use the limit, so skip Paid events from approval transactions.
+    const approvals = new Set(resolved.filter((ev) => Number(ev.args.status) === 2).map((ev) => ev.transactionHash));
+    const since = Number(a.periodStart), items = [];
+    for (const ev of [...paid, ...gas]) {
+      if (ev.seed || (ev.fragment.name === "Paid" && approvals.has(ev.transactionHash))) continue;
+      const b = await ev.getBlock(); if (b.timestamp < since) continue;
+      items.push({ gas: ev.fragment.name === "Refueled", amt: ev.args.amount, at: b.timestamp, i: ev.index });
+    }
+    items.sort((x, y) => x.at - y.at || x.i - y.i);
+    let shown = 0n;
+    for (const it of items) {
+      if (shown + it.amt > used) break;
+      shown += it.amt;
+      const s = document.createElement("span"); s.className = "seg" + (it.gas ? " gas" : "");
+      s.style.flex = `0 0 calc(${Number((it.amt * 10000n) / cap) / 100}% - 3px)`;
+      s.title = `${it.gas ? "Gas" : "Payment"} ${fmt(it.amt, m.dec)} ${m.sym}`;
+      el.appendChild(s);
+    }
+    if (shown < used) { const s = document.createElement("span"); s.className = "seg"; s.style.flex = `0 0 ${Number(((used - shown) * 10000n) / cap) / 100}%`; el.appendChild(s); }
+  }
+  const rest = document.createElement("span"); rest.className = "rest"; el.appendChild(rest);
+}
+
+function renderInbox(pending, m) {
+  const ul = $("#inbox"); ul.innerHTML = "";
+  $("#inboxEmpty").classList.toggle("hidden", pending.length > 0);
+  for (const { rid, r } of pending.reverse()) {
+    const li = document.createElement("li"); li.className = "req";
+    li.innerHTML = `<div class="top"><span class="memo">${esc(r.memo)}</span><span class="amt">${fmt(r.amount, m.dec)} ${esc(m.sym)}</span></div>
+      <span class="why">Held: ${HOLD[Number(r.reason)]}</span>
+      <span class="to">To ${r.to}</span>
+      <div class="acts">
+        <button class="btn primary small" data-a="approve">Approve</button>
+        ${Number(r.reason) === 3 ? '<button class="btn small" data-a="trust">Approve and trust recipient</button>' : ""}
+        <button class="btn danger small" data-a="reject">Reject</button>
+      </div>`;
+    li.querySelectorAll("button").forEach((b) => (b.onclick = async () => {
+      li.querySelectorAll("button").forEach((x) => (x.disabled = true));
+      try {
+        if (b.dataset.a === "reject") await send("Rejecting", () => S.al.reject(rid));
+        else await send(b.dataset.a === "trust" ? "Approving and trusting" : "Approving", () => S.al.approve(rid, b.dataset.a === "trust"));
+        await refresh();
+      } catch { li.querySelectorAll("button").forEach((x) => (x.disabled = false)); }
+    }));
+    ul.appendChild(li);
+  }
+}
+
+function renderFeed(m, held, paid, gas, resolved, frozen) {
+  const rows = [];
+  for (const ev of paid) rows.push([ev, "paid", `Paid ${fmt(ev.args.amount, m.dec)} ${m.sym} · ${esc(ev.args.memo)}`]);
+  for (const ev of gas) rows.push([ev, "gas", `${ev.seed ? "Starting gas" : "Gas refuel"} ${fmt(ev.args.amount, m.dec)} ${m.sym}`]);
+  for (const { ev, r } of held) rows.push([ev, "held", `Held ${fmt(r.amount, m.dec)} ${m.sym} · ${esc(r.memo)} <span class="hint">(${HOLD[Number(r.reason)].toLowerCase()})</span>`]);
+  for (const ev of resolved) { const st = Number(ev.args.status); if (st !== 2) rows.push([ev, "no", `Request ${STATUS[st].toLowerCase()}`]); }
+  for (const ev of frozen) rows.push([ev, "ice", ev.args.frozen ? "Agent frozen" : "Agent unfrozen"]);
+  rows.sort((x, y) => y[0].blockNumber - x[0].blockNumber || y[0].index - x[0].index);
+  const ul = $("#feed"); ul.innerHTML = "";
+  $("#feedEmpty").classList.toggle("hidden", rows.length > 0);
+  for (const [ev, k, text] of rows.slice(0, 40)) {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="k ${k}"></span><span>${text}</span><span>${txLink(ev.transactionHash) || `<time>#${ev.blockNumber}</time>`}</span>`;
+    ul.appendChild(li);
+  }
+}
+
+// ---------------------------------------------------------------- agent tester
+let agentWallet = null;
+function renderAgent(id, a, m) {
+  const key = agentKey(id), box = $("#agentBox");
+  if (!key) { box.classList.add("hidden"); agentWallet = null; return; }
+  agentWallet = new ethers.Wallet(key, S.provider);
+  if (agentWallet.address.toLowerCase() !== a.agent.toLowerCase()) { box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+  const f = $("#payForm"); if (!f.to.value) f.to.value = S.me;
+  previewPay();
+}
+async function previewPay() {
+  const f = $("#payForm"), v = $("#verdict"), e = S.accounts.find((x) => x.id === S.sel);
+  if (!e || !ethers.isAddress(f.to.value)) { v.textContent = ""; return; }
+  const now = Math.floor(Date.now() / 1000);
+  if (e.a.frozen) { v.className = "verdict full stop"; v.textContent = "Blocked: the agent is frozen."; return; }
+  if (Number(e.a.rules.expiresAt) && now >= Number(e.a.rules.expiresAt)) { v.className = "verdict full stop"; v.textContent = "Blocked: the allowance has expired."; return; }
+  try {
+    const amt = parse(f.amount.value, e.m.dec);
+    const [hold] = await S.al.preview(S.sel, f.to.value, amt);
+    if (Number(hold) === 0) {
+      v.className = "verdict full " + (amt > e.a.balance ? "stop" : "now");
+      v.textContent = amt > e.a.balance ? "Blocked: not enough budget left." : "Will be paid instantly.";
+    } else { v.className = "verdict full hold"; v.textContent = "Will wait for your approval: " + HOLD[Number(hold)].toLowerCase() + "."; }
+  } catch { v.textContent = ""; }
+}
+async function payAsAgent(ev) {
+  ev.preventDefault();
+  const f = ev.target, e = S.accounts.find((x) => x.id === S.sel), btn = f.querySelector("[type=submit]");
+  btn.disabled = true;
+  try {
+    const al = S.al.connect(agentWallet);
+    toast("Agent is sending…");
+    const tx = await al.pay(S.sel, f.to.value, parse(f.amount.value, e.m.dec), f.memo.value);
+    const r = await tx.wait();
+    const held = r.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } }).find((p) => p?.name === "PaymentHeld");
+    toast(held ? "Held for your approval: " + HOLD[Number(held.args.reason)].toLowerCase() : "Paid instantly");
+    await refresh();
+  } catch (err) { toast(friendly(err), true); } finally { btn.disabled = false; }
+}
+
+// ---------------------------------------------------------------- owner actions
+async function openAccount(ev) {
+  ev.preventDefault();
+  const f = ev.target, dec = 18, btn = $("#openSubmit");
+  const agent = ethers.Wallet.createRandom();
+  const expires = Number(f.expires.value);
+  const rules = {
+    perPayment: parse(f.perPayment.value, dec), perPeriod: parse(f.perPeriod.value, dec), period: Number(f.period.value),
+    expiresAt: expires ? Math.floor(Date.now() / 1000) + expires : 0, trustedOnly: f.trustedOnly.checked,
+  };
+  const trusted = f.trusted.value.trim() ? [f.trusted.value.trim()] : [S.me];
+  if (!trusted.every(ethers.isAddress)) { toast("The trusted recipient isn't a valid address.", true); return; }
+  const deposit = parse(f.deposit.value, dec), gas = parse(f.gas.value, dec);
+  btn.disabled = true;
+  try {
+    const r = await send("Creating allowance", () => S.al.openAccount(agent.address, NATIVE, f.name.value.trim(), rules, trusted, deposit, gas, { value: deposit + gas }));
+    const opened = r.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } }).find((p) => p?.name === "AccountOpened");
+    const id = Number(opened.args.accountId);
+    writeStore(`agent:${S.chainId}:${S.address}:${id}`, agent.privateKey);
+    S.sel = id; $("#openDlg").close();
+    await loadAccounts();
+  } catch {} finally { btn.disabled = false; }
+}
+async function saveRules(ev) {
+  ev.preventDefault();
+  const f = ev.target, e = S.accounts.find((x) => x.id === S.sel);
+  const exp = f.expires.value === "keep" ? Number(e.a.rules.expiresAt) : Number(f.expires.value) ? Math.floor(Date.now() / 1000) + Number(f.expires.value) : 0;
+  const rules = { perPayment: parse(f.perPayment.value, e.m.dec), perPeriod: parse(f.perPeriod.value, e.m.dec), period: Number(f.period.value), expiresAt: exp, trustedOnly: f.trustedOnly.checked };
+  await send("Saving rules", () => S.al.setRules(S.sel, rules)).then(refresh).catch(() => {});
+}
+async function fundOrWithdraw(ev) {
+  ev.preventDefault();
+  const f = ev.target, e = S.accounts.find((x) => x.id === S.sel), amt = parse(f.amount.value, e.m.dec);
+  if (ev.submitter?.value === "withdraw") return send("Withdrawing", () => S.al.withdraw(S.sel, amt, S.me)).then(refresh).catch(() => {});
+  if (e.a.asset !== NATIVE) {
+    const t = new ethers.Contract(e.a.asset, ["function approve(address,uint256) returns (bool)"], S.signer);
+    await send("Approving token", () => t.approve(S.address, amt)).catch(() => {});
+    return send("Adding budget", () => S.al.fund(S.sel, amt)).then(refresh).catch(() => {});
+  }
+  return send("Adding budget", () => S.al.fund(S.sel, amt, { value: amt })).then(refresh).catch(() => {});
+}
+async function trustEdit(ev) {
+  ev.preventDefault();
+  const addr = ev.target.addr.value.trim();
+  if (!ethers.isAddress(addr)) return toast("That isn't a valid address.", true);
+  const add = ev.submitter?.value !== "remove";
+  await send(add ? "Trusting" : "Removing", () => S.al.setTrusted(S.sel, [addr], add)).then(refresh).catch(() => {});
+}
+async function toggleFreeze() {
+  const e = S.accounts.find((x) => x.id === S.sel), btn = $("#freezeBtn"); btn.disabled = true;
+  await send(e.a.frozen ? "Unfreezing" : "Freezing", () => S.al.setFrozen(S.sel, !e.a.frozen)).then(refresh).catch(() => {});
+  btn.disabled = false;
+}
+
+// ---------------------------------------------------------------- wiring
+$("#connectBtn").onclick = () => connect().catch((e) => toast(friendly(e), true));
+$("#connectBtn2").onclick = () => connect().catch((e) => toast(friendly(e), true));
+$("#deployBtn").onclick = deploy;
+$("#openBtn").onclick = () => $("#openDlg").showModal();
+$("#openForm").addEventListener("submit", (e) => { if (e.submitter?.value === "cancel") return; openAccount(e); });
+$("#rulesForm").onsubmit = saveRules;
+$("#fundForm").onsubmit = fundOrWithdraw;
+$("#trustForm").onsubmit = trustEdit;
+$("#freezeBtn").onclick = toggleFreeze;
+$("#payForm").onsubmit = payAsAgent;
+$("#payForm").oninput = () => { clearTimeout(previewPay.t); previewPay.t = setTimeout(previewPay, 250); };
+$("#toStrangerBtn").onclick = () => { $("#payForm").to.value = ethers.Wallet.createRandom().address; previewPay(); };
+$("#toTrustedBtn").onclick = () => { $("#payForm").to.value = S.me; previewPay(); };
+</script>
+</body>
+</html>
