@@ -1,0 +1,16 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+
+[fuzz]
+runs = 1000
+
+# Network endpoints live in config/networks.json and are passed with --rpc-url.
+# Portaldot V3 values will be filled in once the official endpoints are published.

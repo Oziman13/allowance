@@ -1,0 +1,26 @@
+{
+  "_note": "All chain-specific values live here. Portaldot V3 entries are placeholders until the official endpoints are published (V3 mainnet launched 2026-10-16).",
+  "local": {
+    "name": "Local (anvil)",
+    "chainId": 31337,
+    "rpc": "http://127.0.0.1:8545",
+    "explorer": null,
+    "nativeSymbol": "POT"
+  },
+  "portaldot-testnet": {
+    "name": "Portaldot V3 Testnet",
+    "chainId": null,
+    "rpc": null,
+    "explorer": null,
+    "nativeSymbol": "tPOT",
+    "status": "waiting for official endpoints"
+  },
+  "portaldot-mainnet": {
+    "name": "Portaldot V3 Mainnet",
+    "chainId": null,
+    "rpc": null,
+    "explorer": null,
+    "nativeSymbol": "POT",
+    "status": "waiting for official endpoints"
+  }
+}
