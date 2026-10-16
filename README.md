@@ -81,6 +81,20 @@ forge test
 
 27 tests, including a fuzz test of the core guarantee: across 1,000 random sequences of payments, gas refuels and time jumps, money that leaves an account without an owner's approval never exceeds the period limit. Also covered: approvals and trust-on-approve, rejection and cancellation finality, freeze, expiry, key rotation, reentrancy on approval, recipients that refuse funds, ERC-20 fee-on-transfer and false-returning tokens.
 
+## Owner dashboard
+
+`docs/index.html` is a single static page (built from `web/index.src.html` by `build.py`). It works with any wallet on Portaldot V3; if no Allowance contract is configured for the network, it offers to deploy one.
+
+- **Your agents:** every allowance you own, with what's left this period
+- **Budget meter:** each instant payment and gas refuel of the current period, against the cap
+- **Waiting for you:** held payments with the agent's memo and the reason; approve, approve and trust the recipient, or reject
+- **Controls:** freeze, rules, budget, trusted recipients
+- **Try it as the agent:** the page creates the agent key in your browser, so you can send payments as the agent and watch the rules apply
+
+```
+forge build && python3 build.py   # writes docs/index.html and docs/abi.json
+```
+
 ## Deploy
 
 ```
@@ -95,7 +109,7 @@ Network values live in `config/networks.json`. Portaldot V3 testnet and mainnet 
 |---|---|
 | ✅ | Core contract and test suite |
 | ⏳ | Deployment on Portaldot V3 testnet (waiting for official endpoints) |
-| ⏳ | Owner dashboard (web) |
+| ✅ | Owner dashboard: open allowances, see spending, approve or reject held payments, freeze, change rules, try it as the agent |
 | ⏳ | MCP server: lets any AI assistant use an Allowance account as a tool |
 | ⏳ | "Getting started with Solidity on Portaldot V3" guide |
 
