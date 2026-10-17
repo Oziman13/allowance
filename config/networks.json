@@ -1,5 +1,5 @@
 {
-  "_note": "All chain-specific values live here. Portaldot V3 entries are placeholders until the official endpoints are published (V3 mainnet launched 2026-10-16).",
+  "_note": "All chain-specific values live here. Portaldot V3 testnet values are from the official announcement (Portaldot Discord, #dev-announcement, 2026-10-16).",
   "local": {
     "name": "Local (anvil)",
     "chainId": 31337,
@@ -9,11 +9,13 @@
   },
   "portaldot-testnet": {
     "name": "Portaldot V3 Testnet",
-    "chainId": null,
-    "rpc": null,
+    "chainId": 420420777,
+    "rpc": "https://test-evm-rpc-v3.portaldot.dev",
+    "substrateWs": "wss://test-node-v3.portaldot.dev",
     "explorer": null,
-    "nativeSymbol": "tPOT",
-    "status": "waiting for official endpoints"
+    "nodeConsole": "https://node-console.portaldot.dev/",
+    "nativeSymbol": "POT",
+    "status": "live; Allowance deployment pending"
   },
   "portaldot-mainnet": {
     "name": "Portaldot V3 Mainnet",

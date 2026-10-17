@@ -170,6 +170,8 @@ input[type=text], input[type=number], select {
 .verdict { font-size: 15px; font-weight: 600; min-height: 1.5em; }
 .verdict.now { color: var(--paid); } .verdict.hold { color: var(--held); } .verdict.stop { color: var(--danger); }
 
+details.assistant { margin-top: 16px; background: var(--surface); }
+details.assistant pre { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px; overflow-x: auto; font-size: 13px; line-height: 1.45; white-space: pre; }
 dialog { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); padding: 26px; width: min(640px, calc(100vw - 32px)); }
 dialog::backdrop { background: rgba(20, 16, 40, .45); }
 dialog h2 { margin: 0 0 6px; }
@@ -314,6 +316,12 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
               <button class="btn" type="button" id="toTrustedBtn">Use a trusted address</button>
             </div>
           </form>
+          <details class="assistant">
+            <summary>Give this allowance to an AI assistant</summary>
+            <p class="hint">Paste this into your MCP client (Claude Desktop, Claude Code, Cursor). The assistant gets only the agent key; the rules above still apply to everything it does. Setup steps are in <a href="https://github.com/Oziman13/allowance/tree/main/mcp" target="_blank" rel="noopener">mcp/README.md</a>.</p>
+            <pre id="mcpConfig" tabindex="0"></pre>
+            <button class="btn small" type="button" id="copyCfgBtn">Copy config</button>
+          </details>
         </div>
       </div>
     </div>
@@ -662,6 +670,9 @@ function renderAgent(id, a, m) {
   if (agentWallet.address.toLowerCase() !== a.agent.toLowerCase()) { box.classList.add("hidden"); return; }
   box.classList.remove("hidden");
   const f = $("#payForm"); if (!f.to.value) f.to.value = S.me;
+  const netKey = { 31337: "local", 420420777: "portaldot-testnet" }[S.chainId] || "portaldot-testnet";
+  $("#mcpConfig").textContent = JSON.stringify({ mcpServers: { allowance: { command: "node", args: ["/absolute/path/to/allowance/mcp/index.js"],
+    env: { ALLOWANCE_NETWORK: netKey, ALLOWANCE_ADDRESS: S.address, ALLOWANCE_ACCOUNT_ID: String(id), ALLOWANCE_AGENT_KEY: key } } } }, null, 2);
   previewPay();
 }
 async function previewPay() {
@@ -761,6 +772,10 @@ $("#freezeBtn").onclick = toggleFreeze;
 $("#payForm").onsubmit = payAsAgent;
 $("#payForm").oninput = () => { clearTimeout(previewPay.t); previewPay.t = setTimeout(previewPay, 250); };
 $("#toStrangerBtn").onclick = () => { $("#payForm").to.value = ethers.Wallet.createRandom().address; previewPay(); };
+$("#copyCfgBtn").onclick = async () => {
+  try { await navigator.clipboard.writeText($("#mcpConfig").textContent); toast("Config copied. It contains the agent key, so keep it private."); }
+  catch { toast("Couldn't copy. Select the text and copy it manually.", true); }
+};
 $("#toTrustedBtn").onclick = () => { $("#payForm").to.value = S.me; previewPay(); };
 </script>
 </body>

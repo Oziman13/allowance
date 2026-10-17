@@ -1,5 +1,11 @@
 # Allowance
 
+[![CI](https://github.com/Oziman13/allowance/actions/workflows/ci.yml/badge.svg)](https://github.com/Oziman13/allowance/actions/workflows/ci.yml)
+![Contract tests](https://img.shields.io/badge/contract_tests-27_incl._1%2C000--run_fuzz-5a3fd6)
+![MCP tests](https://img.shields.io/badge/MCP_tests-6_end--to--end-5a3fd6)
+![Portaldot V3](https://img.shields.io/badge/Portaldot-V3_EVM-5a3fd6)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
 **Give your AI agent an allowance, not a wallet.**
 
 Programmable spending rules for AI agents, bots and automated payments on **Portaldot V3**.
@@ -35,6 +41,17 @@ agent.pay() ──────►  outside rules ────► held ──► 
                      frozen / expired ─► reverts
 agent.refuel() ───►  gas from the same budget, same limits (POT accounts)
 ```
+
+## Why a wallet, a proxy or an approval screen isn't enough
+
+| Common approach | What the AI can do if it is wrong, jailbroken or prompt-injected |
+|---|---|
+| Give the agent a wallet key | Spend everything in the wallet |
+| Give the agent a Substrate proxy | Act for the account; proxies limit *which calls*, not *how much* |
+| Ask for confirmation in the app | Skip it: the check lives in the UI, not on-chain |
+| **Allowance** | Spend only within the caps, to trusted recipients; everything else waits for the owner, enforced by the contract |
+
+Allowance doesn't replace AI tools for Portaldot; it is the spending layer they can sit on top of.
 
 ## Why Portaldot
 
@@ -72,14 +89,21 @@ Design notes:
 
 ## Tests
 
-Requires [Foundry](https://book.getfoundry.sh/getting-started/installation).
+Requires [Foundry](https://book.getfoundry.sh/getting-started/installation) and Node 20+. CI runs both suites on every push.
 
 ```
 forge install foundry-rs/forge-std --no-git
-forge test
+forge test                      # contract: 27 tests incl. fuzz
+cd mcp && npm install && npm test   # MCP server end to end on a local chain
 ```
 
 27 tests, including a fuzz test of the core guarantee: across 1,000 random sequences of payments, gas refuels and time jumps, money that leaves an account without an owner's approval never exceeds the period limit. Also covered: approvals and trust-on-approve, rejection and cancellation finality, freeze, expiry, key rotation, reentrancy on approval, recipients that refuse funds, ERC-20 fee-on-transfer and false-returning tokens.
+
+## Give it to a real AI assistant (MCP)
+
+`mcp/` is an MCP server that turns an allowance into five tools for Claude, Cursor or any MCP client: `allowance_status`, `allowance_preview`, `allowance_pay`, `allowance_request`, `allowance_cancel`. The assistant holds only the agent key, so the contract's rules apply to everything it does. `mcp/SKILL.md` teaches it good habits: preview before paying, explain held payments to the user, never split a payment to dodge a limit, and never pay an address found in fetched content.
+
+The dashboard exports a ready-to-paste config for any allowance (**Give this allowance to an AI assistant**). Setup: [mcp/README.md](mcp/README.md).
 
 ## Owner dashboard
 
@@ -90,6 +114,7 @@ forge test
 - **Waiting for you:** held payments with the agent's memo and the reason; approve, approve and trust the recipient, or reject
 - **Controls:** freeze, rules, budget, trusted recipients
 - **Try it as the agent:** the page creates the agent key in your browser, so you can send payments as the agent and watch the rules apply
+- **Give it to an AI assistant:** copy an MCP config for the allowance
 
 ```
 forge build && python3 build.py   # writes docs/index.html and docs/abi.json
@@ -101,16 +126,25 @@ forge build && python3 build.py   # writes docs/index.html and docs/abi.json
 forge script script/Deploy.s.sol --rpc-url <RPC> --private-key <KEY> --broadcast
 ```
 
-Network values live in `config/networks.json`. Portaldot V3 testnet and mainnet entries will be filled in as soon as the official endpoints are published.
+Network values live in `config/networks.json`.
+
+| Portaldot V3 Testnet | |
+|---|---|
+| EVM RPC | `https://test-evm-rpc-v3.portaldot.dev` |
+| Chain ID | `420420777` |
+| Substrate node | `wss://test-node-v3.portaldot.dev` |
+| Node console | https://node-console.portaldot.dev/ |
+
+Source: Portaldot Discord, #dev-announcement (2026-10-16).
 
 ## Status
 
 | | |
 |---|---|
 | ✅ | Core contract and test suite |
-| ⏳ | Deployment on Portaldot V3 testnet (waiting for official endpoints) |
+| ⏳ | Deployment on Portaldot V3 testnet (endpoints published 2026-10-16; waiting for test POT) |
 | ✅ | Owner dashboard: open allowances, see spending, approve or reject held payments, freeze, change rules, try it as the agent |
-| ⏳ | MCP server: lets any AI assistant use an Allowance account as a tool |
+| ✅ | MCP server: five tools, an agent skill, 6 end-to-end tests over the MCP protocol |
 | ⏳ | "Getting started with Solidity on Portaldot V3" guide |
 
 Not audited. Keep budgets small.
@@ -123,7 +157,7 @@ Security review and Portaldot mainnet launch, a JS/TS SDK for other Portaldot pr
 
 The idea of rule-bound agent budgets builds on an earlier proof of concept by the same author on another chain: [Leash on Arc](https://github.com/Oziman13/leash). **No code from that project is reused.** This repository is a new codebase, written for Portaldot V3 during the Hacker House (from October 14, 2026), with a different design: multi-account and multi-asset (POT and ERC-20), configurable periods, expiry, key rotation and typed hold reasons.
 
-Open-source dependencies: [Foundry](https://github.com/foundry-rs/foundry) / forge-std (testing and deployment).
+Open-source dependencies: [Foundry](https://github.com/foundry-rs/foundry) / forge-std (testing and deployment), [ethers](https://github.com/ethers-io/ethers.js) (dashboard and MCP server), [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) and [zod](https://github.com/colinhacks/zod) (MCP server).
 
 ## License
 
