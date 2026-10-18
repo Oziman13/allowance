@@ -126,7 +126,7 @@ forge build && python3 build.py   # writes docs/index.html and docs/abi.json
 forge script script/Deploy.s.sol --rpc-url <RPC> --private-key <KEY> --broadcast
 ```
 
-Network values live in `config/networks.json`.
+Network values live in `config/networks.json`. New to Portaldot V3? Read [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md) first: deploying needs a code deposit of about 0.08 POT per byte, and `script/fallback_address.py` tells you which Substrate account funds your MetaMask address.
 
 | Portaldot V3 Testnet | |
 |---|---|
@@ -142,10 +142,10 @@ Source: Portaldot Discord, #dev-announcement (2026-10-16).
 | | |
 |---|---|
 | ✅ | Core contract and test suite |
-| ⏳ | Deployment on Portaldot V3 testnet (endpoints published 2026-10-16; waiting for test POT) |
+| ⏳ | Deployment on Portaldot V3 testnet: solc bytecode accepted in dry runs; waiting for test POT to cover the ~791 POT code deposit |
 | ✅ | Owner dashboard: open allowances, see spending, approve or reject held payments, freeze, change rules, try it as the agent |
 | ✅ | MCP server: five tools, an agent skill, 6 end-to-end tests over the MCP protocol |
-| ⏳ | "Getting started with Solidity on Portaldot V3" guide |
+| ✅ | [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md): funding MetaMask, deploy costs, gotchas (measured on the live testnet) |
 
 Not audited. Keep budgets small.
 
