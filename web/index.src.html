@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Allowance</title>
 <meta name="description" content="Give your AI agent an allowance, not a wallet. Spending rules for agents on Portaldot V3.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* Schibsted Grotesk (SIL OFL 1.1), embedded by build.py from web/fonts/ */
+__FONTS__
 :root {
   --paper: #f1f0f7;
   --surface: #ffffff;
@@ -45,7 +44,7 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--paper); color: var(--ink);
   font: 400 16px/1.5 "Schibsted Grotesk", system-ui, sans-serif;
-  font-variant-numeric: tabular-nums;
+  /* No tabular-nums: in this typeface it also widens "." and ",", which reads as a space before punctuation. */
 }
 a { color: var(--violet); }
 button, input, select { font: inherit; color: inherit; }
