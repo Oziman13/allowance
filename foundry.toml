@@ -7,10 +7,11 @@ libs = ["lib"]
 solc_version = "0.8.28"
 evm_version = "cancun"
 optimizer = true
-optimizer_runs = 200
+optimizer_runs = 1
+# Portaldot V3 charges a storage deposit per byte of contract code, so the build is tuned for size.
+via_ir = true
 
 [fuzz]
 runs = 1000
 
 # Network endpoints live in config/networks.json and are passed with --rpc-url.
-# Portaldot V3 values will be filled in once the official endpoints are published.
