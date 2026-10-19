@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the dashboard: inject ABI, bytecode and network config into web/index.src.html -> docs/index.html.
 Run `forge build` first. GitHub Pages serves docs/."""
-import base64, json, pathlib
+import base64, json, pathlib, shutil, subprocess
 root = pathlib.Path(__file__).parent
 art = json.loads((root / "out/Allowance.sol/Allowance.json").read_text())
 nets = json.loads((root / "config/networks.json").read_text())
@@ -19,5 +19,17 @@ html = (html.replace("__FONTS__", fonts)
             .replace("__NETWORKS__", json.dumps(by_chain)))
 (root / "docs").mkdir(exist_ok=True)
 (root / "docs/index.html").write_text(html)
+# Simulation mode: bundle the in-browser chain (web/sim) into docs/sim.js. Needs `npm install` in web/sim;
+# without it the committed docs/sim.js is kept as is.
+sim = root / "web/sim"
+if (sim / "node_modules/.bin/esbuild").exists():
+    subprocess.run([str(sim / "node_modules/.bin/esbuild"), "provider.js", "--bundle", "--format=iife", "--minify",
+                    "--platform=browser", "--target=es2020", "--legal-comments=eof", f"--outfile={root / 'docs/sim.js'}",
+                    "--banner:js=/* Allowance simulation (MIT). Bundles unmodified EthereumJS packages (MPL-2.0; source: "
+                    "https://github.com/ethereumjs/ethereumjs-monorepo) and @noble/@scure crypto (MIT). See web/sim/package.json. */"],
+                   cwd=sim, check=True, capture_output=True)
+    print("docs/sim.js bundled,", (root / "docs/sim.js").stat().st_size // 1024, "KB")
+else:
+    print("web/sim/node_modules missing: kept the existing docs/sim.js (run `npm install` in web/sim to rebuild it)")
 (root / "docs/abi.json").write_text(json.dumps(art["abi"], indent=1))
 print("docs/index.html written,", len(html) // 1024, "KB; networks:", ", ".join(v["name"] for v in by_chain.values()))

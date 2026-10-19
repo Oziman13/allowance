@@ -73,6 +73,12 @@ header { display: flex; align-items: center; gap: 12px 16px; padding: 18px 0; fl
 .btn.ice { background: var(--frozen); border-color: var(--frozen); color: #fff; }
 .btn:disabled { opacity: .5; cursor: progress; }
 .btn.small { padding: 6px 12px; font-size: 14px; }
+a.btn { text-decoration: none; color: inherit; display: inline-block; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.intro .cta-hint { font-size: 15px; max-width: 560px; margin: 12px 0 28px; }
+.sim-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin: 0 0 22px; padding: 14px 18px; border-radius: 14px; border: 1px dashed var(--violet); background: var(--violet-soft); }
+.sim-bar p { margin: 0; max-width: 680px; }
+.sim-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* intro */
 .intro { padding: 48px 0 56px; max-width: 760px; }
@@ -204,7 +210,11 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
   <section class="intro" id="intro">
     <h1>Give your AI agent an allowance, not a wallet.</h1>
     <p>Your agent spends from a budget with rules that live on Portaldot. Small payments go through instantly. Anything outside the rules waits here for your decision.</p>
-    <button class="btn primary" id="connectBtn2">Connect wallet</button>
+    <div class="cta">
+      <button class="btn primary" id="connectBtn2">Connect wallet</button>
+      <button class="btn" id="simBtn">Try it without a wallet</button>
+    </div>
+    <p class="hint cta-hint">No wallet? The simulation runs the real Allowance contract inside your browser, with a demo agent already spending. Nothing is on-chain and nothing costs money.</p>
     <div class="rules-preview">
       <div><b>Spending caps</b><span>Per payment and per day, week or month.</span></div>
       <div><b>Trusted recipients</b><span>Unknown addresses need your approval.</span></div>
@@ -212,6 +222,14 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
       <div><b>Freeze anytime</b><span>One click stops the agent completely.</span></div>
     </div>
   </section>
+
+  <div class="sim-bar hidden" id="simBar" role="status">
+    <p><b>Simulation.</b> The real Allowance contract is running inside your browser, so everything below works, but nothing is on a blockchain.</p>
+    <div class="sim-actions">
+      <button class="btn small" id="skipDayBtn">Skip ahead 1 day</button>
+      <a class="btn small" href="./">Leave simulation</a>
+    </div>
+  </div>
 
   <section class="hidden" id="deployBox">
     <div class="panel">
@@ -407,7 +425,7 @@ function errText(name, args) {
 }
 async function send(label, fn) {
   try {
-    toast(label + "… confirm in your wallet");
+    toast(label + (S.sim ? "…" : "… confirm in your wallet"));
     const tx = await fn();
     toast(label + "… waiting for the block");
     const r = await tx.wait();
@@ -417,9 +435,11 @@ async function send(label, fn) {
 }
 
 // ---------------------------------------------------------------- connect
-async function connect() {
-  if (!window.ethereum) { toast("Install a wallet such as MetaMask to continue.", true); return; }
-  S.provider = new ethers.BrowserProvider(window.ethereum, "any");
+async function connect(eth = window.ethereum) {
+  if (!eth) { toast("No wallet found. Install one such as MetaMask, or try the simulation.", true); return; }
+  S.eth = eth; S.sim = !!eth.isAllowanceSimulation;
+  S.provider = new ethers.BrowserProvider(eth, "any", S.sim ? { cacheTimeout: -1 } : undefined);
+  if (S.sim) S.provider.pollingInterval = 250; // blocks are instant in the simulation
   await S.provider.send("eth_requestAccounts", []);
   S.signer = await S.provider.getSigner();
   S.me = await S.signer.getAddress();
@@ -428,13 +448,21 @@ async function connect() {
   $("#netName").textContent = net().name;
   $("#connectBtn").textContent = short(S.me);
   document.querySelectorAll(".sym").forEach((el) => (el.textContent = net().nativeSymbol));
-  window.ethereum.on?.("chainChanged", () => location.reload());
-  window.ethereum.on?.("accountsChanged", () => location.reload());
+  eth.on?.("chainChanged", () => location.reload());
+  eth.on?.("accountsChanged", () => location.reload());
 
+  $("#intro").classList.add("hidden");
+  if (S.sim) {
+    // The simulation deploys its own copy of the contract; nothing is stored in the link.
+    S.address = eth.allowance; S.fromBlock = eth.allowanceFromBlock;
+    $("#simBar").classList.remove("hidden");
+    $("#connectBtn").textContent = "Simulation";
+    document.querySelector("details.assistant")?.classList.add("hidden"); // an AI assistant needs a real network
+    return start();
+  }
   const url = new URL(location.href);
   S.address = url.searchParams.get("contract") || net().allowance || readStore("contract:" + S.chainId);
   S.fromBlock = Number(url.searchParams.get("from") || net().allowanceFromBlock || readStore("from:" + S.chainId) || 0);
-  $("#intro").classList.add("hidden");
   if (!S.address || (await S.provider.getCode(S.address)) === "0x") { $("#deployBox").classList.remove("hidden"); return; }
   await start();
 }
@@ -443,8 +471,19 @@ async function deploy() {
   const btn = $("#deployBtn"); btn.disabled = true;
   try {
     const f = new ethers.ContractFactory(ABI, BYTECODE, S.signer);
-    toast("Deploying… confirm in your wallet");
-    const c = await f.deploy();
+    // Portaldot V3 charges a storage deposit for contract code, so a deploy costs hundreds of POT.
+    // Wallets reserve gasLimit × maxFee up front and often set maxFee to 2 × base fee, which can
+    // exceed the balance even when the real cost fits. A fixed legacy gas price (+5%) and a tight
+    // gas limit (+1%) keep the reservation close to the real cost; unused gas is refunded.
+    const gasPrice = BigInt(await S.provider.send("eth_gasPrice", [])) * 105n / 100n;
+    const gasLimit = (await S.provider.estimateGas({ from: S.me, data: (await f.getDeployTransaction()).data })) * 101n / 100n;
+    const need = gasLimit * gasPrice, have = await S.provider.getBalance(S.me);
+    if (need > have) {
+      toast(`Deploying needs about ${fmt(need, 18)} ${net().nativeSymbol}; this account has ${fmt(have, 18)}.`, true);
+      return;
+    }
+    toast(`Deploying (up to ${fmt(need, 18)} ${net().nativeSymbol}, mostly the code storage deposit)… confirm in your wallet`);
+    const c = await f.deploy({ type: 0, gasPrice, gasLimit });
     const rcpt = await c.deploymentTransaction().wait();
     S.address = await c.getAddress(); S.fromBlock = rcpt.blockNumber;
     writeStore("contract:" + S.chainId, S.address); writeStore("from:" + S.chainId, String(S.fromBlock));
@@ -532,7 +571,12 @@ function renderList() {
   }
 }
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]); }
-function fmtDur(s) { if (s >= 86400) return Math.round(s / 86400) + " days"; if (s >= 3600) return Math.round(s / 3600) + " hours"; return Math.max(1, Math.round(s / 60)) + " min"; }
+function fmtDur(s) {
+  const n = (v, unit) => `${v} ${unit}${v === 1 ? "" : "s"}`;
+  if (s >= 86400) return n(Math.round(s / 86400), "day");
+  if (s >= 3600) return n(Math.round(s / 3600), "hour");
+  return Math.max(1, Math.round(s / 60)) + " min";
+}
 
 async function renderDetail(id) {
   const entry = S.accounts.find((x) => x.id === id); if (!entry) return;
@@ -758,10 +802,53 @@ async function toggleFreeze() {
   btn.disabled = false;
 }
 
+// ---------------------------------------------------------------- simulation
+// Loads docs/sim.js (an in-browser EVM running the real Allowance bytecode) and seeds a demo agent,
+// so judges and newcomers can try every feature without a wallet or test tokens.
+function loadScript(src) {
+  return new Promise((ok, fail) => { const el = document.createElement("script"); el.src = src; el.onload = ok; el.onerror = () => fail(new Error("Couldn't load the simulation.")); document.head.append(el); });
+}
+async function startSimulation() {
+  const btn = $("#simBtn"); btn.disabled = true;
+  try {
+    toast("Starting the simulation…");
+    if (!window.AllowanceSim) await loadScript("sim.js");
+    const sim = await window.AllowanceSim.createSimulation({ bytecode: BYTECODE, ownerKey: ethers.Wallet.createRandom().privateKey });
+    await seedDemo(sim);
+    await connect(sim);
+    toast("Simulation ready: a demo agent has been spending. Two payments are waiting for you.");
+  } catch (e) { toast(friendly(e), true); } finally { btn.disabled = false; }
+}
+async function seedDemo(sim) {
+  // cacheTimeout -1: blocks are instant here, so ethers' short request cache could hand out a stale nonce.
+  const p = new ethers.BrowserProvider(sim, "any", { cacheTimeout: -1 }), E = ethers.parseEther;
+  p.pollingInterval = 50; // blocks are instant in the simulation
+  const owner = await p.getSigner();
+  const al = new ethers.Contract(sim.allowance, ABI, owner);
+  const agent = ethers.Wallet.createRandom(), api = ethers.Wallet.createRandom().address;
+  const rules = { perPayment: E("1"), perPeriod: E("5"), period: 86400, expiresAt: 0, trustedOnly: true };
+  await (await al.openAccount(agent.address, NATIVE, "Research agent", rules, [api, sim.owner], E("20"), E("0.5"), { value: E("20.5") })).wait();
+  writeStore(`agent:${sim.chainId}:${sim.allowance}:0`, agent.privateKey);
+  const asAgent = al.connect(agent.connect(p));
+  for (const [to, amt, memo] of [
+    [api, "0.4", "Search API credits"],
+    [api, "0.6", "Market data feed"],
+    [api, "2.5", "GPU hour for fine-tuning"],
+    [ethers.Wallet.createRandom().address, "0.3", "New dataset vendor"],
+  ]) await (await asAgent.pay(0, to, E(amt), memo)).wait();
+}
+async function skipDay() {
+  const btn = $("#skipDayBtn"); btn.disabled = true;
+  try { await S.eth.advance(86400); await refresh(); toast("One day later: the daily limit has reset."); }
+  catch (e) { toast(friendly(e), true); } finally { btn.disabled = false; }
+}
+
 // ---------------------------------------------------------------- wiring
 $("#connectBtn").onclick = () => connect().catch((e) => toast(friendly(e), true));
 $("#connectBtn2").onclick = () => connect().catch((e) => toast(friendly(e), true));
 $("#deployBtn").onclick = deploy;
+$("#simBtn").onclick = startSimulation;
+$("#skipDayBtn").onclick = skipDay;
 $("#openBtn").onclick = () => $("#openDlg").showModal();
 $("#openForm").addEventListener("submit", (e) => { if (e.submitter?.value === "cancel") return; openAccount(e); });
 $("#rulesForm").onsubmit = saveRules;

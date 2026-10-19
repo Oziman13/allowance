@@ -24,5 +24,13 @@
     "explorer": null,
     "nativeSymbol": "POT",
     "status": "waiting for official endpoints"
+  },
+  "simulation": {
+    "name": "Simulation (in your browser)",
+    "chainId": 77001,
+    "rpc": null,
+    "explorer": null,
+    "nativeSymbol": "POT",
+    "status": "in-browser EVM running the real Allowance bytecode (docs/sim.js); no real chain"
   }
 }

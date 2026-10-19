@@ -116,8 +116,10 @@ The dashboard exports a ready-to-paste config for any allowance (**Give this all
 - **Try it as the agent:** the page creates the agent key in your browser, so you can send payments as the agent and watch the rules apply
 - **Give it to an AI assistant:** copy an MCP config for the allowance
 
+**Try it without a wallet.** The page has a simulation mode: it runs the real Allowance bytecode in an in-browser EVM ([EthereumJS](https://github.com/ethereumjs/ethereumjs-monorepo)), seeds a demo agent that has already paid twice and asked twice, and lets you approve, reject, freeze, send as the agent and skip ahead a day to watch the limit reset. Nothing touches a chain and nothing costs money. Source: `web/sim/provider.js`, bundled into `docs/sim.js`.
+
 ```
-forge build && python3 build.py   # writes docs/index.html and docs/abi.json
+forge build && python3 build.py   # writes docs/index.html, docs/abi.json and (with web/sim deps installed) docs/sim.js
 ```
 
 ## Deploy
@@ -144,6 +146,7 @@ Source: Portaldot Discord, #dev-announcement (2026-10-16).
 | ✅ | Core contract and test suite |
 | ⏳ | Deployment on Portaldot V3 testnet: solc bytecode accepted in dry runs; waiting for test POT to cover the ~791 POT code deposit |
 | ✅ | Owner dashboard: open allowances, see spending, approve or reject held payments, freeze, change rules, try it as the agent |
+| ✅ | Simulation mode: try every feature in the browser with no wallet, running the real contract bytecode |
 | ✅ | MCP server: five tools, an agent skill, 6 end-to-end tests over the MCP protocol |
 | ✅ | [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md): funding MetaMask, deploy costs, gotchas (measured on the live testnet) |
 
@@ -157,7 +160,7 @@ Security review and Portaldot mainnet launch, a JS/TS SDK for other Portaldot pr
 
 The idea of rule-bound agent budgets builds on an earlier proof of concept by the same author on another chain: [Leash on Arc](https://github.com/Oziman13/leash). **No code from that project is reused.** This repository is a new codebase, written for Portaldot V3 during the Hacker House (from October 14, 2026), with a different design: multi-account and multi-asset (POT and ERC-20), configurable periods, expiry, key rotation and typed hold reasons.
 
-Open-source dependencies: [Foundry](https://github.com/foundry-rs/foundry) / forge-std (testing and deployment), [ethers](https://github.com/ethers-io/ethers.js) (dashboard and MCP server), [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) and [zod](https://github.com/colinhacks/zod) (MCP server), [Schibsted Grotesk](https://github.com/schibsted/schibsted-grotesk) (dashboard typeface, SIL OFL 1.1, embedded so the page makes no third-party requests besides the ethers CDN).
+Open-source dependencies: [Foundry](https://github.com/foundry-rs/foundry) / forge-std (testing and deployment), [ethers](https://github.com/ethers-io/ethers.js) (dashboard and MCP server), [EthereumJS](https://github.com/ethereumjs/ethereumjs-monorepo) (simulation mode, MPL-2.0, bundled unmodified), [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) and [zod](https://github.com/colinhacks/zod) (MCP server), [Schibsted Grotesk](https://github.com/schibsted/schibsted-grotesk) (dashboard typeface, SIL OFL 1.1, embedded so the page makes no third-party requests besides the ethers CDN).
 
 ## License
 
