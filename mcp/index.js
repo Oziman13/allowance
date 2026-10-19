@@ -10,7 +10,7 @@ import { createClient, explain } from "./lib.js";
 const env = process.env;
 const die = (m) => { console.error(`allowance-mcp: ${m}`); process.exit(1); };
 if (!env.ALLOWANCE_AGENT_KEY) die("Set ALLOWANCE_AGENT_KEY to the agent key from the Allowance dashboard. Never use your own wallet key.");
-if (!env.ALLOWANCE_ADDRESS) die("Set ALLOWANCE_ADDRESS to the Allowance contract address.");
+if (!env.ALLOWANCE_ADDRESS && (env.ALLOWANCE_NETWORK || "portaldot-testnet") !== "portaldot-testnet") die("Set ALLOWANCE_ADDRESS to the Allowance contract address.");
 
 let client;
 try {

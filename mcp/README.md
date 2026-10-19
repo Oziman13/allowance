@@ -50,10 +50,12 @@ Five tools on purpose: the assistant gets exactly what it needs to spend, and no
 | Variable | Required | Default |
 |---|---|---|
 | `ALLOWANCE_AGENT_KEY` | yes | |
-| `ALLOWANCE_ADDRESS` | yes | |
+| `ALLOWANCE_ADDRESS` | on other networks | Portaldot V3 testnet: the public deployment `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` |
 | `ALLOWANCE_NETWORK` | no | `portaldot-testnet` (`local` for anvil) |
 | `ALLOWANCE_RPC` | no | the network's public RPC |
 | `ALLOWANCE_ACCOUNT_ID` | no | the newest allowance this agent controls |
+
+**Gas on Portaldot V3.** Instant payments cost the agent about 0.03 POT. Asking for approval (a held payment) stores a request on chain, and V3 charges the sender a storage deposit for it: about 15 POT on the testnet today. Give the agent enough starting gas on the dashboard if it will ask for approvals. Details: [Solidity on Portaldot V3](../docs/SOLIDITY-ON-PORTALDOT-V3.md).
 
 ## Tests
 

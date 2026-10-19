@@ -424,9 +424,11 @@ function errText(name, args) {
   })[name] || name;
 }
 async function send(label, fn) {
+  // Wallet popups sometimes don't open (e.g. MetaMask in side-panel mode). Say what to do if it takes a while.
+  const nudge = S.sim ? null : setTimeout(() => toast("Still waiting for your wallet. If no MetaMask window opened, click the MetaMask icon in your browser toolbar."), 8000);
   try {
     toast(label + (S.sim ? "…" : "… confirm in your wallet"));
-    const tx = await fn();
+    const tx = await fn().finally(() => clearTimeout(nudge));
     toast(label + "… waiting for the block");
     const r = await tx.wait();
     toast(label + " done");
@@ -762,6 +764,8 @@ async function openAccount(ev) {
   if (!trusted.every(ethers.isAddress)) { toast("The trusted recipient isn't a valid address.", true); return; }
   const deposit = parse(f.deposit.value, dec), gas = parse(f.gas.value, dec);
   btn.disabled = true;
+  const label = btn.textContent;
+  btn.textContent = S.sim ? "Creating…" : "Confirm in your wallet…"; // toasts sit behind an open dialog
   try {
     const r = await send("Creating allowance", () => S.al.openAccount(agent.address, NATIVE, f.name.value.trim(), rules, trusted, deposit, gas, { value: deposit + gas }));
     const opened = r.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } }).find((p) => p?.name === "AccountOpened");
@@ -769,7 +773,7 @@ async function openAccount(ev) {
     writeStore(`agent:${S.chainId}:${S.address}:${id}`, agent.privateKey);
     S.sel = id; $("#openDlg").close();
     await loadAccounts();
-  } catch {} finally { btn.disabled = false; }
+  } catch {} finally { btn.disabled = false; btn.textContent = label; }
 }
 async function saveRules(ev) {
   ev.preventDefault();

@@ -8,7 +8,8 @@ export const ABI = JSON.parse(readFileSync(new URL("./abi.json", import.meta.url
 const ERC20 = ["function symbol() view returns (string)", "function decimals() view returns (uint8)"];
 
 export const NETWORKS = {
-  "portaldot-testnet": { name: "Portaldot V3 Testnet", chainId: 420420777, rpc: "https://test-evm-rpc-v3.portaldot.dev", symbol: "POT", explorer: null },
+  "portaldot-testnet": { name: "Portaldot V3 Testnet", chainId: 420420777, rpc: "https://test-evm-rpc-v3.portaldot.dev", symbol: "POT", explorer: null,
+    allowance: "0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f" }, // public deployment (2026-10-19)
   local: { name: "Local (anvil)", chainId: 31337, rpc: "http://127.0.0.1:8545", symbol: "POT", explorer: null },
 };
 
@@ -44,7 +45,7 @@ export function explain(err, iface) {
 /**
  * @param {object} o
  * @param {string} o.key        agent private key
- * @param {string} o.address    Allowance contract address
+ * @param {string} [o.address] Allowance contract address (defaults to the network's public deployment)
  * @param {string} [o.rpc]      RPC URL (defaults to the network's)
  * @param {string} [o.network]  "portaldot-testnet" | "local"
  * @param {number} [o.accountId] account to use; defaults to the newest one this agent controls
@@ -53,6 +54,7 @@ export function explain(err, iface) {
 export async function createClient(o) {
   const net = NETWORKS[o.network || "portaldot-testnet"];
   if (!net) throw new Error(`Unknown network "${o.network}". Use one of: ${Object.keys(NETWORKS).join(", ")}`);
+  o = { ...o, address: o.address || net.allowance };
   if (!ethers.isAddress(o.address)) throw new Error("ALLOWANCE_ADDRESS must be the Allowance contract address.");
   const provider = new ethers.JsonRpcProvider(o.rpc || net.rpc, net.chainId, { staticNetwork: true, cacheTimeout: -1 });
   provider.pollingInterval = 500;

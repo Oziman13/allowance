@@ -4,9 +4,9 @@ A field guide from building [Allowance](../README.md) on the Portaldot V3 testne
 
 ## TL;DR
 
-1. **Use plain Solidity.** `solc` / Foundry bytecode is accepted. No PolkaVM recompile (`resolc`) is needed: our dry-run deploys of solc output succeed.
+1. **Use plain Solidity.** `solc` / Foundry bytecode deploys and runs as is. No PolkaVM recompile (`resolc`) is needed. Allowance is [live on the testnet](../README.md#live-on-portaldot-v3-testnet), deployed this way.
 2. **Fund a MetaMask address through its Substrate twin.** Every `0x` address has a fixed Substrate account (`0x… ++ 0xEE × 12`). Send POT there from the Node Console, and it shows up in MetaMask.
-3. **Deploying costs more than gas: you pay a deposit for the code.** It is about **0.08 POT per byte of contract code**. A 10 KB contract needs roughly **800 POT** at deploy time. Optimize your contract for size.
+3. **Storage costs more than computation.** You pay a deposit for every byte a contract stores, its code included: about **0.08 POT per byte of code**, so a 10 KB contract needs roughly **800 POT** to deploy. Writing a new storage slot costs a few POT; clearing one gives the deposit back. Optimize for size, and for storage.
 
 ## 1. Network
 
@@ -59,7 +59,7 @@ Normal Foundry and solc output works:
 - `eth_estimateGas` and `eth_call` for a contract creation return success for Allowance's solc 0.8.28 bytecode (`evm_version = "cancun"`).
 - Contracts don't need `resolc` or a separate PolkaVM build.
 
-> ⏳ Full on-chain deployment of Allowance is pending test funds (see §4). This section will link the deployment transaction once it is live.
+> ✅ Allowance was deployed this way on 2026-10-19: block 102688, transaction `0xb575397eea5c93908c43f13e4e9aff874f4777e0b4ab61164b36005ea0bcacd5`. The code returned by `eth_getCode` is byte-for-byte the Foundry build.
 
 **How to deploy:**
 - **Foundry:** `forge script script/Deploy.s.sol --rpc-url https://test-evm-rpc-v3.portaldot.dev --private-key <KEY> --broadcast`
@@ -89,7 +89,22 @@ From these numbers:
 - A contract costs about **18 POT** as a base.
 - On top of that it costs about **0.08 POT per byte of code**.
 
-Writing new contract storage later (opening accounts, storing requests) also takes a deposit. We will add measured numbers after the Allowance deployment.
+**Measured on chain** (Allowance, 2026-10-19; cost = gas used × effective gas price from the receipt):
+
+| Transaction | What it stores | Real cost |
+|---|---|---|
+| Deploy (9.8 KB) | the contract code | **778.99 POT** (estimate was 791) |
+| Open an account | ~10 new slots: account struct, name, index arrays, trusted recipient | 42.42 POT |
+| Instant payment | updates existing slots only | **0.032 POT** |
+| Held payment (a request with a memo) | ~5 new slots | 15.40 POT |
+| Approve a request | updates existing slots | 0.019 POT |
+| Freeze (`false` → `true` in an empty slot) | 1 slot goes from zero to non-zero | 3.86 POT |
+| Unfreeze (back to zero) | clears that slot | **0**: the receipt reports 0 gas used, the freed deposit covered the fee |
+
+**The pattern:** a slot that goes from zero to non-zero costs a deposit of a few POT; updating a non-zero slot is almost free; setting a slot back to zero refunds its deposit. So:
+- **Prefer updating over creating.** Allowance's instant payments only touch existing slots, which is why they cost 3 hundredths of a POT.
+- **Clear what you no longer need.** Deleting a finished record (`delete requests[id]`) returns its deposit. Allowance's next version will do this for resolved requests.
+- **Whoever writes pays.** The deposit is charged to the sender, so a contract call that creates storage can cost a user (or an AI agent with a small gas balance) far more than the gas estimate suggests on other chains. Give such accounts enough native POT.
 
 **What this means for you:**
 - **Check your balance against the estimate before you deploy.** MetaMask shows the full maximum. If your balance is lower, the transaction is rejected up front with "insufficient funds".
@@ -110,7 +125,8 @@ via_ir = true
 - **Gas numbers look huge.** `eth_estimateGas` returns values like `0x5d26ed11ff8019` (2.6 × 10¹⁶). They include the deposit, expressed as gas. Multiply by the gas price to get POT; don't compare the number with Ethereum gas.
 - **Some error messages mix units.** One "insufficient funds" error showed the balance in 18-decimal units (`have 99900000000000000000` for 99.9 POT). In the same message, the required amount appeared to be in the chain's native base units. Compare amounts in POT, not raw numbers.
 - **`eth_maxPriorityFeePerGas` returns 0.** Don't set a priority fee; base fee only.
-- **There is no block explorer yet.** Keep your transaction hashes. Allowance records them in its README as a proof table.
+- **There is no block explorer yet.** Keep your transaction hashes. Allowance records them in its README as a proof table, with the full list in [PROOF.md](PROOF.md).
+- **MetaMask reserves gas limit × max fee up front.** With a deploy this large, its default max fee (about 2 × base fee) can exceed your balance even though the real cost fits. Send a legacy transaction with an explicit `gasPrice` (current price + 5%) and a tight `gasLimit` (estimate + 1%). That's what Allowance's dashboard does.
 - **Discord help tickets:** the server's filter blocked our messages that contained the word "pot". If your message disappears, rephrase it (for example, "testnet funds").
 
 ## 6. Checklist
@@ -120,6 +136,7 @@ via_ir = true
 - [ ] SS58 twin computed (`script/fallback_address.py`) and funded from the Node Console
 - [ ] Contract optimized for size; tests still pass
 - [ ] `eth_estimateGas` × gas price < your balance
+- [ ] Accounts that will write storage (users, agents) hold enough native POT for the deposits
 - [ ] Deployed; transaction hash saved
 
 ---

@@ -15,7 +15,10 @@
     "explorer": null,
     "nodeConsole": "https://node-console.portaldot.dev/",
     "nativeSymbol": "POT",
-    "status": "live; Allowance deployment pending"
+    "status": "live; Allowance deployed 2026-10-19",
+    "allowance": "0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f",
+    "allowanceFromBlock": 102688,
+    "allowanceDeployTx": "0xb575397eea5c93908c43f13e4e9aff874f4777e0b4ab61164b36005ea0bcacd5"
   },
   "portaldot-mainnet": {
     "name": "Portaldot V3 Mainnet",
