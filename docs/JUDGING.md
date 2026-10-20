@@ -54,7 +54,7 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 | Real market need | AI agents are starting to pay for APIs, data and compute on their own. Every team that deploys one faces the same question, "how much can it spend without asking me?", and today's answer is either too much trust or no autonomy. |
 | Target users | Teams running AI agents or bots on Portaldot; game studios and guilds; DAOs and teams that want members to spend within limits. |
 | Ability to continue | One developer delivering steadily: a deployed contract, a dashboard, an MCP server, a guide, CI and a simulation mode in the first six days, all public. |
-| Business model and growth path | ⏳ To be added before the final submission. |
+| Business model and growth path | **Open protocol, paid team layer, no token** ([details](../README.md#business-model)). The core is free and open source, so it can become shared infrastructure. Teams pay a subscription for alerts, approvals by more than one member, reports and hosted agent runners. On mainnet, a v2 contract adds a small, capped protocol fee on instant payments. Revenue grows with agent payment volume on Portaldot, which is the on-chain activity the ecosystem rewards. |
 
 ---
 
@@ -62,7 +62,6 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 
 | Item | Plan |
 |---|---|
-| Business model and growth path | Written up before the final submission. |
 | Use of V3's Substrate side (WASM / multi-chain) | Today Allowance uses V3's EVM side. Next: let an owner fund and manage an allowance from a Portaldot (Substrate) wallet, not only from MetaMask. |
 | Narrated demo video (≤ 3 minutes) | Before check-in. |
 | Pitch deck | Before the final submission. |

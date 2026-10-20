@@ -182,6 +182,18 @@ The costs are real and mostly storage deposits: Portaldot V3 charges for every b
 
 Not audited. Keep budgets small.
 
+## Business model
+
+**Open protocol, paid team layer.** No token.
+
+| Layer | What | Who pays |
+|---|---|---|
+| **Open core** (free, MIT) | The contract, the dashboard and the MCP server. Any Portaldot AI tool, game or bot can give its agents limited budgets. | Nobody |
+| **Allowance for Teams** (subscription) | Telegram and email alerts when a payment is waiting, approvals by more than one team member, spending reports, hosted agent runners. Built around the contract, never in place of it: the rules stay on chain. | Teams running agents in production |
+| **Protocol fee** (mainnet, v2 contract) | A small, capped share of instant payments (for example 0.1%), visible on chain. It ships together with v2's deposit refunds for resolved requests. The testnet contract has no fee. | Accounts that use instant payments |
+
+**Growth path.** First, integrations with AI and game projects on the Portaldot testnet. Then a mainnet launch with the v2 contract. After that, game guild treasuries, subscriptions and team spending. Revenue grows with the number of agent payments on Portaldot, which is the same on-chain activity the ecosystem wants.
+
 ## Roadmap after the Hacker House
 
 Cheaper requests on V3: clear a request's storage when it is approved, rejected or cancelled, so its deposit (~15 POT on the testnet today) goes back instead of staying locked. Security review and Portaldot mainnet launch, a JS/TS SDK for other Portaldot projects, per-recipient limits and spend categories, integrations with iSwap and Portaldot game projects, and approval notifications in Portaldot Wallet.
