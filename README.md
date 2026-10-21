@@ -154,7 +154,7 @@ Deployed on 2026-10-19 from the dashboard's *Deploy Allowance* button. The bytec
 | Deployer (owner) | `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` |
 | Agent of account #0 | `0x9C0e1F786b38923519dF2cec05464F95cCd29009` |
 
-Every rule, exercised on chain. There is no block explorer yet, so the full hashes are listed in [docs/PROOF.md](docs/PROOF.md); any of them can be checked with `eth_getTransactionReceipt` on the public RPC.
+Every rule, exercised on chain. There is no block explorer yet, so the full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go.
 
 | Block | What happened | Signed by | Tx | Cost |
 |---|---|---|---|---|

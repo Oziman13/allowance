@@ -646,7 +646,10 @@ async function renderMeter({ a, left, m }, paid, gas, resolved) {
     const since = Number(a.periodStart), items = [];
     for (const ev of [...paid, ...gas]) {
       if (ev.seed || (ev.fragment.name === "Paid" && approvals.has(ev.transactionHash))) continue;
-      const b = await ev.getBlock(); if (b.timestamp < since) continue;
+      // Public nodes may prune old blocks (Portaldot V3 testnet does). If a block can't be read,
+      // skip that segment; the remainder below still shows the right total.
+      let b; try { b = await ev.getBlock(); } catch { continue; }
+      if (!b || b.timestamp < since) continue;
       items.push({ gas: ev.fragment.name === "Refueled", amt: ev.args.amount, at: b.timestamp, i: ev.index });
     }
     items.sort((x, y) => x.at - y.at || x.i - y.i);

@@ -2,12 +2,14 @@
 
 Contract `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f`, chain ID 420420777, RPC `https://test-evm-rpc-v3.portaldot.dev`.
 
-Check any transaction:
+Check them yourself. The public testnet node prunes old blocks, so `eth_getTransactionReceipt` returns `null` for transactions older than a day or two. Contract events stay available, and a transaction only emits events if it succeeded:
 
 ```
 curl -s -X POST https://test-evm-rpc-v3.portaldot.dev -H 'content-type: application/json' \
- -d '{"jsonrpc":"2.0","id":1,"method":"eth_getTransactionReceipt","params":["<hash>"]}'
+ -d '{"jsonrpc":"2.0","id":1,"method":"eth_getLogs","params":[{"address":"0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f","fromBlock":"0x19120","toBlock":"latest"}]}'
 ```
+
+Every `transactionHash` in that output is one of the rows below. The deployment itself is proven by the code at the address: `eth_getCode` returns exactly this repository's build. `python3 script/check_submission.py` runs both checks.
 
 | Block | What happened | From | Transaction hash | Status | Cost (gas used × price) |
 |---|---|---|---|---|---|
