@@ -104,7 +104,7 @@ def chain_checks():
         # Contract events stay queryable, and only a successful transaction emits them, so each
         # transaction in PROOF.md (except the deployment, proven by the code above) is matched to its events.
         dep = (net.get("allowanceDeployTx") or "").lower()
-        hashes = [h.lower() for h in re.findall(r"`(0x[0-9a-fA-F]{64})`", read("docs/PROOF.md")) if h.lower() != dep]
+        hashes = [h.lower() for h in dict.fromkeys(re.findall(r"\b(0x[0-9a-fA-F]{64})\b", read("docs/PROOF.md"))) if h.lower() != dep]
         logs = rpc(url, "eth_getLogs", [{"address": address, "fromBlock": hex(net.get("allowanceFromBlock", 0)), "toBlock": "latest"}])
         seen = {l["transactionHash"].lower() for l in logs}
         found = [h for h in hashes if h in seen]
