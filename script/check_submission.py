@@ -60,7 +60,8 @@ def repo_checks():
     check(g, "Third-party dependencies disclosed", all(w in readme for w in ["Foundry", "ethers", "EthereumJS", "MCP TypeScript SDK"]))
     check(g, "CI workflow runs contract and MCP tests", "forge test" in read(".github/workflows/ci.yml") and "npm test" in read(".github/workflows/ci.yml"))
     check(g, "Runnable demo: dashboard built (docs/index.html) with simulation (docs/sim.js)",
-          (ROOT / "docs/index.html").exists() and (ROOT / "docs/sim.js").exists() and "Try it without a wallet" in read("docs/index.html"))
+          (ROOT / "docs/index.html").exists() and (ROOT / "docs/sim.js").exists()
+          and all(marker in read("docs/index.html") for marker in ['id="simBtn"', 'id="simBar"', "AllowanceSim.createSimulation"]))
 
     g = "Code compliance"
     log = git("log", "--format=%H|%aI|%s")
