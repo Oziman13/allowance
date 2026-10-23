@@ -3,47 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Allowance</title>
+<title>Allowance — Autonomous Finance Command Center</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%23131D30%22%2F%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2222%22%20height%3D%2216%22%20rx%3D%224%22%20fill%3D%22none%22%20stroke%3D%22%239585FF%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20d%3D%22M5%2013h22M9%2019h7%22%20stroke%3D%22%239585FF%22%20stroke-width%3D%222%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Give your AI agent an allowance, not a wallet. Spending rules for agents on Portaldot V3.">
 <style>
-/* Schibsted Grotesk (SIL OFL 1.1), embedded by build.py from web/fonts/ */
+/* Sora, Inter and JetBrains Mono (SIL OFL 1.1), embedded locally by build.py. */
 __FONTS__
 :root {
-  --paper: #f1f0f7;
-  --surface: #ffffff;
-  --ink: #201c3a;
-  --ink-2: #5d587a;
-  --line: #dcd9ea;
-  --violet: #5a3fd6;
-  --violet-soft: #e7e2fb;
-  --paid: #2e7a57;
-  --held: #a8690a;
-  --held-soft: #fbf0dc;
-  --frozen: #2f6e95;
-  --frozen-soft: #e0eef6;
-  --danger: #b03a3a;
-  --gas: #9b8fd6;
-  --radius-lg: 18px;
-  --radius-sm: 9px;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #16142a; --surface: #211e3a; --ink: #eceaf7; --ink-2: #a9a4c6; --line: #343053;
-    --violet: #9a86ff; --violet-soft: #2e2856; --paid: #5cc79a; --held: #e8a640; --held-soft: #3a2e1a;
-    --frozen: #6fb2da; --frozen-soft: #1d3342; --danger: #f07a7a; --gas: #6f63ad; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #16142a; --surface: #211e3a; --ink: #eceaf7; --ink-2: #a9a4c6; --line: #343053;
-  --violet: #9a86ff; --violet-soft: #2e2856; --paid: #5cc79a; --held: #e8a640; --held-soft: #3a2e1a;
-  --frozen: #6fb2da; --frozen-soft: #1d3342; --danger: #f07a7a; --gas: #6f63ad; color-scheme: dark;
+  --paper: #080D18; --surface: #131D30; --surface-raised: #19243A;
+  --ink: #F5F7FF; --ink-2: #A6B3CC; --line: #2b3851;
+  --violet: #9585FF; --violet-soft: #221f40; --cyan: #63CFF1;
+  --paid: #51D9B5; --held: #F4BA65; --held-soft: #30271c;
+  --frozen: #EF7186; --frozen-soft: #321d2b; --danger: #EF7186; --gas: #63CFF1;
+  --radius-lg: 24px; --radius-sm: 10px;
+  --space-1: 8px; --space-2: 16px; --space-3: 24px; --space-4: 32px; --space-6: 48px;
+  --shadow: 0 20px 64px #00000035;
+  --font-heading: "Sora", sans-serif; --font-ui: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--paper); color: var(--ink);
-  font: 400 16px/1.5 "Schibsted Grotesk", system-ui, sans-serif;
+  font: 400 15px/1.6 var(--font-ui);
   /* No tabular-nums: in this typeface it also widens "." and ",", which reads as a space before punctuation. */
 }
 a { color: var(--violet); }
@@ -112,13 +95,6 @@ a.btn { text-decoration: none; color: inherit; display: inline-block; }
 .day-log .held { background: linear-gradient(90deg, transparent, var(--held-soft) 30%, transparent); }
 .day-proof { display: inline-block; margin-top: 12px; font-size: 14px; font-weight: 600; }
 @media (max-width: 520px) { .day-log li { grid-template-columns: minmax(0, 1fr) auto; } .day-log .blk { grid-column: 1 / -1; } .day-log .amt { display: none; } }
-@media (prefers-reduced-motion: no-preference) {
-  .day.play .day-log li { opacity: 0; transform: translateY(4px); animation: dayIn .45s ease-out forwards; animation-delay: calc(var(--i) * 0.42s + 0.2s); }
-  .day.play .day-meter span { width: 0; animation: dayMeter 1.1s ease-out 0.6s forwards; }
-}
-@keyframes dayIn { to { opacity: 1; transform: none; } }
-@keyframes dayMeter { to { width: 20%; } }
-
 .intro section { margin-top: 84px; }
 .intro h2 { font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em; margin: 0 0 22px; max-width: 30ch; }
 .how ol { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
@@ -250,36 +226,284 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
   .meter.fresh .seg { animation: grow .5s ease-out both; transform-origin: left; }
   @keyframes grow { from { transform: scaleX(0); } }
 }
+/* Phase 1: Autonomous Finance Command Center. Breakpoints: 1100 / 860 / 560px. */
+body { background: radial-gradient(ellipse at 75% 12%, #9585ff09, transparent 38%), var(--paper); }
+.wrap { max-width: 1280px; padding-inline: 40px; }
+h1,h2,h3,.brand,.left-num,.req .amt { font-family: var(--font-heading); }
+button,a,input,select,summary { -webkit-tap-highlight-color: transparent; }
+button,input,select { min-height: 44px; }
+button { transition: background .18s, border-color .18s, transform .18s; }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { cursor: wait; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+.skip-link { position: absolute; top: -80px; left: 16px; z-index: 20; background: var(--ink); color: var(--paper); padding: 12px; border-radius: 8px; }
+.skip-link:focus { top: 12px; }
+header { min-height: 100px; border-bottom: 1px solid var(--line); gap: 24px; }
+.brand { font-size: 23px; font-weight: 600; letter-spacing: -.05em; }
+.brand svg { color: var(--violet); width: 34px; height: 34px; }
+.top-nav { display: flex; gap: 24px; margin-left: 32px; font-size: 13px; }
+.top-nav a { color: var(--ink-2); text-decoration: none; }
+.top-nav a:hover { color: var(--ink); }
+.net { font: 11px var(--font-mono); background: #19243a80; border: 1px solid var(--line); padding: 9px 12px; border-radius: 8px; }
+.dot { background: var(--ink-2); width: 6px; height: 6px; }
+.btn { border-radius: 10px; background: var(--surface-raised); padding: 11px 18px; font-size: 13px; font-weight: 600; }
+.btn:hover { background: #23314c; border-color: var(--violet); }
+.btn.primary { background: var(--violet); color: #100b28; border-color: var(--violet); box-shadow: 0 4px 20px #9585ff12; }
+.btn.primary:hover { background: #b1a5ff; filter: none; }
+.btn.ice { color: #160810; background: var(--frozen); border-color: var(--frozen); }
+.btn.small { font-size: 12px; padding: 8px 12px; }
+.btn.big { font-size: 14px; padding: 16px 21px; min-height: 54px; }
+.intro { padding: 76px 0 88px; }
+.hero { gap: 48px; grid-template-columns: 1.1fr 1fr; }
+.eyebrow { font: 500 10px/1.6 var(--font-mono); letter-spacing: .13em; color: var(--ink-2); margin: 0 0 20px; }
+.hero-copy>.eyebrow { display: flex; gap: 8px; align-items: center; color: var(--cyan); }
+.hero-copy>.eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); }
+.intro h1 { font-size: clamp(36px, 4.3vw, 60px); font-weight: 500; line-height: 1.12; letter-spacing: -.06em; margin-bottom: 24px; text-wrap: initial; }
+.intro h1 em { color: var(--violet); font-style: normal; }
+.intro .lede { font-size: 16px; line-height: 1.8; max-width: 42ch; margin-bottom: 30px; }
+.intro .cta-hint { font-size: 11px; margin-top: 16px; max-width: none; }
+.cta .primary span { padding-left: 18px; }
+.hero-values { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 32px; font-size: 10px; color: var(--ink-2); }
+.hero-values span::before { content: '✓'; color: var(--paid); padding-right: 6px; }
+.command-map { margin: 0; padding: 24px; background: linear-gradient(145deg,#19243a,#101828); border: 1px solid #364460; border-radius: var(--radius-lg); box-shadow: var(--shadow); position: relative; }
+.command-map::before { content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit; background-image: radial-gradient(#a6b3cc18 .6px,transparent .6px); background-size:16px 16px; }
+.command-map>* { position:relative; }
+.command-map figcaption { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:24px; }
+.command-map .eyebrow { margin:0; font-size:9px; }
+.map-network { color:var(--ink-2); font:10px var(--font-mono); }
+.map-network::before { content:'●'; color:var(--violet); margin-right:8px; }
+.map-agent { display:flex; align-items:center; gap:12px; background:#19243a; border:1px solid var(--line); border-radius:12px; padding:16px; }
+.agent-glyph { display:grid; place-items:center; width:42px; height:42px; border-radius:10px; font-size:30px; color:var(--violet); background:var(--violet-soft); }
+.map-agent b { font-size:13px; font-weight:600; display:block; }
+.map-agent div>span { color:var(--ink-2); font-size:10px; display:block; margin-top:3px; }
+.map-tag { font:8px var(--font-mono); padding:4px 6px; border:1px solid #9585ff55; color:var(--violet); border-radius:4px; margin-left:auto; }
+.policy-boundary { margin:30px 0 24px; border:1px dashed #9585ff88; border-radius:16px; padding:26px 14px 14px; position:relative; background:#9585ff05; }
+.policy-boundary::before { content:''; position:absolute; height:30px; width:1px; background:var(--violet); top:-31px; left:50%; }
+.boundary-label { position:absolute; top:-7px; left:50%; transform:translateX(-50%); white-space:nowrap; background:#162035; color:var(--violet); font:8px var(--font-mono); letter-spacing:.1em; padding:0 10px; }
+.policy-core { display:flex; align-items:center; gap:14px; }
+.policy-core svg { width:100px; height:100px; flex:none; fill:none; stroke:var(--line); stroke-width:3; }
+.policy-core .orbit { stroke:var(--violet); stroke-dasharray:255 65; transform:rotate(-90deg); transform-origin:center; stroke-linecap:round; }
+.policy-core path { stroke:var(--violet); stroke-width:1.8; }
+.policy-core b { font-family:var(--font-heading); font-size:18px; line-height:1.4; font-weight:500; letter-spacing:-.03em; }
+.policy-core div>span { display:block; color:var(--ink-2); font-size:9px; margin-top:10px; }
+.policy-route { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px; font:8px var(--font-mono); letter-spacing:.03em; text-align:center; }
+.policy-route span:first-child { color:var(--paid); }
+.policy-route span:last-child { color:var(--held); }
+.map-outcomes { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.map-outcomes>div { border:1px solid #51d9b540; background:#51d9b507; padding:14px 10px; border-radius:10px; text-align:center; position:relative; }
+.map-outcomes>div:last-child { border-color:#f4ba6540; background:#f4ba6507; }
+.map-outcomes>div::before { content:''; position:absolute; width:1px; height:24px; top:-25px; left:50%; background:#51d9b570; }
+.map-outcomes>div:last-child::before { background:#f4ba6570; }
+.outcome-icon { display:block; font-size:18px; color:var(--paid); }
+.map-outcomes>div:last-child .outcome-icon { color:var(--held); }
+.map-outcomes b { display:block; font-size:11px; margin-top:4px; }
+.map-outcomes div>span:last-child { display:block; font-size:9px; color:var(--ink-2); margin-top:4px; }
+.map-note { margin:18px 0 0; color:var(--ink-2); font-size:9px; text-align:center; }
+.intro section { margin-top:88px; }
+.intro h2 { font-weight:500; font-size:30px; letter-spacing:-.04em; max-width:32ch; }
+.how ol { gap:16px; }
+.how li { border:1px solid var(--line); border-radius:16px; padding:24px; background:var(--surface); font-size:13px; }
+.how li::before { font:400 12px var(--font-mono); color:var(--violet); margin-bottom:24px; content:'0' counter(step) ' /'; }
+.how li b { font-family:var(--font-heading); font-size:16px; font-weight:500; margin-bottom:10px; }
+.evidence .day { max-width:820px; margin:auto; background:var(--surface); padding:28px; }
+.day figcaption b { font:500 23px var(--font-heading); letter-spacing:-.04em; }
+.day figcaption span { font-size:11px; margin-top:6px; }
+.day-rules,.day-log li { font-size:13px; }
+.day-log .st { font-size:10px; }
+.day-log .blk,.day-log .what small { font-size:11px; }
+.day-proof { font-size:12px; }
+.compare table { font-size:13px; }
+.fit-grid { gap:24px; }
+.fit-grid p { font-size:13px; }
+.fit-grid b { font:500 16px/1.5 var(--font-heading); margin-bottom:12px; }
+.fit-contract code { font:11px var(--font-mono); }
+.sim-bar { border:1px solid #63cff166; border-left:3px solid var(--cyan); background:#101f30; margin:28px 0; padding:16px 20px; border-radius:12px; font-size:12px; }
+.sim-bar b { color:var(--cyan); }
+.app { grid-template-columns:250px minmax(0,1fr); gap:24px; margin-top:32px; }
+.side { position:sticky; top:24px; }
+.side>.eyebrow { margin-bottom:24px; }
+.side h2 { font-size:15px; font-weight:500; }
+.section-mark { color:var(--violet); }
+.acct-list { gap:10px; margin:20px 0; }
+.acct-list button { background:#101828; border:1px solid var(--line); padding:16px; border-radius:14px; gap:16px; }
+.acct-list button[aria-current="true"] { border-color:#9585ff99; background:linear-gradient(135deg,#9585ff18,var(--surface)); box-shadow:inset 3px 0 var(--violet); }
+.acct-list .row { font-size:13px; flex-wrap:wrap; }
+.acct-list .sub { font-size:10px; gap:8px; flex-wrap:wrap; }
+.acct-list .sub>span { overflow-wrap:anywhere; }
+.side>#openBtn { width:100%; background:transparent; color:var(--violet); border-style:dashed; }
+.panel { padding:32px; background:linear-gradient(135deg,#162137,var(--surface)); box-shadow:var(--shadow); }
+.acct-head { align-items:center; padding-bottom:24px; border-bottom:1px solid var(--line); }
+.acct-head h2 { font-size:24px; font-weight:500; }
+.acct-head .who { font:10px/1.6 var(--font-mono); overflow-wrap:anywhere; }
+.budget-overview { display:flex; align-items:center; gap:32px; margin:30px 0; }
+.budget-copy { min-width:0; flex:1; }
+.budget-copy .eyebrow { margin-bottom:12px; color:var(--violet); }
+.spending-ring { --used:0%; width:160px; height:160px; flex:none; border-radius:50%; padding:8px; background:conic-gradient(var(--violet) var(--used),#2b3851 var(--used)); transform:rotate(0); }
+.spending-ring>div { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%; border-radius:50%; background:#142035; box-shadow:inset 0 0 0 6px #19263d; }
+.spending-ring b { font:500 30px var(--font-heading); letter-spacing:-.05em; }
+.spending-ring span { font:9px var(--font-mono); color:var(--ink-2); margin-top:6px; }
+.spending-ring.blocked { background:conic-gradient(var(--danger) var(--used),#3e2935 var(--used)); }
+.left-num { font-size:56px; font-weight:500; overflow-wrap:anywhere; }
+.left-num small { font:400 15px var(--font-mono); }
+.left-cap { font-size:12px; margin:12px 0 0; max-width:45ch; }
+.meter { height:12px; padding:2px; border-radius:6px; gap:2px; }
+.meter .seg { border-radius:3px; min-width:2px; }
+.meter-legend { font-size:10px; margin-top:12px; gap:8px 16px; }
+.meter-legend i { width:7px; height:7px; border-radius:2px; }
+#dReset { margin-left:auto; }
+.facts { gap:12px; grid-template-columns:repeat(4,minmax(0,1fr)); padding:24px 0; margin-top:24px; border-bottom:1px solid var(--line); }
+.facts dt { font-size:10px; }
+.facts dd { font-size:12px; margin-top:8px; overflow-wrap:anywhere; }
+.section { margin-top:32px; }
+.section h2 { font-size:15px; font-weight:500; display:flex; align-items:center; gap:12px; }
+.badge { font:500 9px/1.6 var(--font-mono); padding:3px 8px; }
+.hint { font-size:11px; }
+.empty { font-size:12px; padding:20px; background:#080d1840; border:1px dashed var(--line); border-radius:12px; }
+.req { background:linear-gradient(110deg,#f4ba650c,#131d30); border-color:#f4ba654a; border-left:3px solid var(--held); padding:20px; gap:12px; }
+.req .memo { font-size:14px; font-weight:500; }
+.req .amt { font-size:20px; font-weight:500; }
+.req .why { font-size:10px; }
+.req .to { font:10px/1.6 var(--font-mono); }
+.req .acts { border-top:1px solid #f4ba6524; padding-top:14px; }
+.req .primary { background:var(--held); border-color:var(--held); color:#261907; }
+.freeze-row { background:#ef718607; border-color:#ef718633; padding:20px; }
+.freeze-row p { font-size:11px; }
+.freeze-row b { font-size:13px; margin-bottom:4px; }
+.freeze-row.on { background:var(--frozen-soft); border-color:var(--danger); }
+summary { font-size:12px; padding:16px 0; }
+details { background:#080d1825; }
+form.grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+label { font-size:11px; gap:8px; }
+label.check { font-size:12px; }
+input[type=text],input[type=number],select { font-size:12px; background:#0c1424; padding:12px; }
+input[name=addr],input[name=to],.feed .hash { font-family:var(--font-mono); }
+.feed li { font-size:12px; grid-template-columns:12px minmax(0,1fr) auto; gap:12px; padding:16px 0; }
+.feed li>span { min-width:0; overflow-wrap:anywhere; }
+.feed .tx { flex-direction:column; gap:4px; align-items:flex-end; font-size:9px; }
+.feed .hash,.feed a { font-size:9px; min-height:24px; }
+.feed .k { width:6px; height:6px; border-radius:50%; }
+.feed .k.paid { background:var(--paid); }
+.agent { border-style:solid; border-color:#9585ff44; padding:24px; }
+.agent>.eyebrow { font-size:9px; color:var(--violet); margin-bottom:8px; }
+.agent h2 { font-weight:500; }
+.agent>p:not(.eyebrow) { font-size:12px; margin-top:8px; }
+.verdict { font-size:12px; padding:12px; background:#080d1860; border-radius:8px; }
+.verdict:empty { display:none; }
+.verdict.now::before { content:'✓ '; }
+.verdict.hold::before { content:'◷ '; }
+.verdict.stop::before { content:'⊘ '; }
+details.assistant pre { font:10px/1.8 var(--font-mono); }
+dialog { box-shadow:var(--shadow); max-height:calc(100dvh - 32px); overflow:auto; }
+dialog::backdrop { background:#040812cc; }
+dialog h2 { font-weight:500; font-size:24px; }
+dialog p { font-size:12px; }
+#toast { background:#e9e4ff; color:#16112b; font-size:12px; box-shadow:var(--shadow); }
+#toast.err { color:#180910; }
+footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; }
+@media (max-width:1100px) {
+ .top-nav { margin-left:12px; gap:16px; } .hero { gap:28px; } .map-tag { display:none; }
+ .facts { grid-template-columns:repeat(2,minmax(0,1fr)); } .app { grid-template-columns:220px minmax(0,1fr); }
+ .spending-ring { width:130px; height:130px; } .budget-overview { gap:20px; }
+}
+@media (max-width:860px) {
+ .wrap { padding-inline:24px; } .top-nav { display:none; } .hero { grid-template-columns:1fr; gap:40px; }
+ .hero-copy { max-width:600px; } .intro h1 { font-size:54px; } .command-map { width:100%; max-width:540px; margin-inline:auto; }
+ .intro { padding-top:48px; } .app { grid-template-columns:1fr; } .side { position:static; }
+ .acct-list { grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); } .side>#openBtn { width:auto; }
+ .side>.eyebrow { margin-bottom:12px; } .panel { padding:28px; }
+}
+@media (max-width:560px) {
+ .wrap { padding-inline:18px; } header { gap:12px; min-height:100px; padding-block:18px; }
+ .brand { font-size:21px; } .net { order:3; width:auto; margin-left:0; font-size:9px; } #connectBtn { margin-left:auto; }
+ .intro { padding-top:40px; } .intro h1 { font-size:39px; line-height:1.15; } .hero-copy>.eyebrow { font-size:8px; letter-spacing:.08em; }
+ .intro .lede { font-size:14px; } .btn.big { padding:14px 16px; font-size:12px; } .hero-values { font-size:9px; gap:10px; }
+ .command-map { padding:18px; } .map-agent { padding:12px; } .map-agent div>span { font-size:9px; }
+ .policy-core { gap:8px; } .policy-core b { font-size:17px; } .policy-core svg { width:90px; height:90px; }
+ .map-outcomes b { font-size:10px; } .map-outcomes div>span:last-child { font-size:8px; }
+ .intro section { margin-top:56px; } .intro h2 { font-size:25px; } .evidence .day { padding:20px; }
+ .day-log .amt { display:inline; } .day-log li { grid-template-columns:minmax(0,1fr) auto; gap:6px; }
+ .day-log .amt { grid-column:1; } .day-log .st { grid-column:2; grid-row:auto; }
+ .compare th,.compare td { padding:12px 8px 12px 0; font-size:11px; } .compare tbody th { width:38%; }
+ .panel { padding:20px; border-radius:18px; } .acct-head { align-items:flex-start; gap:12px; }
+ .acct-head h2 { font-size:22px; } .budget-overview { gap:16px; margin:24px 0; }
+ .spending-ring { width:100px; height:100px; padding:6px; } .spending-ring b { font-size:23px; } .spending-ring span { font-size:8px; }
+ .left-num { font-size:40px; } .left-num small { font-size:11px; display:block; margin:6px 0 0; }
+ .budget-copy .eyebrow { font-size:8px; letter-spacing:.06em; } .left-cap { font-size:10px; }
+ .facts { gap:20px 12px; } .req { padding:16px; } .req .acts { gap:8px; }
+ .feed li { grid-template-columns:10px minmax(0,1fr); } .feed .tx { grid-column:2; flex-direction:row; align-items:center; gap:12px; }
+ .agent { padding:16px; } form.grid { grid-template-columns:1fr; } .sim-bar { margin-top:20px; padding:16px; }
+ #dReset { margin-left:0; width:100%; } .section h2 { flex-wrap:wrap; } .btn { white-space:normal; }
+}
+@media (prefers-reduced-motion:reduce) {
+ *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+}
+
+.arrow-icon { width:14px; height:14px; display:inline-block; vertical-align:-2px; flex:none; }
+.cta .arrow-icon { margin-left:14px; }
+.connected .top-nav a:first-child { display:none; }
+.account-title { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+.badge.active { color:var(--paid); background:#51d9b512; border:1px solid #51d9b533; }
+.simulation .dot.on { background:var(--cyan); }
+.command-map .map-note { font-size:10px; }
+@media(max-width:560px) { .account-title { gap:10px; } .map-note { line-height:1.7; } }
+__POLICY_CSS__
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="wrap">
   <header>
     <div class="brand">
       <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M3 12h26" stroke="currentColor" stroke-width="2.4"/><rect x="7" y="17" width="9" height="4" rx="2" fill="var(--violet)"/></svg>
       Allowance
     </div>
+    <nav class="top-nav" aria-label="Main navigation"><a href="#howTitle">How it works</a><a href="https://github.com/Oziman13/allowance/tree/main/docs" target="_blank" rel="noopener">Documentation <svg class="arrow-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a></nav>
     <div class="net"><span class="dot" id="netDot"></span><span id="netName">Not connected</span></div>
-    <button class="btn primary" id="connectBtn">Connect wallet</button>
+    <button class="btn primary" id="connectBtn">Connect Wallet</button>
   </header>
 </div>
 
-<main class="wrap">
+<main class="wrap" id="main">
   <section class="intro" id="intro">
     <div class="hero">
       <div class="hero-copy">
-        <h1>Give your AI agent an allowance, not a wallet.</h1>
-        <p class="lede">Your agent spends from a budget with rules that live on Portaldot. Small payments go through on their own. Anything bigger, or to someone new, waits for you.</p>
+        <p class="eyebrow"><span></span> AUTONOMOUS FINANCE, UNDER YOUR CONTROL</p>
+        <h1>Give AI the freedom to act.<br><em>Keep the power to decide.</em></h1>
+        <p class="lede">On-chain spending boundaries for autonomous agents. Configure trusted recipients, enforce budgets, and review payments that need your decision.</p>
         <div class="cta">
-          <button class="btn primary big" id="simBtn">Try it without a wallet</button>
-          <button class="btn big" id="connectBtn2">Connect wallet</button>
+          <button class="btn primary big" id="simBtn">Try Interactive Demo <svg class="arrow-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></button>
+          <button class="btn big" id="connectBtn2">Connect Wallet</button>
         </div>
-        <p class="hint cta-hint">The simulation runs the real contract in your browser, with a demo agent already spending. No wallet, no test tokens.</p>
+        <p class="hint cta-hint">Real contract. In-browser simulation. No wallet needed.</p>
+        <div class="hero-values"><span>On-chain limits</span><span>Independent payments</span><span>Owner oversight</span></div>
       </div>
 
+      <figure class="policy-field pf-landing" id="landingField" data-state="allowed" aria-labelledby="landingFieldTitle">
+        <figcaption class="pf-heading"><div><p class="eyebrow">THE BOUNDARIES OF AUTONOMY</p><h2 id="landingFieldTitle">A field of possibility.<br>A boundary you define.</h2></div><span class="pf-mode">ILLUSTRATION</span></figcaption>
+        <div class="pf-canvas" data-policy-diagram="landing" aria-hidden="true"></div>
+        <div class="pf-selector" role="group" aria-label="Illustrative policy scenarios">
+          <button type="button" data-scenario="allowed" aria-pressed="true">Autonomous payment</button>
+          <button type="button" data-scenario="pending" aria-pressed="false">Owner approval</button>
+          <button type="button" data-scenario="blocked" aria-pressed="false">Policy block</button>
+        </div>
+        <div class="pf-explanation" aria-live="polite" aria-atomic="true"><b id="scenarioTitle">Within the active policy</b><p id="scenarioText">Illustrative example: a payment to a trusted recipient fits both caps and the contract balance. It can settle autonomously.</p></div>
+        <p class="pf-footnote">Illustrative scenarios, not recorded transactions. The boundary is a policy abstraction; distance does not determine authorization.</p>
+      </figure>
+    </div>
+
+    <section class="how" aria-labelledby="howTitle">
+      <h2 id="howTitle">Freedom to act. A framework you define.</h2>
+      <ol>
+        <li><b>Set the rules.</b> Open an allowance for an agent key: a budget, a cap per payment, a cap per day or week, and who it may pay without asking.</li>
+        <li><b>The agent pays.</b> Inside the rules, payments settle at once, gas included. The contract checks every payment, so the agent can't skip the check.</li>
+        <li><b>You decide the rest.</b> Anything outside the rules waits with the agent's reason. Approve it, trust the recipient for next time, or reject it. Freeze the agent with one click.</li>
+      </ol>
+    </section>
+
+    <section class="evidence" aria-label="Recorded testnet evidence">
       <figure class="day" aria-labelledby="dayTitle">
         <figcaption>
-          <b id="dayTitle">One agent's afternoon</b>
+          <b id="dayTitle">Control, proven on chain</b>
           <span>Recorded on the Portaldot V3 testnet, 19 October 2026</span>
         </figcaption>
         <p class="day-rules"><span>Research agent</span> may pay up to <b>1 POT</b> at a time and <b>5 POT</b> a day, to trusted recipients only.</p>
@@ -294,15 +518,6 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
         </ol>
         <a class="day-proof" href="https://github.com/Oziman13/allowance/blob/main/docs/PROOF.md" target="_blank" rel="noopener">Check these transactions on chain</a>
       </figure>
-    </div>
-
-    <section class="how" aria-labelledby="howTitle">
-      <h2 id="howTitle">How it works</h2>
-      <ol>
-        <li><b>Set the rules.</b> Open an allowance for an agent key: a budget, a cap per payment, a cap per day or week, and who it may pay without asking.</li>
-        <li><b>The agent pays.</b> Inside the rules, payments settle at once, gas included. The contract checks every payment, so the agent can't skip the check.</li>
-        <li><b>You decide the rest.</b> Anything outside the rules waits with the agent's reason. Approve it, trust the recipient for next time, or reject it. Freeze the agent with one click.</li>
-      </ol>
     </section>
 
     <section class="compare" aria-labelledby="cmpTitle">
@@ -347,7 +562,8 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
 
   <section class="app hidden" id="app">
     <aside class="side">
-      <h2>Your agents</h2>
+      <p class="eyebrow">COMMAND CENTER</p>
+      <h2>Your agents<span class="section-mark" aria-hidden="true"> / </span></h2>
       <ul class="acct-list" id="acctList"></ul>
       <p class="empty hidden" id="noAccts">You haven't given any agent an allowance yet.</p>
       <button class="btn primary" id="openBtn">New allowance</button>
@@ -356,32 +572,52 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
     <div>
       <div class="panel hidden" id="detail">
         <div class="acct-head">
-          <h2 id="dName"></h2>
+          <div class="account-title"><h2 id="dName"></h2><span class="badge" id="accountStatus"></span></div>
           <span class="who" id="dWho"></span>
         </div>
 
+        <section class="policy-field pf-control" id="controlField" data-state="neutral" aria-labelledby="controlFieldTitle" aria-busy="true">
+          <div class="pf-heading"><div><p class="eyebrow">LIVE POLICY / SELECTED AGENT</p><h3 id="controlFieldTitle">Agent Control Field</h3></div><span class="pf-mode" id="fieldMode">Reading contract…</span></div>
+          <div class="pf-canvas" data-policy-diagram="control" aria-hidden="true"></div>
+          <p class="pf-summary" id="fieldSummary" aria-live="polite">Reading the selected agent's spending environment.</p>
+          <dl class="pf-readings">
+            <div><dt>Contract-held balance</dt><dd id="fieldBalance">—</dd></div>
+            <div><dt>Per-payment cap</dt><dd id="fieldCap">—</dd></div>
+            <div><dt>Autonomous period limit</dt><dd id="fieldLimit">—</dd></div>
+            <div><dt>Autonomous allowance remaining</dt><dd id="fieldLeft">—</dd></div>
+          </dl>
+          <details id="fieldDetails"><summary>Inspect policy &amp; verified recipients</summary>
+            <dl class="pf-policy-details"><div><dt>Agent address</dt><dd id="fieldAgent">—</dd></div><div><dt>Recipient policy</dt><dd id="fieldTrust">—</dd></div><div><dt>Expiry</dt><dd id="fieldExpiry">—</dd></div><div><dt>Pending requests</dt><dd id="fieldPending">—</dd></div></dl>
+            <p class="hint" id="fieldTrustNote">Reading recipient history…</p><ul id="fieldRecipients" class="pf-recipients"></ul>
+          </details>
+          <p class="pf-footnote">Positions are illustrative, not numerical limits. Trusted does not guarantee payment authorization. Pending requests do not reserve funds.</p>
+        </section>
+
         <div class="meter-block">
+          <div class="budget-overview"><div class="spending-ring" id="spendingRing" role="img"><div><b id="ringPercent"></b><span>limit used</span></div></div><div class="budget-copy"><p class="eyebrow">AUTONOMOUS ALLOWANCE</p>
           <div class="left-num" id="dLeft"></div>
           <p class="left-cap" id="dLeftCap"></p>
+          </div></div>
           <div class="meter" id="dMeter" role="img"></div>
           <div class="meter-legend"><span><i style="background:var(--violet)"></i>Payments</span><span><i style="background:var(--gas)"></i>Gas</span><span id="dReset"></span></div>
         </div>
 
         <dl class="facts">
-          <div><dt>Budget left</dt><dd id="fBalance"></dd></div>
+          <div><dt>Contract balance</dt><dd id="fBalance"></dd></div>
           <div><dt>Per payment</dt><dd id="fPerPay"></dd></div>
           <div><dt>Recipients</dt><dd id="fTrust"></dd></div>
           <div><dt>Spent all time</dt><dd id="fTotal"></dd></div>
         </dl>
 
         <div class="section">
-          <h2>Waiting for you</h2>
+          <h2>Approval inbox <span class="badge held" id="pendingCount">0 pending</span></h2>
+          <p class="hint">Awaiting owner approval. Pending requests do not reserve funds; review the current balance before deciding.</p>
           <ul class="inbox" id="inbox"></ul>
           <p class="empty hidden" id="inboxEmpty">Nothing to decide. Payments outside the rules will appear here.</p>
         </div>
 
         <div class="section controls">
-          <h2>Controls</h2>
+          <h2>Policy &amp; controls</h2>
           <div class="freeze-row" id="freezeRow">
             <p id="freezeText"></p>
             <button class="btn ice" id="freezeBtn"></button>
@@ -420,18 +656,20 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
         </div>
 
         <div class="section">
-          <h2>Activity</h2>
+          <h2>Transaction activity</h2>
+          <p class="hint" id="activityContext">On-chain events, newest first.</p>
           <ul class="feed" id="feed"></ul>
           <p class="empty hidden" id="feedEmpty">No activity yet.</p>
         </div>
 
         <div class="agent hidden" id="agentBox">
-          <h2>Try it as the agent</h2>
+          <p class="eyebrow">AGENT WORKSPACE</p><h2>Test an agent payment</h2>
           <p>This browser holds the agent key for this allowance. Send a payment the way your agent would and watch the rules apply.</p>
           <form class="grid" id="payForm">
             <label class="full">Pay to<input type="text" name="to" required autocomplete="off" spellcheck="false"></label>
             <label><span>Amount (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="amount" value="0.1" required></label>
             <label>What it's for<input type="text" name="memo" maxlength="140" value="API credits" required></label>
+            <p class="pf-preview-label full">NEXT PAYMENT PREVIEW · NOT A TRANSACTION</p>
             <p class="verdict full" id="verdict" aria-live="polite"></p>
             <div class="full" style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn primary" type="submit">Send as agent</button>
@@ -439,6 +677,12 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
               <button class="btn" type="button" id="toTrustedBtn">Use a trusted address</button>
             </div>
           </form>
+          <section class="pf-decision" id="paymentDecision" data-state="neutral" aria-labelledby="decisionTitle" aria-live="polite" aria-atomic="true">
+            <div class="pf-heading"><span class="eyebrow">PAYMENT DECISION</span><span class="pf-mode" id="decisionMode">No transaction submitted</span></div>
+            <ol class="pf-journey" aria-label="Payment lifecycle"><li data-step="request"><span class="pf-dot"></span><span>Payment requested</span></li><li data-step="policy"><span class="pf-dot"></span><span>Policy evaluation</span></li><li data-step="outcome"><span class="pf-dot"></span><span id="decisionEndpoint">Actual outcome</span></li></ol>
+            <h3 id="decisionTitle">Inspect a payment</h3><p id="decisionReason">A preview checks the active policy. It does not send a payment.</p>
+            <p class="pf-decision-proof hidden" id="decisionProof"></p>
+          </section>
           <details class="assistant">
             <summary>Give this allowance to an AI assistant</summary>
             <p class="hint">Paste this into your MCP client (Claude Desktop, Claude Code, Cursor). The assistant gets only the agent key; the rules above still apply to everything it does. Setup steps are in <a href="https://github.com/Oziman13/allowance/tree/main/mcp" target="_blank" rel="noopener">mcp/README.md</a>.</p>
@@ -453,9 +697,9 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
 
 <div class="wrap"><footer>Allowance is open source (MIT) and not audited. Keep budgets small. <a href="https://github.com/Oziman13/allowance">Source on GitHub</a></footer></div>
 
-<dialog id="openDlg">
+<dialog id="openDlg" aria-labelledby="openTitle">
   <form id="openForm" method="dialog">
-    <h2>New allowance</h2>
+    <h2 id="openTitle">New allowance</h2>
     <p>A fresh agent key is created in this browser. Give it to your agent; your own key never leaves your wallet.</p>
     <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
       <label class="full">Name<input type="text" name="name" maxlength="64" value="Research agent" required></label>
@@ -476,9 +720,9 @@ footer { padding: 28px 0 40px; color: var(--ink-2); font-size: 14px; border-top:
   </form>
 </dialog>
 
-<div id="toast" role="status" aria-live="polite"></div>
+<div id="toast" role="status" aria-live="polite" aria-atomic="true" role="status" aria-live="polite"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<script src="vendor/ethers-6.13.4.umd.min.js"></script>
 <script>
 "use strict";
 const ABI = __ABI__;
@@ -506,7 +750,6 @@ function fmt(v, dec) {
 }
 const parse = (v, dec) => ethers.parseUnits(String(v || "0"), dec);
 const net = () => NETWORKS[String(S.chainId)] || { name: "Chain " + S.chainId, nativeSymbol: "POT", explorer: null };
-const txLink = (h) => net().explorer ? `<a href="${net().explorer}/tx/${h}" target="_blank" rel="noopener">tx</a>` : "";
 function friendly(e) {
   const data = e?.data || e?.info?.error?.data || e?.error?.data;
   try { const p = data && S.al.interface.parseError(data); if (p) return errText(p.name, p.args); } catch {}
@@ -526,7 +769,7 @@ function errText(name, args) {
     InvalidAmount: "Check the amount.",
     NotPending: "That request was already decided.",
     TransferFailed: "The recipient refused the payment, so nothing moved.",
-    OutsideRules: "Outside the rules: " + (HOLD[Number(args?.[0])] || "").toLowerCase() + ".",
+    OutsideRules: "Outside the rules: " + (HOLD[Number(args?.length ? args[0] : 0)] || "").toLowerCase() + ".",
   })[name] || name;
 }
 async function send(label, fn) {
@@ -545,6 +788,7 @@ async function send(label, fn) {
 // ---------------------------------------------------------------- connect
 async function connect(eth = window.ethereum) {
   if (!eth) { toast("No wallet found. Install one such as MetaMask, or try the simulation.", true); return; }
+  if (eth.isAllowanceSimulation) eth = serializedSimulationTransport(eth);
   S.eth = eth; S.sim = !!eth.isAllowanceSimulation;
   S.provider = new ethers.BrowserProvider(eth, "any", S.sim ? { cacheTimeout: -1 } : undefined);
   if (S.sim) S.provider.pollingInterval = 250; // blocks are instant in the simulation
@@ -554,6 +798,9 @@ async function connect(eth = window.ethereum) {
   S.chainId = Number((await S.provider.getNetwork()).chainId);
   $("#netDot").classList.add("on");
   $("#netName").textContent = net().name;
+  document.body.classList.toggle("simulation", S.sim);
+  document.body.classList.add("connected");
+  $("#activityContext").textContent = S.sim ? "Simulation events · local to this browser, no testnet transactions." : "On-chain events, newest first.";
   $("#connectBtn").textContent = short(S.me);
   document.querySelectorAll(".sym").forEach((el) => (el.textContent = net().nativeSymbol));
   eth.on?.("chainChanged", () => location.reload());
@@ -633,8 +880,8 @@ async function loadAccounts() {
     const [a, left] = await S.al.getAccount(id);
     S.accounts.push({ id, a, left, m: await assetMeta(a.asset), pending: await pendingCount(id) });
   }
-  renderList();
   if (S.sel == null && S.accounts.length) S.sel = S.accounts[S.accounts.length - 1].id;
+  renderList();
   if (S.sel != null) await renderDetail(S.sel);
 }
 async function refresh() { if (S.al) await loadAccounts().catch(() => {}); }
@@ -673,8 +920,9 @@ function renderList() {
     li.innerHTML = `<button type="button" aria-current="${id === S.sel}">
       <span class="row"><span>${esc(a.name || "Agent " + id)}</span>${a.frozen ? '<span class="badge frozen">Frozen</span>' : pending ? `<span class="badge held">${pending} waiting</span>` : ""}</span>
       <span class="mini"><i style="width:${pct}%"></i></span>
-      <span class="sub"><span>${fmt(left, m.dec)} ${m.sym} left</span><span>per ${PERIOD_NAME[Number(a.rules.period)] || fmtDur(Number(a.rules.period))}</span></span>
+      <span class="sub"><span>${fmt(left, m.dec)} <span class="asset-symbol"></span> available</span><span>per ${PERIOD_NAME[Number(a.rules.period)] || fmtDur(Number(a.rules.period))}</span></span>
     </button>`;
+    li.querySelector(".asset-symbol").textContent = m.sym;
     li.firstElementChild.onclick = () => { S.sel = id; renderList(); renderDetail(id); };
     ul.appendChild(li);
   }
@@ -688,16 +936,27 @@ function fmtDur(s) {
 }
 
 async function renderDetail(id) {
-  const entry = S.accounts.find((x) => x.id === id); if (!entry) return;
+  const entry = S.accounts.find((x) => x.id === id); if (!entry || S.sel !== id) return;
   const { a, left, m } = entry;
   $("#detail").classList.remove("hidden");
+  $("#controlField").setAttribute("aria-busy", "true");
   $("#dName").textContent = a.name || "Agent " + id;
   $("#dWho").textContent = (a.asset === NATIVE ? m.sym : m.sym + " (ERC-20)") + " · agent " + short(a.agent);
   document.querySelectorAll(".sym").forEach((el) => (el.textContent = m.sym));
 
   const cap = a.rules.perPeriod, period = Number(a.rules.period);
-  $("#dLeft").innerHTML = `${fmt(left, m.dec)}<small>${esc(m.sym)}</small>`;
-  const now = Math.floor(Date.now() / 1000), expired = Number(a.rules.expiresAt) && now >= Number(a.rules.expiresAt);
+  $("#dLeft").replaceChildren(document.createTextNode(fmt(left, m.dec)));
+  const unit = document.createElement("small"); unit.textContent = m.sym; $("#dLeft").append(unit);
+  const usedPercent = cap ? Math.max(0, Math.min(100, Number(((cap - left) * 10000n) / cap) / 100)) : 0;
+  $("#spendingRing").style.setProperty("--used", usedPercent + "%");
+  $("#spendingRing").classList.toggle("blocked", a.frozen);
+  $("#spendingRing").setAttribute("aria-label", `${usedPercent}% of autonomous spending limit used${a.frozen ? "; agent frozen" : ""}`);
+  $("#ringPercent").textContent = usedPercent + "%";
+  const block = await S.provider.getBlock("latest");
+  if (S.sel !== id) return;
+  const now = block.timestamp, expired = Number(a.rules.expiresAt) && now >= Number(a.rules.expiresAt);
+  $("#accountStatus").textContent = a.frozen ? "Frozen · blocked" : expired ? "Expired · blocked" : "Active · policy enforced";
+  $("#accountStatus").className = "badge " + (a.frozen || expired ? "frozen" : "active");
   $("#dLeftCap").textContent = a.frozen ? "Frozen. The agent can't spend or ask until you unfreeze it."
     : expired ? "Expired. The agent's access has ended."
     : `left to spend without asking you, out of ${fmt(cap, m.dec)} ${m.sym} per ${PERIOD_NAME[period] || fmtDur(period)}`;
@@ -730,13 +989,16 @@ async function renderDetail(id) {
     logs(S.al.filters.RequestResolved(null, id)),
     logs(S.al.filters.FrozenSet(id)),
   ]);
+  if (S.sel !== id) return;
   // The starting gas is sent when the account is opened and doesn't count against the period limit.
   const opened = await logs(S.al.filters.AccountOpened(id));
   const openTx = new Set(opened.map((ev) => ev.transactionHash));
   for (const ev of gas) ev.seed = openTx.has(ev.transactionHash);
+  if (S.sel !== id) return;
   renderInbox(held.filter((x) => Number(x.r.status) === 1), m);
   await renderMeter(entry, paid, gas, resolved);
   renderFeed(m, held, paid, gas, resolved, frozen);
+  await renderControlField(entry, held, now);
   renderAgent(id, a, m);
 }
 
@@ -777,10 +1039,12 @@ async function renderMeter({ a, left, m }, paid, gas, resolved) {
 function renderInbox(pending, m) {
   const ul = $("#inbox"); ul.innerHTML = "";
   $("#inboxEmpty").classList.toggle("hidden", pending.length > 0);
+  $("#pendingCount").textContent = pending.length + " pending";
   for (const { rid, r } of pending.reverse()) {
-    const li = document.createElement("li"); li.className = "req";
+    const li = document.createElement("li"); li.className = "req"; li.dataset.requestId = String(rid);
     li.innerHTML = `<div class="top"><span class="memo">${esc(r.memo)}</span><span class="amt">${fmt(r.amount, m.dec)} ${esc(m.sym)}</span></div>
-      <span class="why">Held: ${HOLD[Number(r.reason)]}</span>
+      <span class="pf-request-route"><span class="pf-node-mark" aria-hidden="true">•</span> Request #${rid}<span class="pf-route-mark" aria-hidden="true"></span><span class="pf-decision-mark" aria-hidden="true">◇</span> Awaiting owner approval</span>
+      <span class="why">Owner decision required · ${HOLD[Number(r.reason)]}</span>
       <span class="to">To ${r.to}</span>
       <div class="acts">
         <button class="btn primary small" data-a="approve">Approve</button>
@@ -790,8 +1054,17 @@ function renderInbox(pending, m) {
     li.querySelectorAll("button").forEach((b) => (b.onclick = async () => {
       li.querySelectorAll("button").forEach((x) => (x.disabled = true));
       try {
-        if (b.dataset.a === "reject") await send("Rejecting", () => S.al.reject(rid));
-        else await send(b.dataset.a === "trust" ? "Approving and trusting" : "Approving", () => S.al.approve(rid, b.dataset.a === "trust"));
+        const context = paymentKey(), accountId = S.sel;
+        const receipt = b.dataset.a === "reject"
+          ? await send("Rejecting", () => S.al.reject(rid))
+          : await send(b.dataset.a === "trust" ? "Approving and trusting" : "Approving", () => S.al.approve(rid, b.dataset.a === "trust"));
+        const events = receipt.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } });
+        if (paymentKey() === context) {
+          const resolution = events.find((x) => x?.name === "RequestResolved" && Number(x.args.requestId) === rid && Number(x.args.accountId) === accountId);
+          const paid = events.find((x) => x?.name === "Paid" && Number(x.args.accountId) === accountId);
+          if (resolution && Number(resolution.args.status) === 2 && paid) recordPaymentResult({ state: "owner", title: "Paid after owner approval", reason: "Confirmed owner-authorized payment. This does not consume the autonomous period allowance.", receipt, requestId: rid });
+          else if (resolution && Number(resolution.args.status) === 3) recordPaymentResult({ state: "blocked", title: "Request rejected by owner", reason: "The owner rejected this request. No payment was executed.", receipt, requestId: rid });
+        }
         await refresh();
       } catch { li.querySelectorAll("button").forEach((x) => (x.disabled = false)); }
     }));
@@ -801,26 +1074,43 @@ function renderInbox(pending, m) {
 
 function renderFeed(m, held, paid, gas, resolved, frozen) {
   const rows = [];
-  for (const ev of paid) rows.push([ev, "paid", `Paid ${fmt(ev.args.amount, m.dec)} ${m.sym} · ${esc(ev.args.memo)}`]);
-  for (const ev of gas) rows.push([ev, "gas", `${ev.seed ? "Starting gas" : "Gas refuel"} ${fmt(ev.args.amount, m.dec)} ${m.sym}`]);
-  for (const { ev, r } of held) rows.push([ev, "held", `Held ${fmt(r.amount, m.dec)} ${m.sym} · ${esc(r.memo)} <span class="hint">(${HOLD[Number(r.reason)].toLowerCase()})</span>`]);
-  for (const ev of resolved) { const st = Number(ev.args.status); if (st !== 2) rows.push([ev, "no", `Request ${STATUS[st].toLowerCase()}`]); }
-  for (const ev of frozen) rows.push([ev, "ice", ev.args.frozen ? "Agent frozen" : "Agent unfrozen"]);
+  const approvals = new Set(resolved.filter((ev) => Number(ev.args.status) === 2).map((ev) => ev.transactionHash));
+  for (const ev of paid) rows.push([ev, approvals.has(ev.transactionHash) ? "owner" : "paid", `${approvals.has(ev.transactionHash) ? "Paid after owner approval" : "Paid autonomously"} · ${fmt(ev.args.amount, m.dec)} ${m.sym} · ${ev.args.memo}`]);
+  for (const ev of gas) rows.push([ev, "gas", `${ev.seed ? "Starting gas" : "Gas refuel"} · ${fmt(ev.args.amount, m.dec)} ${m.sym}`]);
+  for (const { ev, r } of held) rows.push([ev, "held", `Requested · ${fmt(r.amount, m.dec)} ${m.sym} · ${r.memo} · ${HOLD[Number(r.reason)]}. ${Number(r.status) === 1 ? "Awaiting owner decision" : "Now " + STATUS[Number(r.status)].toLowerCase()}`]);
+  for (const ev of resolved) { const st = Number(ev.args.status); rows.push([ev, st === 2 ? "ok" : "no", `Request #${ev.args.requestId} · ${STATUS[st]}`]); }
+  for (const ev of frozen) rows.push([ev, ev.args.frozen ? "ice" : "ok", ev.args.frozen ? "Agent frozen · spending blocked" : "Agent unfrozen · policy active"]);
   rows.sort((x, y) => y[0].blockNumber - x[0].blockNumber || y[0].index - x[0].index);
-  const ul = $("#feed"); ul.innerHTML = "";
+  const ul = $("#feed"); ul.replaceChildren();
   $("#feedEmpty").classList.toggle("hidden", rows.length > 0);
   for (const [ev, k, text] of rows.slice(0, 40)) {
-    const li = document.createElement("li");
-    // The transaction hash is the proof: one click copies it, to check against the public RPC.
+    const li = document.createElement("li"); li.dataset.outcome = k;
+    const dot = document.createElement("span"); dot.className = "k " + k; dot.setAttribute("aria-hidden", "true");
+    const description = document.createElement("span"); description.textContent = text;
+    const tx = document.createElement("span"); tx.className = "tx";
     const h = ev.transactionHash;
-    li.innerHTML = `<span class="k ${k}"></span><span>${text}</span><span class="tx">${txLink(h) || `<button class="hash" type="button" data-h="${h}" title="Copy transaction hash">${h.slice(0, 8)}…${h.slice(-4)}</button><time>#${ev.blockNumber}</time>`}</span>`;
-    ul.appendChild(li);
+    if (net().explorer && !S.sim) {
+      const link = document.createElement("a"); link.href = net().explorer + "/tx/" + encodeURIComponent(h);
+      link.target = "_blank"; link.rel = "noopener"; link.textContent = "View tx ↗"; tx.append(link);
+    } else {
+      const copy = document.createElement("button"); copy.className = "hash"; copy.type = "button";
+      copy.dataset.h = h; copy.title = S.sim ? "Copy simulation transaction hash (not on testnet)" : "Copy transaction hash";
+      copy.textContent = h.slice(0, 8) + "…" + h.slice(-4); tx.append(copy);
+    }
+    const block = document.createElement("span"); block.textContent = (S.sim ? "sim #" : "#") + ev.blockNumber; tx.append(block);
+    li.append(dot, description, tx); ul.append(li);
   }
 }
 
 // ---------------------------------------------------------------- agent tester
 let agentWallet = null;
+let paymentInFlight = false;
+let previewSequence = 0;
+let paymentContext = null;
+let paymentResult = null;
 function renderAgent(id, a, m) {
+  if (paymentContext !== paymentKey()) { paymentContext = paymentKey(); paymentResult = null; previewSequence++; showPaymentDecision({ state: "neutral", stage: "preview", title: "Inspect a payment", reason: "No transaction submitted for this selected agent." }); }
+  if (paymentResult) showPaymentDecision(paymentResult);
   const key = agentKey(id), box = $("#agentBox");
   if (!key) { box.classList.add("hidden"); agentWallet = null; return; }
   agentWallet = new ethers.Wallet(key, S.provider);
@@ -833,36 +1123,59 @@ function renderAgent(id, a, m) {
   previewPay();
 }
 async function previewPay() {
+  const seq = ++previewSequence, context = paymentKey();
   const f = $("#payForm"), v = $("#verdict"), e = S.accounts.find((x) => x.id === S.sel);
-  if (!e || !ethers.isAddress(f.to.value)) { v.textContent = ""; return; }
-  const now = Math.floor(Date.now() / 1000);
-  if (e.a.frozen) { v.className = "verdict full stop"; v.textContent = "Blocked: the agent is frozen."; return; }
-  if (Number(e.a.rules.expiresAt) && now >= Number(e.a.rules.expiresAt)) { v.className = "verdict full stop"; v.textContent = "Blocked: the allowance has expired."; return; }
+  if (!e || paymentInFlight) return;
+  const show = (state, text) => {
+    if (seq !== previewSequence || context !== paymentKey() || paymentInFlight) return;
+    v.className = "verdict full " + ({ allowed: "now", pending: "hold", blocked: "stop" }[state] || ""); v.textContent = text;
+    if (!paymentResult) showPaymentDecision({ state, stage: "preview", title: state === "allowed" ? "Preview · autonomous payment possible" : state === "pending" ? "Preview · owner approval would be required" : state === "blocked" ? "Preview · payment would not execute" : "Preview unavailable", reason: text });
+  };
+  const input = [f.to.value, f.amount.value, f.memo.value].join("\n");
+  const current = () => seq === previewSequence && context === paymentKey() && !paymentInFlight && input === [f.to.value, f.amount.value, f.memo.value].join("\n");
   try {
-    const amt = parse(f.amount.value, e.m.dec);
-    const [hold] = await S.al.preview(S.sel, f.to.value, amt);
-    if (Number(hold) === 0) {
-      v.className = "verdict full " + (amt > e.a.balance ? "stop" : "now");
-      v.textContent = amt > e.a.balance ? "Blocked: not enough budget left." : "Will be paid instantly.";
-    } else { v.className = "verdict full hold"; v.textContent = "Will wait for your approval: " + HOLD[Number(hold)].toLowerCase() + "."; }
-  } catch { v.textContent = ""; }
+    const block = await S.provider.getBlock("latest"); if (!current()) return;
+    const expired = Number(e.a.rules.expiresAt) && block.timestamp >= Number(e.a.rules.expiresAt);
+    f.querySelector("[type=submit]").disabled = e.a.frozen || !!expired;
+    if (!ethers.isAddress(f.to.value)) { show("neutral", "Enter a valid recipient to preview the spending policy."); return; }
+    const amount = parse(f.amount.value, e.m.dec);
+    // eth_call executes the real contract without persisting changes. preview() alone
+    // does not check freeze, expiry, invalid amounts or recipient transfer failures.
+    await S.al.connect(agentWallet).pay.staticCall(e.id, f.to.value, amount, f.memo.value);
+    const [hold] = await S.al.preview(e.id, f.to.value, amount); if (!current()) return;
+    if (Number(hold) === 0) show("allowed", "Will be paid instantly if execution succeeds. This dry run does not submit a payment.");
+    else show("pending", "Will wait for your approval: " + HOLD[Number(hold)].toLowerCase() + ". This check creates no request and reserves no funds.");
+  } catch (error) { if (current()) show(isKnownPaymentFailure(error) ? "blocked" : "neutral", friendly(error)); }
 }
 async function payAsAgent(ev) {
   ev.preventDefault();
-  const f = ev.target, e = S.accounts.find((x) => x.id === S.sel), btn = f.querySelector("[type=submit]");
-  btn.disabled = true;
+  if (paymentInFlight) return;
+  const f = ev.target, e = S.accounts.find((x) => x.id === S.sel), btn = f.querySelector("[type=submit]"), context = paymentKey();
+  paymentInFlight = true; previewSequence++; paymentResult = null; btn.disabled = true;
+  showPaymentDecision({ state: "neutral", stage: "submitting", title: "Submitting payment", reason: S.sim ? "The browser EVM is evaluating this payment. No outcome is confirmed yet." : "Submission is in progress. No outcome is confirmed yet." });
   try {
     const al = S.al.connect(agentWallet);
     toast("Agent is sending…");
-    const args = [S.sel, f.to.value, parse(f.amount.value, e.m.dec), f.memo.value];
-    // Tight legacy fees: a held request pays a storage deposit, and default fees would reserve twice that.
+    const args = [e.id, f.to.value, parse(f.amount.value, e.m.dec), f.memo.value];
+    // Preserve existing fee and transaction authorization behavior.
     const opts = S.sim ? {} : { type: 0, gasPrice: BigInt(await S.provider.send("eth_gasPrice", [])) * 105n / 100n, gasLimit: (await al.pay.estimateGas(...args)) * 105n / 100n };
     const tx = await al.pay(...args, opts);
+    if (context === paymentKey()) showPaymentDecision({ state: "neutral", stage: "submitted", title: "Submitted · awaiting confirmation", reason: "Submission is not settlement. Waiting for the transaction receipt.", hash: tx.hash });
     const r = await tx.wait();
-    const held = r.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } }).find((p) => p?.name === "PaymentHeld");
-    toast(held ? "Held for your approval: " + HOLD[Number(held.args.reason)].toLowerCase() : "Paid instantly");
+    const events = r.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } });
+    const held = events.find((p) => p?.name === "PaymentHeld" && Number(p.args.accountId) === e.id);
+    const paid = events.find((p) => p?.name === "Paid" && Number(p.args.accountId) === e.id);
+    if (context === paymentKey()) {
+      if (held) recordPaymentResult({ state: "pending", title: "Awaiting owner approval", reason: "This request requires an owner decision. " + HOLD[Number(held.args.reason)] + ". No funds are reserved.", receipt: r, requestId: Number(held.args.requestId) });
+      else if (paid) recordPaymentResult({ state: "allowed", title: "Paid autonomously", reason: "Completed within the active on-chain spending policy.", receipt: r });
+      else recordPaymentResult({ state: "neutral", title: "Confirmed · outcome not identified", reason: "A receipt was received, but no matching payment or request event was found. Inspect transaction activity.", receipt: r });
+    }
+    toast(held ? "Held for your approval: " + HOLD[Number(held.args.reason)].toLowerCase() : paid ? "Paid instantly" : "Transaction confirmed; inspect activity");
     await refresh();
-  } catch (err) { toast(friendly(err), true); } finally { btn.disabled = false; }
+  } catch (err) {
+    if (context === paymentKey()) recordPaymentResult({ state: isKnownPaymentFailure(err) ? "blocked" : "neutral", title: isKnownPaymentFailure(err) ? "Payment not executed" : "Payment outcome unconfirmed", reason: friendly(err) });
+    toast(friendly(err), true);
+  } finally { paymentInFlight = false; btn.disabled = false; previewPay(); }
 }
 
 // ---------------------------------------------------------------- owner actions
@@ -928,7 +1241,7 @@ function loadScript(src) {
   return new Promise((ok, fail) => { const el = document.createElement("script"); el.src = src; el.onload = ok; el.onerror = () => fail(new Error("Couldn't load the simulation.")); document.head.append(el); });
 }
 async function startSimulation() {
-  const btn = $("#simBtn"); btn.disabled = true;
+  const btn = $("#simBtn"), label = btn.innerHTML; btn.disabled = true; btn.textContent = "Starting simulation…";
   try {
     toast("Starting the simulation…");
     if (!window.AllowanceSim) await loadScript("sim.js");
@@ -936,7 +1249,7 @@ async function startSimulation() {
     await seedDemo(sim);
     await connect(sim);
     toast("Simulation ready: a demo agent has been spending. Two payments are waiting for you.");
-  } catch (e) { toast(friendly(e), true); } finally { btn.disabled = false; }
+  } catch (e) { toast(friendly(e), true); } finally { btn.disabled = false; btn.innerHTML = label; }
 }
 async function seedDemo(sim) {
   // cacheTimeout -1: blocks are instant here, so ethers' short request cache could hand out a stale nonce.
@@ -962,6 +1275,8 @@ async function skipDay() {
   catch (e) { toast(friendly(e), true); } finally { btn.disabled = false; }
 }
 
+__POLICY_JS__
+
 // ---------------------------------------------------------------- wiring
 $("#connectBtn").onclick = () => connect().catch((e) => toast(friendly(e), true));
 $("#connectBtn2").onclick = () => connect().catch((e) => toast(friendly(e), true));
@@ -978,8 +1293,6 @@ $("#feed").addEventListener("click", async (e) => {
   try { await navigator.clipboard.writeText(b.dataset.h); toast("Transaction hash copied"); }
   catch { toast(b.dataset.h); }
 });
-document.querySelectorAll(".day-log li").forEach((li, i) => li.style.setProperty("--i", i));
-$(".day")?.classList.add("play");
 $("#copyContractBtn").onclick = async () => {
   try { await navigator.clipboard.writeText(NETWORKS["420420777"]?.allowance || ""); toast("Contract address copied"); }
   catch { toast("Couldn't copy. Select the address and copy it manually.", true); }
@@ -992,13 +1305,13 @@ $("#fundForm").onsubmit = fundOrWithdraw;
 $("#trustForm").onsubmit = trustEdit;
 $("#freezeBtn").onclick = toggleFreeze;
 $("#payForm").onsubmit = payAsAgent;
-$("#payForm").oninput = () => { clearTimeout(previewPay.t); previewPay.t = setTimeout(previewPay, 250); };
-$("#toStrangerBtn").onclick = () => { $("#payForm").to.value = ethers.Wallet.createRandom().address; previewPay(); };
+$("#payForm").oninput = () => { paymentResult = null; clearTimeout(previewPay.t); previewPay.t = setTimeout(previewPay, 250); };
+$("#toStrangerBtn").onclick = () => { paymentResult = null; $("#payForm").to.value = ethers.Wallet.createRandom().address; previewPay(); };
 $("#copyCfgBtn").onclick = async () => {
   try { await navigator.clipboard.writeText($("#mcpConfig").textContent); toast("Config copied. It contains the agent key, so keep it private."); }
   catch { toast("Couldn't copy. Select the text and copy it manually.", true); }
 };
-$("#toTrustedBtn").onclick = () => { $("#payForm").to.value = S.me; previewPay(); };
+$("#toTrustedBtn").onclick = () => { paymentResult = null; $("#payForm").to.value = S.me; previewPay(); };
 </script>
 </body>
 </html>
