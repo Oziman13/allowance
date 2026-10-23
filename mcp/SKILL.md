@@ -20,8 +20,10 @@ well inside them and keep the owner informed.
 
 ## Paying
 
-- Call `allowance_pay` with a memo that explains the purchase in plain words ("Weather API, 1,000 calls").
-  The owner reads the memo when deciding.
+- Call `allowance_pay` with a short memo that says what the purchase is ("Weather API, 1k calls", "GPU hour").
+  The owner reads the memo when deciding. Keep it under about 30 characters: on Portaldot V3 a payment that
+  waits for approval stores its memo on chain, and the agent pays a storage deposit for every byte
+  (measured: a 24-character memo cost 11.6 POT, a 50-character one 19.2 POT).
 - If the result is **held for owner approval**, tell the user it is waiting for them, with the amount,
   the reason and the request id. Do not retry.
 - **Never split a payment into smaller ones to stay under a limit.** The limits exist so the owner can

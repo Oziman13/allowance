@@ -116,7 +116,9 @@ export async function createClient(o) {
       account_id: id,
       network: net.name,
       state: a.frozen ? "frozen by owner" : expired ? "expired" : "active",
-      can_spend_now_without_asking: fmt(left),
+      // The period limit caps what the agent may spend alone; the budget caps what exists. Show the smaller.
+      can_spend_now_without_asking: fmt(left < a.balance ? left : a.balance),
+      note: "Payments the owner approves don't count against the period limit; they still come out of the budget.",
       period_limit: `${fmt(a.rules.perPeriod)} per ${periodName(Number(a.rules.period))}`,
       period_resets_in: left === a.rules.perPeriod ? "nothing spent this period" : resetIn > 0 ? duration(resetIn) : "on the next payment",
       per_payment_limit: fmt(a.rules.perPayment),

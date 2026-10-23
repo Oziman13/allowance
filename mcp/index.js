@@ -45,8 +45,8 @@ server.registerTool("allowance_preview", {
 
 server.registerTool("allowance_pay", {
   title: "Allowance: pay",
-  description: "Pay from your allowance. Inside the rules it settles immediately. Outside them (too large, over the period limit, untrusted recipient) it is NOT rejected: it is held for the owner's approval and you get a request_id. Never try to get around a hold by splitting a payment into smaller ones; the owner sees every payment. Always write a clear memo.",
-  inputSchema: { to: address, amount, memo: z.string().min(3).max(140).describe("What this payment is for. The owner reads it when deciding.") },
+  description: "Pay from your allowance. Inside the rules it settles immediately. Outside them (too large, over the period limit, untrusted recipient) it is NOT rejected: it is held for the owner's approval and you get a request_id. Never try to get around a hold by splitting a payment into smaller ones; the owner sees every payment. Always write a short, clear memo (under ~30 characters): a held payment stores it on chain and the agent pays a storage deposit per byte.",
+  inputSchema: { to: address, amount, memo: z.string().min(3).max(140).describe("What this payment is for, in a few words (e.g. \"GPU hour\"). The owner reads it. Shorter is cheaper if the payment is held.") },
 }, run(({ to, amount, memo }) => client.pay(to, amount, memo)));
 
 server.registerTool("allowance_request", {

@@ -167,6 +167,8 @@ Every rule, exercised on chain. Block numbers link to the [Portaldot V3 testnet 
 | [102887](https://scanner-testnet-v3.portaldot.dev/#/blocks/102887) | Owner freezes the agent | owner | `0x49e0a879…150752` | 3.86 POT |
 | [102900](https://scanner-testnet-v3.portaldot.dev/#/blocks/102900) | Owner unfreezes the agent | owner | `0x37c0ccee…50090e` | 0 POT (freed deposit covered the fee) |
 
+**With a real AI assistant (Oct 23):** Claude, connected through the MCP server, paid 0.3 POT at once ([blocks 159822–160258](docs/PROOF.md#a-real-ai-assistant-on-chain-2026-10-23)), had a 2 POT request held for approval instead of splitting it, and stopped when the owner froze the agent.
+
 The costs are real and mostly storage deposits: Portaldot V3 charges for every byte a contract stores (including its code) and refunds it when the storage is cleared. That's why freezing costs 3.86 POT and unfreezing costs nothing. Measurements and what they mean for builders: [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md).
 
 ## Status

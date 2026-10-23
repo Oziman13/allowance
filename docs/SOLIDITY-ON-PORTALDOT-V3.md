@@ -96,7 +96,7 @@ From these numbers:
 | Deploy (9.8 KB) | the contract code | **778.99 POT** (estimate was 791) |
 | Open an account | ~10 new slots: account struct, name, index arrays, trusted recipient | 42.42 POT |
 | Instant payment | updates existing slots only | **0.032 POT** |
-| Held payment (a request with a memo) | ~5 new slots | 15.40 POT |
+| Held payment (a request with a memo) | ~5 new slots | 15.40 POT (11.56 to 19.24 POT on Oct 23, depending on the memo: 24 vs 50 characters) |
 | Approve a request | updates existing slots | 0.019 POT |
 | Freeze (`false` → `true` in an empty slot) | 1 slot goes from zero to non-zero | 3.86 POT |
 | Unfreeze (back to zero) | clears that slot | **0**: the receipt reports 0 gas used, the freed deposit covered the fee |
@@ -125,6 +125,8 @@ via_ir = true
 - **Gas numbers look huge.** `eth_estimateGas` returns values like `0x5d26ed11ff8019` (2.6 × 10¹⁶). They include the deposit, expressed as gas. Multiply by the gas price to get POT; don't compare the number with Ethereum gas.
 - **Some error messages mix units.** One "insufficient funds" error showed the balance in 18-decimal units (`have 99900000000000000000` for 99.9 POT). In the same message, the required amount appeared to be in the chain's native base units. Compare amounts in POT, not raw numbers.
 - **`eth_maxPriorityFeePerGas` returns 0.** Don't set a priority fee; base fee only.
+- **Strings you store are priced per byte, by whoever sends the transaction.** The same held payment cost the agent 11.56 POT with a 24-character memo and 19.24 POT with a 50-character one. Keep stored text short, or store a hash and keep the text in an event.
+- **"1010 Invalid Transaction" from `eth_sendRawTransaction`** is the Substrate transaction pool refusing the transaction, usually because the sender can't cover it. ethers can't parse this error and reports "could not coalesce error"; read `error.error.message` to see the node's words. The RPC reports a priority fee of 0. Transactions sent as EIP-1559 with a 1 gwei tip (max fee = 2 × base fee + tip, gas limit = the estimate) went through; the chain still charged the base fee only.
 - **The public testnet RPC prunes history.** After a day or two, `eth_getTransactionReceipt` and `eth_getTransactionByHash` return `null`, and historical `eth_getBlockByNumber` fails with "State already discarded". `eth_getLogs` keeps working, so prove your transactions through the events they emitted, and keep receipts as you go.
 - **The explorer indexes the Substrate side.** Searching a `0x` contract address finds nothing; open the block (`/#/blocks/<number>`) or the deployer's `5…` twin account instead. Keep your transaction hashes. Allowance records them in its README as a proof table, with the full list in [PROOF.md](PROOF.md).
 - **MetaMask reserves gas limit × max fee up front.** With a deploy this large, its default max fee (about 2 × base fee) can exceed your balance even though the real cost fits. Send a legacy transaction with an explicit `gasPrice` (current price + 5%) and a tight `gasLimit` (estimate + 1%). That's what Allowance's dashboard does.
