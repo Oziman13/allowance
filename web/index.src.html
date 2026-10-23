@@ -6,6 +6,17 @@
 <title>Allowance — Autonomous Finance Command Center</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%23131D30%22%2F%3E%3Crect%20x%3D%225%22%20y%3D%228%22%20width%3D%2222%22%20height%3D%2216%22%20rx%3D%224%22%20fill%3D%22none%22%20stroke%3D%22%239585FF%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20d%3D%22M5%2013h22M9%2019h7%22%20stroke%3D%22%239585FF%22%20stroke-width%3D%222%22%2F%3E%3C%2Fsvg%3E">
 <meta name="description" content="Give your AI agent an allowance, not a wallet. Spending rules for agents on Portaldot V3.">
+<script>
+// Opt-in comparison only. No storage, navigation item, or application state changes.
+(() => {
+  const applyLayout = () => {
+    if (new URLSearchParams(location.search).get("layout") === "wide-preview") document.documentElement.dataset.layoutPreview = "wide";
+    else delete document.documentElement.dataset.layoutPreview;
+  };
+  applyLayout();
+  addEventListener("popstate", applyLayout);
+})();
+</script>
 <style>
 /* Sora, Inter and JetBrains Mono (SIL OFL 1.1), embedded locally by build.py. */
 __FONTS__
@@ -447,6 +458,7 @@ footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-
 .command-map .map-note { font-size:10px; }
 @media(max-width:560px) { .account-title { gap:10px; } .map-note { line-height:1.7; } }
 __POLICY_CSS__
+__LAYOUT_PREVIEW_CSS__
 </style>
 </head>
 <body>
@@ -609,14 +621,14 @@ __POLICY_CSS__
           <div><dt>Spent all time</dt><dd id="fTotal"></dd></div>
         </dl>
 
-        <div class="section">
+        <div class="section layout-inbox">
           <h2>Approval inbox <span class="badge held" id="pendingCount">0 pending</span></h2>
           <p class="hint">Awaiting owner approval. Pending requests do not reserve funds; review the current balance before deciding.</p>
           <ul class="inbox" id="inbox"></ul>
           <p class="empty hidden" id="inboxEmpty">Nothing to decide. Payments outside the rules will appear here.</p>
         </div>
 
-        <div class="section controls">
+        <div class="section controls layout-controls">
           <h2>Policy &amp; controls</h2>
           <div class="freeze-row" id="freezeRow">
             <p id="freezeText"></p>
@@ -655,7 +667,7 @@ __POLICY_CSS__
           </details>
         </div>
 
-        <div class="section">
+        <div class="section layout-activity">
           <h2>Transaction activity</h2>
           <p class="hint" id="activityContext">On-chain events, newest first.</p>
           <ul class="feed" id="feed"></ul>

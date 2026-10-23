@@ -17,7 +17,8 @@ fonts = "\n".join(
     "src: url(data:font/woff2;base64,%s) format('woff2'); }"
     % (family, weight, base64.b64encode((root / f"web/fonts/{slug}-latin-{weight}-normal.woff2").read_bytes()).decode())
     for family, slug, weights in font_sets for weight in weights)
-html = (html.replace("__POLICY_CSS__", (root / "web/policy-field.css").read_text())
+html = (html.replace("__LAYOUT_PREVIEW_CSS__", (root / "web/layout-preview.css").read_text())
+            .replace("__POLICY_CSS__", (root / "web/policy-field.css").read_text())
             .replace("__POLICY_JS__", (root / "web/policy-field.js").read_text())
             .replace("__FONTS__", fonts)
             .replace("__ABI__", json.dumps(art["abi"]))
