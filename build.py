@@ -8,11 +8,15 @@ nets = json.loads((root / "config/networks.json").read_text())
 by_chain = {str(v["chainId"]): {k: v[k] for k in v if k != "chainId"} for k, v in nets.items()
             if isinstance(v, dict) and v.get("chainId")}
 html = (root / "web/index.src.html").read_text()
+# Local fonts distributed under SIL OFL 1.1; see web/fonts/*-OFL.txt.
+font_sets = [("Sora", "sora", (500, 600, 700)),
+             ("Inter", "inter", (400, 500, 600, 700)),
+             ("JetBrains Mono", "jetbrains-mono", (400,))]
 fonts = "\n".join(
-    "@font-face { font-family: 'Schibsted Grotesk'; font-style: normal; font-display: swap; font-weight: %s; "
+    "@font-face { font-family: '%s'; font-style: normal; font-display: swap; font-weight: %s; "
     "src: url(data:font/woff2;base64,%s) format('woff2'); }"
-    % (w, base64.b64encode((root / f"web/fonts/schibsted-grotesk-latin-{w}-normal.woff2").read_bytes()).decode())
-    for w in (400, 500, 600, 700, 800))
+    % (family, weight, base64.b64encode((root / f"web/fonts/{slug}-latin-{weight}-normal.woff2").read_bytes()).decode())
+    for family, slug, weights in font_sets for weight in weights)
 html = (html.replace("__FONTS__", fonts)
             .replace("__ABI__", json.dumps(art["abi"]))
             .replace("__BYTECODE__", art["bytecode"]["object"])
