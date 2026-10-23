@@ -14,7 +14,7 @@ Programmable spending rules for AI agents, bots and automated payments on **Port
 >
 > **Live on the Portaldot V3 testnet** at `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` ([proof](#live-on-portaldot-v3-testnet)). **[Open the dashboard](https://oziman13.github.io/allowance/)**: connect a wallet on Portaldot V3, or press *Try it without a wallet* to run the same contract in your browser.
 >
-> **Judges:** [how Allowance maps to each judging criterion](docs/JUDGING.md), with links to the evidence. Check-in summary: [docs/CHECKIN.md](docs/CHECKIN.md).
+> **Judges:** [how Allowance maps to each judging criterion](docs/JUDGING.md), with links to the evidence. **October 24 check-in:** [current presentation package and demo script](docs/CHECKIN-2026-10-24.md).
 
 ## The problem
 
@@ -154,7 +154,7 @@ Deployed on 2026-10-19 from the dashboard's *Deploy Allowance* button. The bytec
 | Deployer (owner) | `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` |
 | Agent of account #0 | `0x9C0e1F786b38923519dF2cec05464F95cCd29009` |
 
-Every rule, exercised on chain. Block numbers link to the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (it indexes the Substrate side, so search by block number). Full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go.
+Recorded on-chain lifecycle examples (historical evidence; not a fresh RPC verification). Block numbers link to the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (it indexes the Substrate side, so search by block number). Full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go.
 
 | Block | What happened | Signed by | Tx | Cost |
 |---|---|---|---|---|
@@ -204,7 +204,7 @@ Cheaper requests on V3: clear a request's storage when it is approved, rejected 
 
 The idea of rule-bound agent budgets builds on an earlier proof of concept by the same author on another chain: [Leash on Arc](https://github.com/Oziman13/leash). **No code from that project is reused.** This repository is a new codebase, written for Portaldot V3 during the Hacker House (from October 14, 2026), with a different design: multi-account and multi-asset (POT and ERC-20), configurable periods, expiry, key rotation and typed hold reasons.
 
-Open-source dependencies: [Foundry](https://github.com/foundry-rs/foundry) / forge-std (testing and deployment), [ethers](https://github.com/ethers-io/ethers.js) (dashboard and MCP server), [EthereumJS](https://github.com/ethereumjs/ethereumjs-monorepo) (simulation mode, MPL-2.0, bundled unmodified), [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) and [zod](https://github.com/colinhacks/zod) (MCP server), [Schibsted Grotesk](https://github.com/schibsted/schibsted-grotesk) (dashboard typeface, SIL OFL 1.1, embedded so the page makes no third-party requests besides the ethers CDN).
+Open-source dependencies: [Foundry](https://github.com/foundry-rs/foundry) / forge-std (testing and deployment), [ethers](https://github.com/ethers-io/ethers.js) (dashboard and MCP server), [EthereumJS](https://github.com/ethereumjs/ethereumjs-monorepo) (simulation mode, MPL-2.0, bundled unmodified), [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) and [zod](https://github.com/colinhacks/zod) (MCP server), Sora, Inter and JetBrains Mono (dashboard typefaces, SIL OFL 1.1, embedded locally); ethers 6.13.4 is also served locally, so the page does not depend on external font or script CDNs.
 
 ## License
 
