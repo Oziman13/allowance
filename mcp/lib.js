@@ -38,7 +38,7 @@ export function explain(err, iface) {
   if (!name && data) { try { name = iface.parseError(data)?.name; } catch {} }
   if (name) return ERRORS[name] || name;
   const msg = err?.shortMessage || err?.message || String(err);
-  if (/insufficient funds/i.test(msg)) return "The agent has no gas left and could not refuel. Ask the user to add budget or top up the agent.";
+  if (/insufficient funds|could not coalesce/i.test(msg)) return "The agent doesn't have enough POT for this transaction's gas and storage deposit (asking for approval stores a request on chain). Nothing was sent. Ask the user to top up the agent's gas.";
   return msg;
 }
 
@@ -61,6 +61,17 @@ export async function createClient(o) {
   const agent = new ethers.Wallet(o.key, provider);
   const al = new ethers.Contract(o.address, ABI, agent);
   const minGas = o.minGas ?? ethers.parseEther("0.05");
+
+  // Portaldot V3 charges storage deposits through gas, so a held request can cost several POT.
+  // ethers' default EIP-1559 fees reserve gasLimit × (2 × base fee) up front, which can exceed the
+  // agent's balance even when the real cost fits. Send legacy txs priced at the current gas price
+  // (+5%) with the estimate (+5%) as the limit; unused gas is refunded.
+  async function fees(method, args) {
+    const gasPrice = (await provider.getFeeData()).gasPrice * 105n / 100n;
+    const gasLimit = (await al[method].estimateGas(...args)) * 105n / 100n;
+    return { type: 0, gasPrice, gasLimit };
+  }
+  const send = async (method, ...args) => al[method](...args, await fees(method, args));
 
   let id = o.accountId;
   if (id == null || Number.isNaN(id)) {
@@ -135,7 +146,7 @@ export async function createClient(o) {
     let amt = minGas * 2n;
     for (const cap of [a.rules.perPayment, left, a.balance]) if (amt > cap) amt = cap;
     if (amt === 0n) return null;
-    const tx = await al.refuel(id, amt);
+    const tx = await send("refuel", id, amt);
     await tx.wait();
     return { refueled: fmt(amt), tx: link(tx.hash) };
   }
@@ -147,7 +158,7 @@ export async function createClient(o) {
     await al.pay.staticCall(id, to, amt, memo); // fails fast, without spending gas, if frozen, expired or out of budget
     const gas = await ensureGas();
     const t0 = Date.now();
-    const tx = await al.pay(id, to, amt, memo);
+    const tx = await send("pay", id, to, amt, memo);
     const rcpt = await tx.wait();
     const held = rcpt.logs.map((l) => { try { return al.interface.parseLog(l); } catch { return null; } }).find((p) => p?.name === "PaymentHeld");
     const out = held
@@ -164,7 +175,7 @@ export async function createClient(o) {
   }
 
   async function cancel(requestId) {
-    const tx = await al.cancel(requestId);
+    const tx = await send("cancel", requestId);
     await tx.wait();
     return { request_id: Number(requestId), status: "cancelled", tx: link(tx.hash) };
   }
