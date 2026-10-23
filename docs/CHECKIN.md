@@ -20,8 +20,8 @@ Track 4, Ecosystem DApps · Solo builder: Ozan Turan ([@Oziman13](https://github
 |---|---|
 | Network | Portaldot V3 testnet, chain ID 420420777 |
 | Contract | `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` |
-| Deployment transaction | `0xb575397eea5c93908c43f13e4e9aff874f4777e0b4ab61164b36005ea0bcacd5` (block 102688) |
-| Explorer | none published for V3 yet; every transaction is listed in [PROOF.md](PROOF.md) with a one-line way to check it against the public RPC |
+| Deployment transaction | `0xb575397eea5c93908c43f13e4e9aff874f4777e0b4ab61164b36005ea0bcacd5` ([block 102688](https://scanner-testnet-v3.portaldot.dev/#/blocks/102688)) |
+| Explorer | [deployment block 102688](https://scanner-testnet-v3.portaldot.dev/#/blocks/102688), [owner account](https://scanner-testnet-v3.portaldot.dev/#/accounts/5CcDLjHrfoBeL4NX6ZGQzhBbzCrsS7qwFazkzFcF83pWjq3v); every transaction is listed in [PROOF.md](PROOF.md) with block links |
 
 The code on chain is byte-for-byte this repository's build. Six more transactions exercise every rule on chain: an account opened, two instant payments, a payment held for being over the cap, its approval, a freeze and an unfreeze. `python3 script/check_submission.py` re-checks the deployment and the transactions.
 

@@ -2,6 +2,8 @@
 
 Contract `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f`, chain ID 420420777, RPC `https://test-evm-rpc-v3.portaldot.dev`.
 
+**Explorer:** each block number below opens the block in the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (blocks, events and the owner's Substrate account: [5CcD…jq3v](https://scanner-testnet-v3.portaldot.dev/#/accounts/5CcDLjHrfoBeL4NX6ZGQzhBbzCrsS7qwFazkzFcF83pWjq3v)). The explorer indexes the Substrate side, so search by block number, not by 0x address.
+
 Check them yourself. The public testnet node prunes old blocks, so `eth_getTransactionReceipt` returns `null` for transactions older than a day or two. Contract events stay available, and a transaction only emits events if it succeeded:
 
 ```
@@ -13,14 +15,14 @@ Every `transactionHash` in that output is one of the rows below. The deployment 
 
 | Block | What happened | Signed by | Cost |
 |---|---|---|---|
-| 102688 | Deploy Allowance (9.8 KB of code) | owner | 778.986 POT |
-| 102805 | Owner opens "Research agent": 10 POT budget, 20 POT starting gas, 1 POT per payment, 5 POT a day, trusted recipients only | owner | 42.418 POT |
-| 102861 | Agent pays 0.4 POT to a trusted recipient: paid at once | agent | 0.032 POT |
-| 102867 | Agent pays 0.6 POT: paid at once | agent | 0.032 POT |
-| 102873 | Agent asks for 2 POT, over the 1 POT cap: held, not paid | agent | 15.398 POT |
-| 102880 | Owner approves the request: 2 POT paid | owner | 0.019 POT |
-| 102887 | Owner freezes the agent | owner | 3.86 POT |
-| 102900 | Owner unfreezes the agent | owner | 0 (the freed deposit covered the fee) |
+| [102688](https://scanner-testnet-v3.portaldot.dev/#/blocks/102688) | Deploy Allowance (9.8 KB of code) | owner | 778.986 POT |
+| [102805](https://scanner-testnet-v3.portaldot.dev/#/blocks/102805) | Owner opens "Research agent": 10 POT budget, 20 POT starting gas, 1 POT per payment, 5 POT a day, trusted recipients only | owner | 42.418 POT |
+| [102861](https://scanner-testnet-v3.portaldot.dev/#/blocks/102861) | Agent pays 0.4 POT to a trusted recipient: paid at once | agent | 0.032 POT |
+| [102867](https://scanner-testnet-v3.portaldot.dev/#/blocks/102867) | Agent pays 0.6 POT: paid at once | agent | 0.032 POT |
+| [102873](https://scanner-testnet-v3.portaldot.dev/#/blocks/102873) | Agent asks for 2 POT, over the 1 POT cap: held, not paid | agent | 15.398 POT |
+| [102880](https://scanner-testnet-v3.portaldot.dev/#/blocks/102880) | Owner approves the request: 2 POT paid | owner | 0.019 POT |
+| [102887](https://scanner-testnet-v3.portaldot.dev/#/blocks/102887) | Owner freezes the agent | owner | 3.86 POT |
+| [102900](https://scanner-testnet-v3.portaldot.dev/#/blocks/102900) | Owner unfreezes the agent | owner | 0 (the freed deposit covered the fee) |
 
 Full transaction hashes, in the same order:
 

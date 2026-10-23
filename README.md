@@ -150,22 +150,22 @@ Deployed on 2026-10-19 from the dashboard's *Deploy Allowance* button. The bytec
 | | |
 |---|---|
 | Contract | `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` |
-| Deployed in block | 102688 |
+| Deployed in block | [102688](https://scanner-testnet-v3.portaldot.dev/#/blocks/102688) |
 | Deployer (owner) | `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` |
 | Agent of account #0 | `0x9C0e1F786b38923519dF2cec05464F95cCd29009` |
 
-Every rule, exercised on chain. There is no block explorer yet, so the full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go.
+Every rule, exercised on chain. Block numbers link to the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (it indexes the Substrate side, so search by block number). Full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go.
 
 | Block | What happened | Signed by | Tx | Cost |
 |---|---|---|---|---|
-| 102688 | Deploy Allowance (code deposit for 9.8 KB) | owner | `0xb575397e…bcacd5` | 778.986 POT |
-| 102805 | Owner opens "Research agent": 10 POT budget, 20 POT starting gas, 1 POT per payment, 5 POT per day, trusted recipients only | owner | `0x78ac0568…251b2a` | 42.418 POT |
-| 102861 | Agent pays 0.4 POT to a trusted recipient: settles instantly | agent | `0xed29e4bf…6392bc` | 0.032 POT |
-| 102867 | Agent pays 0.6 POT: settles instantly | agent | `0x457d60e9…ba43db` | 0.032 POT |
-| 102873 | Agent asks for 2 POT (over the 1 POT cap): held as a request, not paid | agent | `0xecad8e81…42ddeb` | 15.398 POT |
-| 102880 | Owner approves the request: 2 POT paid | owner | `0x96b6a6d3…3f473a` | 0.019 POT |
-| 102887 | Owner freezes the agent | owner | `0x49e0a879…150752` | 3.86 POT |
-| 102900 | Owner unfreezes the agent | owner | `0x37c0ccee…50090e` | 0 POT (freed deposit covered the fee) |
+| [102688](https://scanner-testnet-v3.portaldot.dev/#/blocks/102688) | Deploy Allowance (code deposit for 9.8 KB) | owner | `0xb575397e…bcacd5` | 778.986 POT |
+| [102805](https://scanner-testnet-v3.portaldot.dev/#/blocks/102805) | Owner opens "Research agent": 10 POT budget, 20 POT starting gas, 1 POT per payment, 5 POT per day, trusted recipients only | owner | `0x78ac0568…251b2a` | 42.418 POT |
+| [102861](https://scanner-testnet-v3.portaldot.dev/#/blocks/102861) | Agent pays 0.4 POT to a trusted recipient: settles instantly | agent | `0xed29e4bf…6392bc` | 0.032 POT |
+| [102867](https://scanner-testnet-v3.portaldot.dev/#/blocks/102867) | Agent pays 0.6 POT: settles instantly | agent | `0x457d60e9…ba43db` | 0.032 POT |
+| [102873](https://scanner-testnet-v3.portaldot.dev/#/blocks/102873) | Agent asks for 2 POT (over the 1 POT cap): held as a request, not paid | agent | `0xecad8e81…42ddeb` | 15.398 POT |
+| [102880](https://scanner-testnet-v3.portaldot.dev/#/blocks/102880) | Owner approves the request: 2 POT paid | owner | `0x96b6a6d3…3f473a` | 0.019 POT |
+| [102887](https://scanner-testnet-v3.portaldot.dev/#/blocks/102887) | Owner freezes the agent | owner | `0x49e0a879…150752` | 3.86 POT |
+| [102900](https://scanner-testnet-v3.portaldot.dev/#/blocks/102900) | Owner unfreezes the agent | owner | `0x37c0ccee…50090e` | 0 POT (freed deposit covered the fee) |
 
 The costs are real and mostly storage deposits: Portaldot V3 charges for every byte a contract stores (including its code) and refunds it when the storage is cleared. That's why freezing costs 3.86 POT and unfreezing costs nothing. Measurements and what they mean for builders: [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md).
 

@@ -17,7 +17,7 @@ A field guide from building [Allowance](../README.md) on the Portaldot V3 testne
 | Substrate node | `wss://test-node-v3.portaldot.dev` |
 | Node console | https://node-console.portaldot.dev/ |
 | Currency symbol | POT |
-| Block explorer | none yet |
+| Block explorer | https://scanner-testnet-v3.portaldot.dev/ (Substrate view: search by block number or `5…` account, not by `0x` address) |
 
 Source: Portaldot Discord, #dev-announcement (2026-10-16).
 
@@ -126,7 +126,7 @@ via_ir = true
 - **Some error messages mix units.** One "insufficient funds" error showed the balance in 18-decimal units (`have 99900000000000000000` for 99.9 POT). In the same message, the required amount appeared to be in the chain's native base units. Compare amounts in POT, not raw numbers.
 - **`eth_maxPriorityFeePerGas` returns 0.** Don't set a priority fee; base fee only.
 - **The public testnet RPC prunes history.** After a day or two, `eth_getTransactionReceipt` and `eth_getTransactionByHash` return `null`, and historical `eth_getBlockByNumber` fails with "State already discarded". `eth_getLogs` keeps working, so prove your transactions through the events they emitted, and keep receipts as you go.
-- **There is no block explorer yet.** Keep your transaction hashes. Allowance records them in its README as a proof table, with the full list in [PROOF.md](PROOF.md).
+- **The explorer indexes the Substrate side.** Searching a `0x` contract address finds nothing; open the block (`/#/blocks/<number>`) or the deployer's `5…` twin account instead. Keep your transaction hashes. Allowance records them in its README as a proof table, with the full list in [PROOF.md](PROOF.md).
 - **MetaMask reserves gas limit × max fee up front.** With a deploy this large, its default max fee (about 2 × base fee) can exceed your balance even though the real cost fits. Send a legacy transaction with an explicit `gasPrice` (current price + 5%) and a tight `gasLimit` (estimate + 1%). That's what Allowance's dashboard does.
 - **Discord help tickets:** the server's filter blocked our messages that contained the word "pot". If your message disappears, rephrase it (for example, "testnet funds").
 
