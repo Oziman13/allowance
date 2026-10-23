@@ -1,0 +1,446 @@
+[
+  {
+    "view": "landing",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "current": {
+      "main.wrap": {
+        "x": 80,
+        "y": 100,
+        "width": 1280,
+        "height": 2556.84375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".hero-copy": {
+        "x": 120,
+        "y": 226.984375,
+        "width": 603.421875,
+        "height": 583.125,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".pf-landing": {
+        "x": 771.421875,
+        "y": 176,
+        "width": 548.578125,
+        "height": 685.09375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      }
+    },
+    "wide": {
+      "main.wrap": {
+        "x": 0,
+        "y": 100,
+        "width": 1440,
+        "height": 2547.65625,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".hero-copy": {
+        "x": 40,
+        "y": 222.140625,
+        "width": 693.203125,
+        "height": 583.125,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".pf-landing": {
+        "x": 799.984375,
+        "y": 156,
+        "width": 600,
+        "height": 715.40625,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      }
+    }
+  },
+  {
+    "view": "landing",
+    "viewport": {
+      "width": 1728,
+      "height": 1117
+    },
+    "current": {
+      "main.wrap": {
+        "x": 224,
+        "y": 100,
+        "width": 1280,
+        "height": 2556.84375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".hero-copy": {
+        "x": 264,
+        "y": 226.984375,
+        "width": 603.421875,
+        "height": 583.125,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".pf-landing": {
+        "x": 915.421875,
+        "y": 176,
+        "width": 548.578125,
+        "height": 685.09375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      }
+    },
+    "wide": {
+      "main.wrap": {
+        "x": 144,
+        "y": 100,
+        "width": 1440,
+        "height": 2547.65625,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".hero-copy": {
+        "x": 184,
+        "y": 222.140625,
+        "width": 693.203125,
+        "height": 583.125,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".pf-landing": {
+        "x": 943.984375,
+        "y": 156,
+        "width": 600,
+        "height": 715.40625,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      }
+    }
+  },
+  {
+    "view": "dashboard",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "current": {
+      "#app": {
+        "x": 120,
+        "y": 238,
+        "width": 1200,
+        "height": 3573.359375,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "250px 926px"
+      },
+      ".side": {
+        "x": 120,
+        "y": 238,
+        "width": 250,
+        "height": 255.59375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      "#detail": {
+        "x": 394,
+        "y": 238,
+        "width": 926,
+        "height": 3509.359375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      "#controlField": {
+        "x": 427,
+        "y": 358.390625,
+        "width": 860,
+        "height": 812.59375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".meter-block": {
+        "x": 427,
+        "y": 1200.984375,
+        "width": 860,
+        "height": 230,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".layout-inbox": {
+        "x": 427,
+        "y": 1580.171875,
+        "width": 860,
+        "height": 540.59375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".layout-controls": {
+        "x": 427,
+        "y": 2152.765625,
+        "width": 860,
+        "height": 353.546875,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "860px"
+      },
+      ".layout-activity": {
+        "x": 427,
+        "y": 2538.3125,
+        "width": 860,
+        "height": 440.546875,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      }
+    },
+    "wide": {
+      "#app": {
+        "x": 40,
+        "y": 238,
+        "width": 1360,
+        "height": 2715.28125,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "240px 1088px"
+      },
+      ".side": {
+        "x": 40,
+        "y": 238,
+        "width": 240,
+        "height": 255.59375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      "#detail": {
+        "x": 312,
+        "y": 238,
+        "width": 1088,
+        "height": 2651.28125,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "499px 499px"
+      },
+      "#controlField": {
+        "x": 345,
+        "y": 358.390625,
+        "width": 1022,
+        "height": 503.65625,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "476px 476px"
+      },
+      ".meter-block": {
+        "x": 345,
+        "y": 886.046875,
+        "width": 499,
+        "height": 198,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".layout-inbox": {
+        "x": 345,
+        "y": 1108.046875,
+        "width": 499,
+        "height": 558.1875,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".layout-controls": {
+        "x": 868,
+        "y": 1108.046875,
+        "width": 499,
+        "height": 558.1875,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "499px"
+      },
+      ".layout-activity": {
+        "x": 345,
+        "y": 1690.234375,
+        "width": 1022,
+        "height": 440.546875,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      }
+    },
+    "currentHeight": 3912,
+    "wideHeight": 3054
+  },
+  {
+    "view": "dashboard",
+    "viewport": {
+      "width": 1728,
+      "height": 1117
+    },
+    "current": {
+      "#app": {
+        "x": 264,
+        "y": 238,
+        "width": 1200,
+        "height": 3573.359375,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "250px 926px"
+      },
+      ".side": {
+        "x": 264,
+        "y": 238,
+        "width": 250,
+        "height": 255.59375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      "#detail": {
+        "x": 538,
+        "y": 238,
+        "width": 926,
+        "height": 3509.359375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      "#controlField": {
+        "x": 571,
+        "y": 358.390625,
+        "width": 860,
+        "height": 812.59375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".meter-block": {
+        "x": 571,
+        "y": 1200.984375,
+        "width": 860,
+        "height": 230,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".layout-inbox": {
+        "x": 571,
+        "y": 1580.171875,
+        "width": 860,
+        "height": 540.59375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".layout-controls": {
+        "x": 571,
+        "y": 2152.765625,
+        "width": 860,
+        "height": 353.546875,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "860px"
+      },
+      ".layout-activity": {
+        "x": 571,
+        "y": 2538.3125,
+        "width": 860,
+        "height": 440.546875,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      }
+    },
+    "wide": {
+      "#app": {
+        "x": 184,
+        "y": 238,
+        "width": 1360,
+        "height": 2715.28125,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "240px 1088px"
+      },
+      ".side": {
+        "x": 184,
+        "y": 238,
+        "width": 240,
+        "height": 255.59375,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      "#detail": {
+        "x": 456,
+        "y": 238,
+        "width": 1088,
+        "height": 2651.28125,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "499px 499px"
+      },
+      "#controlField": {
+        "x": 489,
+        "y": 358.390625,
+        "width": 1022,
+        "height": 503.65625,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "476px 476px"
+      },
+      ".meter-block": {
+        "x": 489,
+        "y": 886.046875,
+        "width": 499,
+        "height": 198,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".layout-inbox": {
+        "x": 489,
+        "y": 1108.046875,
+        "width": 499,
+        "height": 558.1875,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      },
+      ".layout-controls": {
+        "x": 1012,
+        "y": 1108.046875,
+        "width": 499,
+        "height": 558.1875,
+        "fontSize": "15px",
+        "display": "grid",
+        "gridTemplateColumns": "499px"
+      },
+      ".layout-activity": {
+        "x": 489,
+        "y": 1690.234375,
+        "width": 1022,
+        "height": 440.546875,
+        "fontSize": "15px",
+        "display": "block",
+        "gridTemplateColumns": "none"
+      }
+    },
+    "currentHeight": 3912,
+    "wideHeight": 3054
+  }
+]

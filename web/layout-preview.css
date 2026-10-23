@@ -1,0 +1,62 @@
+/* Visual comparison only: opt in with ?layout=wide-preview.
+   Below 1280px the original layout applies, even with the query flag.
+   Every rule is scoped; nothing changes the default route or policy geometry. */
+@media (min-width: 1280px) {
+  html[data-layout-preview="wide"] .wrap {
+    max-width: 1440px;
+    padding-inline: 40px;
+  }
+  html[data-layout-preview="wide"] .intro { padding-top: 56px; }
+  html[data-layout-preview="wide"] .hero {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 64px;
+  }
+  html[data-layout-preview="wide"] .pf-landing { max-width: 600px; justify-self: end; }
+  html[data-layout-preview="wide"] .hero-copy { max-width: 700px; }
+  html[data-layout-preview="wide"] .app {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 32px;
+  }
+  html[data-layout-preview="wide"] #detail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  html[data-layout-preview="wide"] #detail > .acct-head,
+  html[data-layout-preview="wide"] #controlField,
+  html[data-layout-preview="wide"] #detail > .layout-activity,
+  html[data-layout-preview="wide"] #agentBox { grid-column: 1 / -1; }
+  html[data-layout-preview="wide"] #controlField {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 24px;
+    margin-top: 0;
+  }
+  html[data-layout-preview="wide"] #controlField > .pf-heading,
+  html[data-layout-preview="wide"] #fieldDetails,
+  html[data-layout-preview="wide"] #controlField > .pf-footnote { grid-column: 1 / -1; }
+  html[data-layout-preview="wide"] #controlField > .pf-canvas {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+    align-self: center;
+    max-width: 480px;
+    width: 100%;
+    margin: 8px 0;
+  }
+  html[data-layout-preview="wide"] #controlField > .pf-footnote { max-width: 96ch; }
+  html[data-layout-preview="wide"] #fieldSummary { grid-column: 2; margin: 16px 0 0; }
+  html[data-layout-preview="wide"] #controlField > .pf-readings { grid-column: 2; margin: 16px 0; }
+  html[data-layout-preview="wide"] #detail > .meter-block { margin: 0; }
+  html[data-layout-preview="wide"] .budget-overview { gap: 20px; margin: 0 0 18px; }
+  html[data-layout-preview="wide"] .spending-ring { width: 140px; height: 140px; }
+  html[data-layout-preview="wide"] #detail > .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 0;
+    align-content: center;
+  }
+  html[data-layout-preview="wide"] #detail > .section,
+  html[data-layout-preview="wide"] #agentBox { margin-top: 0; }
+  html[data-layout-preview="wide"] #detail > .layout-inbox { grid-column: 1; }
+  html[data-layout-preview="wide"] #detail > .layout-controls { grid-column: 2; }
+  html[data-layout-preview="wide"] #detail > .layout-activity .feed li > span:nth-child(2) { max-width: 80ch; }
+}
