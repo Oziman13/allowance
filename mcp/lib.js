@@ -38,7 +38,10 @@ export function explain(err, iface) {
   if (!name && data) { try { name = iface.parseError(data)?.name; } catch {} }
   if (name) return ERRORS[name] || name;
   const msg = err?.shortMessage || err?.message || String(err);
-  if (/insufficient funds|could not coalesce/i.test(msg)) return "The agent doesn't have enough POT for this transaction's gas and storage deposit (asking for approval stores a request on chain). Nothing was sent. Ask the user to top up the agent's gas.";
+  if (/insufficient funds/i.test(msg)) return "The agent doesn't have enough POT for this transaction's gas and storage deposit (asking for approval stores a request on chain). Nothing was sent. Ask the user to top up the agent's gas.";
+  // Node rejections ethers can't parse ("could not coalesce error"): show the node's own words.
+  const raw = err?.error?.message || err?.info?.error?.message;
+  if (raw) return `The network rejected the transaction (${raw}${err?.error?.code ? `, code ${err.error.code}` : ""}). Nothing was sent. Don't retry in a loop; tell the user.`;
   return msg;
 }
 
@@ -62,14 +65,16 @@ export async function createClient(o) {
   const al = new ethers.Contract(o.address, ABI, agent);
   const minGas = o.minGas ?? ethers.parseEther("0.05");
 
-  // Portaldot V3 charges storage deposits through gas, so a held request can cost several POT.
-  // ethers' default EIP-1559 fees reserve gasLimit × (2 × base fee) up front, which can exceed the
-  // agent's balance even when the real cost fits. Send legacy txs priced at the current gas price
-  // (+5%) with the estimate (+5%) as the limit; unused gas is refunded.
+  // Portaldot V3 charges storage deposits through gas, so a held request can cost ~15 POT.
+  // Its RPC reports a priority fee of 0, and the transaction pool rejected such large transactions
+  // ("1010 Invalid Transaction"). Send them the way the dashboard's successful ones were sent
+  // (verified on chain): EIP-1559 with a 1 gwei tip, max fee = 2 × base fee + tip, gas limit = the
+  // estimate. The chain charges the base fee only, so the tip doesn't change the cost.
+  const TIP = 1_000_000_000n;
   async function fees(method, args) {
-    const gasPrice = (await provider.getFeeData()).gasPrice * 105n / 100n;
-    const gasLimit = (await al[method].estimateGas(...args)) * 105n / 100n;
-    return { type: 0, gasPrice, gasLimit };
+    const base = (await provider.getBlock("latest")).baseFeePerGas ?? (await provider.getFeeData()).gasPrice;
+    const gasLimit = await al[method].estimateGas(...args);
+    return { type: 2, maxPriorityFeePerGas: TIP, maxFeePerGas: base * 2n + TIP, gasLimit };
   }
   const send = async (method, ...args) => al[method](...args, await fees(method, args));
 
