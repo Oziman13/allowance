@@ -2,6 +2,8 @@
 
 The Hacker House judges on objective evidence: GitHub repositories, commit timelines, testnet transaction records, contract addresses, transaction hashes and live demo performance. This page maps each criterion to the evidence for it, so every claim can be checked in a minute. It also says plainly what is still missing.
 
+**October 24 current status:** [check-in pitch, demo script, verification limitations, and screenshots](CHECKIN-2026-10-24.md). The transactions below are historical records, not a claim of fresh live-chain verification.
+
 **Quick links:** [Live dashboard](https://oziman13.github.io/allowance/) (press *Try it without a wallet* if you don't have test POT) · [Contract on Portaldot V3 testnet](../README.md#live-on-portaldot-v3-testnet) · [All transactions](PROOF.md) · [Architecture](ARCHITECTURE.md) · [CI runs](https://github.com/Oziman13/allowance/actions)
 
 ---
@@ -13,12 +15,12 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 | What the judges look for | Evidence |
 |---|---|
 | Deployed on Portaldot testnet | Contract `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` on Portaldot V3 testnet (chain 420420777), deployed in block 102688. The code returned by `eth_getCode` is byte-for-byte this repository's build. |
-| Verifiable on-chain interactions | [8 transactions](PROOF.md) that exercise every rule: an account opened, two instant payments, a payment held for being over the cap, its approval, a freeze and an unfreeze. Each one can be checked against the public RPC through the events it emitted ([how](PROOF.md)), or with `python3 script/check_submission.py`. |
+| Verifiable on-chain interactions | [8 recorded deployment/lifecycle transactions](PROOF.md) that demonstrate core behavior: an account opened, two instant payments, a payment held for being over the cap, its approval, a freeze and an unfreeze. Each one can be checked against the public RPC through the events it emitted ([how](PROOF.md)), or with `python3 script/check_submission.py`. |
 | Core functions complete | Per-payment cap, per-period cap (any period of 1 hour or more), trusted recipients, expiry, freeze, key rotation, held requests with approve / approve-and-trust / reject / cancel, gas refuels from the same budget, native POT and ERC-20 budgets. [Contract](../src/Allowance.sol), [function table](../README.md#contract). |
-| Code completeness and quality | 27 contract tests, including a 1,000-run fuzz test of the core guarantee: what leaves an account without the owner's approval never exceeds the period limit. They also cover reentrancy, fee-on-transfer and false-returning tokens, and recipients that refuse funds. 6 end-to-end tests run the MCP server over the real MCP protocol against a local chain. Both suites [run in CI on every push](https://github.com/Oziman13/allowance/actions), and every run so far has passed. |
+| Code completeness and quality | 27 contract tests, including a 1,000-run fuzz test of the core guarantee: what leaves an account without the owner's approval never exceeds the period limit. They also cover reentrancy, fee-on-transfer and false-returning tokens, and recipients that refuse funds. 6 end-to-end tests run the MCP server over the real MCP protocol against a local chain. Both suites [run in CI](https://github.com/Oziman13/allowance/actions). See the [dated validation summary](CHECKIN-2026-10-24.md), rather than assuming future CI outcomes. |
 | System architecture | [ARCHITECTURE.md](ARCHITECTURE.md): component and sequence diagrams, account model, security properties. |
 | Actual delivery | Three working parts, all public: the contract, the [owner dashboard](https://oziman13.github.io/allowance/) (GitHub Pages) and the [MCP server](../mcp/) for AI assistants. |
-| Sustained development activity | Commits on four separate days so far (Oct 16, 17, 18, 19), each one a reviewable step: contract and tests → dashboard → MCP server and CI → size-tuned build and guide → simulation mode → testnet deployment and proof. History: [commits](https://github.com/Oziman13/allowance/commits/main). |
+| Sustained development activity | Commits across multiple days since October 16, including the Phase 1/2 UI and check-in preparation:  contract and tests → dashboard → MCP server and CI → size-tuned build and guide → simulation mode → testnet deployment and proof. History: [commits](https://github.com/Oziman13/allowance/commits/main). |
 
 ## Innovation (30%)
 
@@ -63,17 +65,17 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 | Item | Plan |
 |---|---|
 | Use of V3's Substrate side (WASM / multi-chain) | Today Allowance uses V3's EVM side. Next: let an owner fund and manage an allowance from a Portaldot (Substrate) wallet, not only from MetaMask. |
-| Narrated demo video (≤ 3 minutes) | Before check-in. |
-| Pitch deck | Before the final submission. |
+| Narrated demo video (≤ 3 minutes) | **Pending recording and upload.** |
+| Pitch deck | [11-page deck exists](Allowance-pitch-deck.pdf); final approval and upload pending. |
 | MCP server published on npm | Before the final submission. |
-| Block explorer links | V3 testnet has no explorer yet; full hashes are in [PROOF.md](PROOF.md). |
+| Block explorer links | [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) and historical block links are included in [PROOF.md](PROOF.md). The latest RPC recheck was unavailable in the check-in environment. |
 
 ## Code compliance
 
 | Rule | Status |
 |---|---|
 | Repository public during the event | ✅ |
-| At least 3 valid commits during the Hacker House | ✅ 14 commits on 4 days (Oct 16–19) |
+| At least 3 valid commits during the Hacker House | ✅ Multiple commits across multiple days since Oct 16; see [history](https://github.com/Oziman13/allowance/commits/main) |
 | Code primarily produced during the Hacker House (Oct 14 – Nov 6) | ✅ First commit Oct 16. The idea builds on an earlier proof of concept on another chain; **no code from it is reused** ([disclosure](../README.md#prior-work-disclosure)). |
 | Core modules not committed all at once in the last 24 hours | ✅ Core modules were committed on Oct 16–19; the final days are for polish, video and deck. |
-| Third-party code properly licensed and disclosed | ✅ [Dependencies](../README.md#prior-work-disclosure): Foundry/forge-std, ethers, EthereumJS (MPL-2.0, bundled unmodified), MCP SDK, zod, Schibsted Grotesk (OFL). |
+| Third-party code properly licensed and disclosed | ✅ [Dependencies](../README.md#prior-work-disclosure): Foundry/forge-std, ethers, EthereumJS (MPL-2.0, bundled unmodified), MCP SDK, zod, and locally hosted Sora, Inter and JetBrains Mono (OFL). |
