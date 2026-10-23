@@ -561,7 +561,8 @@ async function connect(eth = window.ethereum) {
   $("#connectBtn").textContent = short(S.me);
   document.querySelectorAll(".sym").forEach((el) => (el.textContent = net().nativeSymbol));
   eth.on?.("chainChanged", () => location.reload());
-  eth.on?.("accountsChanged", () => location.reload());
+  eth.on?.("accountsChanged", (accs) => { if (!accs?.length) writeStore("connected", ""); location.reload(); });
+  if (!S.sim) writeStore("connected", "1"); // reconnect on reload without asking again
 
   $("#intro").classList.add("hidden");
   if (S.sim) {
@@ -857,7 +858,10 @@ async function payAsAgent(ev) {
   try {
     const al = S.al.connect(agentWallet);
     toast("Agent is sending…");
-    const tx = await al.pay(S.sel, f.to.value, parse(f.amount.value, e.m.dec), f.memo.value);
+    const args = [S.sel, f.to.value, parse(f.amount.value, e.m.dec), f.memo.value];
+    // Tight legacy fees: a held request pays a storage deposit, and default fees would reserve twice that.
+    const opts = S.sim ? {} : { type: 0, gasPrice: BigInt(await S.provider.send("eth_gasPrice", [])) * 105n / 100n, gasLimit: (await al.pay.estimateGas(...args)) * 105n / 100n };
+    const tx = await al.pay(...args, opts);
     const r = await tx.wait();
     const held = r.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } }).find((p) => p?.name === "PaymentHeld");
     toast(held ? "Held for your approval: " + HOLD[Number(held.args.reason)].toLowerCase() : "Paid instantly");
@@ -967,6 +971,12 @@ $("#connectBtn").onclick = () => connect().catch((e) => toast(friendly(e), true)
 $("#connectBtn2").onclick = () => connect().catch((e) => toast(friendly(e), true));
 $("#deployBtn").onclick = deploy;
 $("#simBtn").onclick = startSimulation;
+// After a reload, reconnect a wallet that already approved this site. eth_accounts never opens a popup.
+if (window.ethereum && readStore("connected") === "1") {
+  window.ethereum.request({ method: "eth_accounts" })
+    .then((accs) => accs?.length ? connect() : writeStore("connected", ""))
+    .catch(() => {});
+}
 $("#feed").addEventListener("click", async (e) => {
   const b = e.target.closest(".hash"); if (!b) return;
   try { await navigator.clipboard.writeText(b.dataset.h); toast("Transaction hash copied"); }
