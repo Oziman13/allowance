@@ -28,7 +28,6 @@ async function capture(page, name, selector) {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', args: ['--no-sandbox'] });
   try {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 1080 }, reducedMotion: 'reduce' });
-    await ctx.route('**/ethers.umd.min.js', r => r.fulfill({ path: path.resolve(__dirname, '../mcp/node_modules/ethers/dist/ethers.umd.min.js'), contentType: 'application/javascript' }));
     const page = await ctx.newPage(), errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.goto(base); await page.evaluate(() => document.fonts.ready);

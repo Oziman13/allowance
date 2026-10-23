@@ -74,7 +74,7 @@
 .pf-decision-mark { font-size: 20px; line-height: 1; }
 .pf-decision { padding: 22px; border: 1px solid var(--line); border-left: 3px solid var(--pf-accent); border-radius: 14px; background: #0c1424; margin-top: 20px; }
 .pf-decision .eyebrow { margin: 0; }
-.pf-decision .pf-mode { font-size: 9px; border: 0; padding: 0; }
+.pf-decision .pf-mode { font-size: 10px; border: 0; padding: 0; }
 .pf-journey { list-style: none; padding: 0; margin: 24px 0; display: grid; grid-template-columns: 1fr 1fr 1fr; }
 .pf-journey li { display: flex; flex-direction: column; gap: 12px; font-size: 11px; color: var(--ink-2); position: relative; padding-right: 8px; }
 .pf-journey li::after { content: ''; height: 1px; position: absolute; left: 21px; right: 1px; top: 8px; background: var(--line); }
@@ -105,9 +105,9 @@
 @media(max-width:560px) {
  .pf-landing { padding: 20px 16px; } .intro .pf-heading h2 { font-size: 23px; }
  .pf-heading { flex-wrap: wrap; gap: 10px; } .pf-control { padding: 16px; margin-inline: -4px; }
- .pf-mode { font-size: 9px; } .pf-selector { gap: 2px; } .pf-selector button { font-size: 11px; padding: 8px 4px; }
+ .pf-mode { font-size: 10px; } .pf-selector { gap: 2px; } .pf-selector button { font-size: 11px; padding: 8px 4px; }
  .pf-readings>div { padding: 12px; } .pf-readings dd { font-size: 15px; } .pf-readings dt { font-size: 10px; }
- .pf-decision { padding: 16px; } .pf-journey li { font-size: 10px; } .pf-decision .pf-mode { font-size: 9px; }
+ .pf-decision { padding: 16px; } .pf-journey li { font-size: 10px; } .pf-decision .pf-mode { font-size: 10px; }
  .pf-request-route { font-size: 10px; } .pf-route-mark { width: 16px; }
 }
 @media(max-width:420px) {
@@ -125,3 +125,13 @@
 }
 
 .pf-preview-label { font: 10px/1.6 var(--font-mono); color: var(--ink-2); margin: 0 0 -8px; letter-spacing: .06em; }
+
+/* Check-in polish: keep mobile agent selection compact without shrinking touch targets. */
+@media(max-width:560px) {
+ .app { margin-top: 20px; gap: 20px; }
+ .side>.eyebrow { margin-bottom: 8px; }
+ .side h2 { margin-bottom: 8px; }
+ .acct-list { margin-block: 12px; }
+ .acct-list button { padding: 12px; gap: 10px; }
+ .acct-head { padding-bottom: 20px; }
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the dashboard: inject ABI, bytecode and network config into web/index.src.html -> docs/index.html.
 Run `forge build` first. GitHub Pages serves docs/."""
-import base64, json, pathlib, shutil, subprocess
+import base64, hashlib, json, pathlib, shutil, subprocess
 root = pathlib.Path(__file__).parent
 art = json.loads((root / "out/Allowance.sol/Allowance.json").read_text())
 nets = json.loads((root / "config/networks.json").read_text())
@@ -23,6 +23,13 @@ html = (html.replace("__POLICY_CSS__", (root / "web/policy-field.css").read_text
             .replace("__ABI__", json.dumps(art["abi"]))
             .replace("__BYTECODE__", art["bytecode"]["object"])
             .replace("__NETWORKS__", json.dumps(by_chain)))
+# Serve the same pinned ethers release locally; do not depend on a third-party CDN at demo time.
+# SHA-256 independently matched the official 6.13.4 CDN distribution and installed npm package.
+vendor = root / "web/vendor"
+assert hashlib.sha256((vendor / "ethers-6.13.4.umd.min.js").read_bytes()).hexdigest() == "fd66c04651929c6a37806a37e8217e6b6aac07c7e816ad478f52690b7429bc61", "Unexpected ethers vendor asset"
+(root / "docs/vendor").mkdir(parents=True, exist_ok=True)
+for name in ("ethers-6.13.4.umd.min.js", "ethers-LICENSE.md"):
+    shutil.copyfile(vendor / name, root / "docs/vendor" / name)
 (root / "docs").mkdir(exist_ok=True)
 (root / "docs/index.html").write_text(html)
 # Simulation mode: bundle the in-browser chain (web/sim) into docs/sim.js. Needs `npm install` in web/sim;
