@@ -452,6 +452,134 @@ footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-
 .simulation .dot.on { background:var(--cyan); }
 .command-map .map-note { font-size:10px; }
 @media(max-width:560px) { .account-title { gap:10px; } .map-note { line-height:1.7; } }
+/* Policy Field: node → boundary → decision. Geometry is semantic, never a limit scale. */
+:root { --pf-policy: var(--violet); --pf-route: var(--cyan); --pf-complete: var(--paid); --pf-decision: var(--held); --pf-block: var(--danger); --pf-inactive: #71809e; }
+.policy-field { --pf-accent: var(--pf-policy); background: #101a2b; border: 1px solid #394460; border-radius: 22px; position: relative; overflow: hidden; }
+.pf-landing { margin: 0; padding: 24px; }
+.pf-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.pf-heading .eyebrow { font-size: 10px; margin: 0 0 10px; color: var(--violet); letter-spacing: .12em; }
+.intro .pf-heading h2 { font-size: 24px; line-height: 1.35; letter-spacing: -.04em; font-weight: 500; margin: 0; }
+.pf-mode { font: 10px/1.6 var(--font-mono); color: var(--ink-2); border: 1px solid var(--line); border-radius: 5px; padding: 4px 7px; flex: none; }
+.pf-landing .pf-mode { border: 0; padding: 0; font-size: 9px; }
+.pf-canvas { margin: 12px -12px 8px; }
+.pf-diagram { display: block; width: 100%; height: auto; }
+.pf-diagram path,.pf-diagram rect,.pf-diagram circle { vector-effect: non-scaling-stroke; }
+.pf-boundary { fill: #9585ff06; stroke: var(--pf-policy); stroke-width: 1.3; }
+.pf-boundary-inset { fill: none; stroke: #9585ff25; stroke-width: 1; }
+.pf-diagram text { fill: var(--ink-2); font: 11px var(--font-ui); }
+.pf-diagram .pf-diagram-label { fill: var(--violet); font: 10px var(--font-mono); letter-spacing: .13em; }
+.pf-diagram .pf-agent-label,.pf-diagram .pf-endpoint-label { fill: var(--ink); font-weight: 500; font-size: 12px; }
+.pf-path { fill: none; stroke: var(--pf-inactive); stroke-width: 1.5; opacity: .25; }
+.pf-path-owner { stroke-dasharray: 4 5; }
+.pf-agent-node rect { fill: #211e3b; stroke: var(--violet); stroke-width: 1.5; }
+.pf-agent-node .pf-agent-icon { fill: none; stroke-width: 1.3; }
+.pf-agent-node path { fill: none; stroke: var(--violet); stroke-width: 1.3; }
+.pf-recipient-node circle { fill: #142733; stroke: var(--pf-inactive); }
+.pf-recipient-node path { stroke: var(--pf-inactive); fill: none; stroke-width: 1.7; }
+.pf-approval-node>path:first-child { fill: #30271c; stroke: var(--pf-decision); }
+.pf-approval-node>path:last-child { fill: none; stroke: var(--pf-decision); }
+.pf-owner-node rect { fill: #1c2337; stroke: var(--pf-inactive); }
+.pf-owner-node path { fill: none; stroke: var(--pf-inactive); stroke-width: 1.2; }
+.pf-blocked-node rect { fill: #251d2a; stroke: var(--pf-inactive); }
+.pf-blocked-node path { fill: none; stroke: var(--pf-inactive); stroke-width: 1.4; }
+[data-state=allowed] { --pf-accent: var(--pf-complete); }
+[data-state=pending] { --pf-accent: var(--pf-decision); }
+[data-state=blocked] { --pf-accent: var(--pf-block); }
+[data-state=owner] { --pf-accent: var(--pf-policy); }
+[data-state=neutral] { --pf-accent: var(--ink-2); }
+[data-state=allowed] .pf-path-allowed { stroke: var(--pf-complete); opacity: 1; }
+[data-state=allowed] .pf-recipient-node circle,[data-state=allowed] .pf-recipient-node path { stroke: var(--pf-complete); }
+[data-state=pending] .pf-path-pending { stroke: var(--pf-decision); opacity: 1; }
+[data-state=pending] .pf-path-owner { stroke: var(--pf-decision); opacity: .4; }
+[data-state=blocked] .pf-boundary { stroke: var(--pf-block); fill: #ef718608; }
+[data-state=blocked] .pf-path-blocked { stroke: var(--pf-block); opacity: 1; }
+[data-state=blocked] .pf-blocked-node rect,[data-state=blocked] .pf-blocked-node path { stroke: var(--pf-block); }
+[data-state=blocked] .pf-agent-node rect,[data-state=blocked] .pf-agent-node path { stroke: var(--pf-block); }
+[data-state=active] .pf-path-allowed { stroke: var(--pf-route); opacity: .6; }
+[data-state=active] .pf-path-pending { stroke: var(--pf-decision); opacity: .6; stroke-dasharray: 4 5; }
+.pf-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid var(--line); border-radius: 10px; padding: 4px; gap: 4px; }
+.pf-selector button { background: transparent; border: 1px solid transparent; border-radius: 6px; font: 500 11px/1.5 var(--font-ui); padding: 8px 5px; cursor: pointer; color: var(--ink-2); min-height: 44px; }
+.pf-selector button[aria-pressed=true] { border-color: var(--pf-accent); color: var(--pf-accent); background: #080d1860; }
+.pf-explanation { padding: 18px 0 0 14px; margin-top: 18px; border-left: 2px solid var(--pf-accent); }
+.pf-explanation>b { display: block; font: 500 14px/1.5 var(--font-heading); color: var(--pf-accent); }
+.pf-explanation p { font-size: 12px; color: var(--ink-2); line-height: 1.75; margin: 8px 0 0; }
+.pf-footnote { font-size: 11px; color: var(--ink-2); line-height: 1.7; margin: 18px 0 0; }
+.pf-control { padding: 22px; margin-top: 24px; }
+.pf-heading h3 { font: 500 19px/1.4 var(--font-heading); margin: 0; letter-spacing: -.03em; }
+.pf-control .pf-canvas { max-width: 600px; margin: 8px auto; }
+.pf-summary { font-size: 12px; line-height: 1.8; border-left: 2px solid var(--pf-accent); padding-left: 14px; color: var(--ink-2); }
+.pf-control[data-state=blocked] .pf-summary { color: var(--danger); }
+.pf-readings { display: grid; grid-template-columns: 1fr 1fr; margin: 20px 0; gap: 0; border: 1px solid var(--line); border-radius: 10px; }
+.pf-readings>div { padding: 14px; min-width: 0; }
+.pf-readings>div:nth-child(2n) { border-left: 1px solid var(--line); }
+.pf-readings>div:nth-child(n+3) { border-top: 1px solid var(--line); }
+.pf-readings dt { font-size: 11px; color: var(--ink-2); }
+.pf-readings dd { font: 500 18px/1.7 var(--font-heading); margin: 6px 0 0; overflow-wrap: anywhere; }
+.pf-readings>div:last-child dd { color: var(--cyan); }
+.pf-policy-details { display: grid; gap: 16px; }
+.pf-policy-details dt { font-size: 11px; color: var(--ink-2); }
+.pf-policy-details dd { font-size: 12px; margin: 6px 0 0; overflow-wrap: anywhere; }
+#fieldAgent,.pf-recipients { font: 11px/1.8 var(--font-mono); }
+.pf-recipients { padding-left: 16px; overflow-wrap: anywhere; }
+.pf-control details .hint { font-size: 11px; line-height: 1.8; }
+.pf-request-route { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font: 11px/1.7 var(--font-mono); color: var(--held); }
+.pf-node-mark { display: inline-grid; place-items: center; width: 18px; height: 18px; border: 1px solid currentColor; border-radius: 50%; font-size: 16px; }
+.pf-route-mark { width: 28px; height: 1px; background: currentColor; }
+.pf-decision-mark { font-size: 20px; line-height: 1; }
+.pf-decision { padding: 22px; border: 1px solid var(--line); border-left: 3px solid var(--pf-accent); border-radius: 14px; background: #0c1424; margin-top: 20px; }
+.pf-decision .eyebrow { margin: 0; }
+.pf-decision .pf-mode { font-size: 9px; border: 0; padding: 0; }
+.pf-journey { list-style: none; padding: 0; margin: 24px 0; display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.pf-journey li { display: flex; flex-direction: column; gap: 12px; font-size: 11px; color: var(--ink-2); position: relative; padding-right: 8px; }
+.pf-journey li::after { content: ''; height: 1px; position: absolute; left: 21px; right: 1px; top: 8px; background: var(--line); }
+.pf-journey li:last-child::after { display: none; }
+.pf-dot { display: inline-block; width: 17px; height: 17px; border: 1px solid var(--ink-2); border-radius: 50%; background: #0c1424; }
+.pf-journey li:nth-child(2) .pf-dot { border-color: var(--violet); border-radius: 4px; transform: rotate(45deg); }
+.pf-journey li:last-child .pf-dot { border-color: var(--pf-accent); }
+.pf-decision[data-stage=preview] .pf-journey li::after { background: repeating-linear-gradient(90deg,var(--line) 0 5px,transparent 5px 10px); }
+.pf-decision[data-stage=result] .pf-journey li::after { background: var(--pf-accent); }
+.pf-decision[data-stage=result] .pf-journey li:last-child .pf-dot::after { display: block; color: var(--pf-accent); content: '✓'; font-size: 12px; line-height: 15px; text-align: center; }
+.pf-decision[data-state=pending] .pf-journey li:last-child .pf-dot { border-radius: 3px; }
+.pf-decision[data-state=pending][data-stage=result] .pf-journey li:last-child .pf-dot::after { content: '◷'; }
+.pf-decision[data-state=blocked][data-stage=result] .pf-journey li:last-child .pf-dot::after { content: '×'; }
+.pf-decision[data-state=neutral][data-stage=result] .pf-journey li:last-child .pf-dot::after { content: '?'; }
+.pf-decision h3 { color: var(--pf-accent); font: 500 18px/1.5 var(--font-heading); letter-spacing: -.03em; margin: 0 0 8px; }
+.pf-decision>p { margin: 0; font-size: 12px; line-height: 1.8; overflow-wrap: anywhere; }
+.pf-decision-proof { color: var(--ink-2); margin-top: 16px !important; }
+.pf-proof-copy { font: 10px/1.5 var(--font-mono); background: none; border: 1px solid var(--line); padding: 7px 10px; border-radius: 6px; cursor: pointer; color: var(--cyan); }
+.feed li[data-outcome=owner] { border-left: 2px solid var(--violet); padding-left: 12px; }
+.feed .k.owner { background: var(--violet); border-radius: 2px; transform: rotate(45deg); }
+.pf-small-route { display: none; }
+@media (prefers-reduced-motion:no-preference) {
+ .pf-decision[data-stage=result][data-state=allowed] .pf-journey li::after,.pf-decision[data-stage=result][data-state=owner] .pf-journey li::after { animation: pf-route-complete .35s ease-out both; transform-origin: left; }
+ @keyframes pf-route-complete { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+}
+@media(max-width:1100px) { .hero { grid-template-columns: 1fr 1fr; gap: 32px; } .pf-landing { padding: 20px; } .pf-landing .pf-mode { display: none; } }
+@media(max-width:860px) { .hero { grid-template-columns: 1fr; } .pf-landing { max-width: 620px; width: 100%; margin-inline: auto; } }
+@media(max-width:560px) {
+ .pf-landing { padding: 20px 16px; } .intro .pf-heading h2 { font-size: 23px; }
+ .pf-heading { flex-wrap: wrap; gap: 10px; } .pf-control { padding: 16px; margin-inline: -4px; }
+ .pf-mode { font-size: 9px; } .pf-selector { gap: 2px; } .pf-selector button { font-size: 11px; padding: 8px 4px; }
+ .pf-readings>div { padding: 12px; } .pf-readings dd { font-size: 15px; } .pf-readings dt { font-size: 10px; }
+ .pf-decision { padding: 16px; } .pf-journey li { font-size: 10px; } .pf-decision .pf-mode { font-size: 9px; }
+ .pf-request-route { font-size: 10px; } .pf-route-mark { width: 16px; }
+}
+@media(max-width:420px) {
+ .pf-diagram { display: none; }
+ .pf-canvas { margin: 24px 0; }
+ .pf-small-route { display: grid; grid-template-columns: 1fr; padding: 18px; border: 1px solid var(--violet); border-radius: 12px; gap: 0; background: #9585ff05; }
+ .pf-small-route>span { display: flex; align-items: center; justify-content: center; padding: 14px 8px; font-size: 13px; text-align: center; }
+ .pf-small-agent { color: var(--violet); gap: 8px; }
+ .pf-small-route .pf-small-boundary { border-top: 1px solid var(--line); border-bottom: 1px dashed var(--pf-accent); color: var(--ink-2); font: 11px var(--font-mono); letter-spacing: .06em; }
+ .pf-small-decision { color: var(--pf-accent); }
+ .pf-readings { grid-template-columns: 1fr; }
+ .pf-readings>div:nth-child(n) { border-left: 0; border-top: 1px solid var(--line); }
+ .pf-readings>div:first-child { border-top: 0; }
+ .pf-readings dt { font-size: 11px; }
+}
+
+.pf-preview-label { font: 10px/1.6 var(--font-mono); color: var(--ink-2); margin: 0 0 -8px; letter-spacing: .06em; }
+
 </style>
 </head>
 <body>
@@ -474,7 +602,7 @@ footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-
       <div class="hero-copy">
         <p class="eyebrow"><span></span> AUTONOMOUS FINANCE, UNDER YOUR CONTROL</p>
         <h1>Give AI the freedom to act.<br><em>Keep the power to decide.</em></h1>
-        <p class="lede">On-chain spending boundaries for autonomous agents. Set the limits. Let payments flow. Stay in control.</p>
+        <p class="lede">On-chain spending boundaries for autonomous agents. Configure trusted recipients, enforce budgets, and review payments that need your decision.</p>
         <div class="cta">
           <button class="btn primary big" id="simBtn">Try Interactive Demo <svg class="arrow-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></button>
           <button class="btn big" id="connectBtn2">Connect Wallet</button>
@@ -483,16 +611,16 @@ footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-
         <div class="hero-values"><span>On-chain limits</span><span>Independent payments</span><span>Owner oversight</span></div>
       </div>
 
-      <figure class="command-map" aria-labelledby="mapTitle">
-        <figcaption><span class="eyebrow">THE POLICY LAYER</span><span class="map-network">Portaldot V3</span></figcaption>
-        <div class="map-agent"><span class="agent-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="5"/><path d="M12 2v3M8 11h2m4 0h2m-7 5h6"/></svg></span><div><b id="mapTitle">Autonomous agent</b><span>Permission to act. Boundaries enforced.</span></div><span class="map-tag">ON-CHAIN</span></div>
-        <div class="policy-boundary">
-          <span class="boundary-label">CONTRACT-ENFORCED POLICY</span>
-          <div class="policy-core"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="51"/><circle class="orbit" cx="60" cy="60" r="51"/><path d="M60 37l18 8v17c0 11-18 21-18 21S42 73 42 62V45z"/><path d="m51 59 6 6 13-14"/></svg><div><b>Available budget.<br>Enforced boundaries.</b><span>Per payment · Per period · Trusted recipients</span></div></div>
-          <div class="policy-route"><span>WITHIN THE RULES</span><span>OUTSIDE THE RULES</span></div>
+      <figure class="policy-field pf-landing" id="landingField" data-state="allowed" aria-labelledby="landingFieldTitle">
+        <figcaption class="pf-heading"><div><p class="eyebrow">THE BOUNDARIES OF AUTONOMY</p><h2 id="landingFieldTitle">A field of possibility.<br>A boundary you define.</h2></div><span class="pf-mode">ILLUSTRATION</span></figcaption>
+        <div class="pf-canvas" data-policy-diagram="landing" aria-hidden="true"></div>
+        <div class="pf-selector" role="group" aria-label="Illustrative policy scenarios">
+          <button type="button" data-scenario="allowed" aria-pressed="true">Autonomous payment</button>
+          <button type="button" data-scenario="pending" aria-pressed="false">Owner approval</button>
+          <button type="button" data-scenario="blocked" aria-pressed="false">Policy block</button>
         </div>
-        <div class="map-outcomes"><div><span class="outcome-icon" aria-hidden="true">✓</span><b>Trusted recipient</b><span>Payment settles independently</span></div><div><span class="outcome-icon" aria-hidden="true">◷</span><b>Owner approval</b><span>Payment held for your decision</span></div></div>
-        <p class="map-note">Policy flow illustration · Try the demo for live balances and payments.</p>
+        <div class="pf-explanation" aria-live="polite" aria-atomic="true"><b id="scenarioTitle">Within the active policy</b><p id="scenarioText">Illustrative example: a payment to a trusted recipient fits both caps and the contract balance. It can settle autonomously.</p></div>
+        <p class="pf-footnote">Illustrative scenarios, not recorded transactions. The boundary is a policy abstraction; distance does not determine authorization.</p>
       </figure>
     </div>
 
@@ -581,6 +709,23 @@ footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-
           <span class="who" id="dWho"></span>
         </div>
 
+        <section class="policy-field pf-control" id="controlField" data-state="neutral" aria-labelledby="controlFieldTitle" aria-busy="true">
+          <div class="pf-heading"><div><p class="eyebrow">LIVE POLICY / SELECTED AGENT</p><h3 id="controlFieldTitle">Agent Control Field</h3></div><span class="pf-mode" id="fieldMode">Reading contract…</span></div>
+          <div class="pf-canvas" data-policy-diagram="control" aria-hidden="true"></div>
+          <p class="pf-summary" id="fieldSummary" aria-live="polite">Reading the selected agent's spending environment.</p>
+          <dl class="pf-readings">
+            <div><dt>Contract-held balance</dt><dd id="fieldBalance">—</dd></div>
+            <div><dt>Per-payment cap</dt><dd id="fieldCap">—</dd></div>
+            <div><dt>Autonomous period limit</dt><dd id="fieldLimit">—</dd></div>
+            <div><dt>Autonomous allowance remaining</dt><dd id="fieldLeft">—</dd></div>
+          </dl>
+          <details id="fieldDetails"><summary>Inspect policy &amp; verified recipients</summary>
+            <dl class="pf-policy-details"><div><dt>Agent address</dt><dd id="fieldAgent">—</dd></div><div><dt>Recipient policy</dt><dd id="fieldTrust">—</dd></div><div><dt>Expiry</dt><dd id="fieldExpiry">—</dd></div><div><dt>Pending requests</dt><dd id="fieldPending">—</dd></div></dl>
+            <p class="hint" id="fieldTrustNote">Reading recipient history…</p><ul id="fieldRecipients" class="pf-recipients"></ul>
+          </details>
+          <p class="pf-footnote">Positions are illustrative, not numerical limits. Trusted does not guarantee payment authorization. Pending requests do not reserve funds.</p>
+        </section>
+
         <div class="meter-block">
           <div class="budget-overview"><div class="spending-ring" id="spendingRing" role="img"><div><b id="ringPercent"></b><span>limit used</span></div></div><div class="budget-copy"><p class="eyebrow">AUTONOMOUS ALLOWANCE</p>
           <div class="left-num" id="dLeft"></div>
@@ -599,7 +744,7 @@ footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-
 
         <div class="section">
           <h2>Approval inbox <span class="badge held" id="pendingCount">0 pending</span></h2>
-          <p class="hint">Held requests are awaiting your decision. No payment has settled yet.</p>
+          <p class="hint">Awaiting owner approval. Pending requests do not reserve funds; review the current balance before deciding.</p>
           <ul class="inbox" id="inbox"></ul>
           <p class="empty hidden" id="inboxEmpty">Nothing to decide. Payments outside the rules will appear here.</p>
         </div>
@@ -657,6 +802,7 @@ footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-
             <label class="full">Pay to<input type="text" name="to" required autocomplete="off" spellcheck="false"></label>
             <label><span>Amount (<span class="sym"></span>)</span><input type="number" step="any" min="0" name="amount" value="0.1" required></label>
             <label>What it's for<input type="text" name="memo" maxlength="140" value="API credits" required></label>
+            <p class="pf-preview-label full">NEXT PAYMENT PREVIEW · NOT A TRANSACTION</p>
             <p class="verdict full" id="verdict" aria-live="polite"></p>
             <div class="full" style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn primary" type="submit">Send as agent</button>
@@ -664,6 +810,12 @@ footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-
               <button class="btn" type="button" id="toTrustedBtn">Use a trusted address</button>
             </div>
           </form>
+          <section class="pf-decision" id="paymentDecision" data-state="neutral" aria-labelledby="decisionTitle" aria-live="polite" aria-atomic="true">
+            <div class="pf-heading"><span class="eyebrow">PAYMENT DECISION</span><span class="pf-mode" id="decisionMode">No transaction submitted</span></div>
+            <ol class="pf-journey" aria-label="Payment lifecycle"><li data-step="request"><span class="pf-dot"></span><span>Payment requested</span></li><li data-step="policy"><span class="pf-dot"></span><span>Policy evaluation</span></li><li data-step="outcome"><span class="pf-dot"></span><span id="decisionEndpoint">Actual outcome</span></li></ol>
+            <h3 id="decisionTitle">Inspect a payment</h3><p id="decisionReason">A preview checks the active policy. It does not send a payment.</p>
+            <p class="pf-decision-proof hidden" id="decisionProof"></p>
+          </section>
           <details class="assistant">
             <summary>Give this allowance to an AI assistant</summary>
             <p class="hint">Paste this into your MCP client (Claude Desktop, Claude Code, Cursor). The assistant gets only the agent key; the rules above still apply to everything it does. Setup steps are in <a href="https://github.com/Oziman13/allowance/tree/main/mcp" target="_blank" rel="noopener">mcp/README.md</a>.</p>
@@ -769,6 +921,7 @@ async function send(label, fn) {
 // ---------------------------------------------------------------- connect
 async function connect(eth = window.ethereum) {
   if (!eth) { toast("No wallet found. Install one such as MetaMask, or try the simulation.", true); return; }
+  if (eth.isAllowanceSimulation) eth = serializedSimulationTransport(eth);
   S.eth = eth; S.sim = !!eth.isAllowanceSimulation;
   S.provider = new ethers.BrowserProvider(eth, "any", S.sim ? { cacheTimeout: -1 } : undefined);
   if (S.sim) S.provider.pollingInterval = 250; // blocks are instant in the simulation
@@ -860,8 +1013,8 @@ async function loadAccounts() {
     const [a, left] = await S.al.getAccount(id);
     S.accounts.push({ id, a, left, m: await assetMeta(a.asset), pending: await pendingCount(id) });
   }
-  renderList();
   if (S.sel == null && S.accounts.length) S.sel = S.accounts[S.accounts.length - 1].id;
+  renderList();
   if (S.sel != null) await renderDetail(S.sel);
 }
 async function refresh() { if (S.al) await loadAccounts().catch(() => {}); }
@@ -916,9 +1069,10 @@ function fmtDur(s) {
 }
 
 async function renderDetail(id) {
-  const entry = S.accounts.find((x) => x.id === id); if (!entry) return;
+  const entry = S.accounts.find((x) => x.id === id); if (!entry || S.sel !== id) return;
   const { a, left, m } = entry;
   $("#detail").classList.remove("hidden");
+  $("#controlField").setAttribute("aria-busy", "true");
   $("#dName").textContent = a.name || "Agent " + id;
   $("#dWho").textContent = (a.asset === NATIVE ? m.sym : m.sym + " (ERC-20)") + " · agent " + short(a.agent);
   document.querySelectorAll(".sym").forEach((el) => (el.textContent = m.sym));
@@ -931,7 +1085,9 @@ async function renderDetail(id) {
   $("#spendingRing").classList.toggle("blocked", a.frozen);
   $("#spendingRing").setAttribute("aria-label", `${usedPercent}% of autonomous spending limit used${a.frozen ? "; agent frozen" : ""}`);
   $("#ringPercent").textContent = usedPercent + "%";
-  const now = Math.floor(Date.now() / 1000), expired = Number(a.rules.expiresAt) && now >= Number(a.rules.expiresAt);
+  const block = await S.provider.getBlock("latest");
+  if (S.sel !== id) return;
+  const now = block.timestamp, expired = Number(a.rules.expiresAt) && now >= Number(a.rules.expiresAt);
   $("#accountStatus").textContent = a.frozen ? "Frozen · blocked" : expired ? "Expired · blocked" : "Active · policy enforced";
   $("#accountStatus").className = "badge " + (a.frozen || expired ? "frozen" : "active");
   $("#dLeftCap").textContent = a.frozen ? "Frozen. The agent can't spend or ask until you unfreeze it."
@@ -966,13 +1122,16 @@ async function renderDetail(id) {
     logs(S.al.filters.RequestResolved(null, id)),
     logs(S.al.filters.FrozenSet(id)),
   ]);
+  if (S.sel !== id) return;
   // The starting gas is sent when the account is opened and doesn't count against the period limit.
   const opened = await logs(S.al.filters.AccountOpened(id));
   const openTx = new Set(opened.map((ev) => ev.transactionHash));
   for (const ev of gas) ev.seed = openTx.has(ev.transactionHash);
+  if (S.sel !== id) return;
   renderInbox(held.filter((x) => Number(x.r.status) === 1), m);
   await renderMeter(entry, paid, gas, resolved);
   renderFeed(m, held, paid, gas, resolved, frozen);
+  await renderControlField(entry, held, now);
   renderAgent(id, a, m);
 }
 
@@ -1015,8 +1174,9 @@ function renderInbox(pending, m) {
   $("#inboxEmpty").classList.toggle("hidden", pending.length > 0);
   $("#pendingCount").textContent = pending.length + " pending";
   for (const { rid, r } of pending.reverse()) {
-    const li = document.createElement("li"); li.className = "req";
+    const li = document.createElement("li"); li.className = "req"; li.dataset.requestId = String(rid);
     li.innerHTML = `<div class="top"><span class="memo">${esc(r.memo)}</span><span class="amt">${fmt(r.amount, m.dec)} ${esc(m.sym)}</span></div>
+      <span class="pf-request-route"><span class="pf-node-mark" aria-hidden="true">•</span> Request #${rid}<span class="pf-route-mark" aria-hidden="true"></span><span class="pf-decision-mark" aria-hidden="true">◇</span> Awaiting owner approval</span>
       <span class="why">Owner decision required · ${HOLD[Number(r.reason)]}</span>
       <span class="to">To ${r.to}</span>
       <div class="acts">
@@ -1027,8 +1187,17 @@ function renderInbox(pending, m) {
     li.querySelectorAll("button").forEach((b) => (b.onclick = async () => {
       li.querySelectorAll("button").forEach((x) => (x.disabled = true));
       try {
-        if (b.dataset.a === "reject") await send("Rejecting", () => S.al.reject(rid));
-        else await send(b.dataset.a === "trust" ? "Approving and trusting" : "Approving", () => S.al.approve(rid, b.dataset.a === "trust"));
+        const context = paymentKey(), accountId = S.sel;
+        const receipt = b.dataset.a === "reject"
+          ? await send("Rejecting", () => S.al.reject(rid))
+          : await send(b.dataset.a === "trust" ? "Approving and trusting" : "Approving", () => S.al.approve(rid, b.dataset.a === "trust"));
+        const events = receipt.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } });
+        if (paymentKey() === context) {
+          const resolution = events.find((x) => x?.name === "RequestResolved" && Number(x.args.requestId) === rid && Number(x.args.accountId) === accountId);
+          const paid = events.find((x) => x?.name === "Paid" && Number(x.args.accountId) === accountId);
+          if (resolution && Number(resolution.args.status) === 2 && paid) recordPaymentResult({ state: "owner", title: "Paid after owner approval", reason: "Confirmed owner-authorized payment. This does not consume the autonomous period allowance.", receipt, requestId: rid });
+          else if (resolution && Number(resolution.args.status) === 3) recordPaymentResult({ state: "blocked", title: "Request rejected by owner", reason: "The owner rejected this request. No payment was executed.", receipt, requestId: rid });
+        }
         await refresh();
       } catch { li.querySelectorAll("button").forEach((x) => (x.disabled = false)); }
     }));
@@ -1039,7 +1208,7 @@ function renderInbox(pending, m) {
 function renderFeed(m, held, paid, gas, resolved, frozen) {
   const rows = [];
   const approvals = new Set(resolved.filter((ev) => Number(ev.args.status) === 2).map((ev) => ev.transactionHash));
-  for (const ev of paid) rows.push([ev, "paid", `${approvals.has(ev.transactionHash) ? "Paid after owner approval" : "Paid autonomously"} · ${fmt(ev.args.amount, m.dec)} ${m.sym} · ${ev.args.memo}`]);
+  for (const ev of paid) rows.push([ev, approvals.has(ev.transactionHash) ? "owner" : "paid", `${approvals.has(ev.transactionHash) ? "Paid after owner approval" : "Paid autonomously"} · ${fmt(ev.args.amount, m.dec)} ${m.sym} · ${ev.args.memo}`]);
   for (const ev of gas) rows.push([ev, "gas", `${ev.seed ? "Starting gas" : "Gas refuel"} · ${fmt(ev.args.amount, m.dec)} ${m.sym}`]);
   for (const { ev, r } of held) rows.push([ev, "held", `Requested · ${fmt(r.amount, m.dec)} ${m.sym} · ${r.memo} · ${HOLD[Number(r.reason)]}. ${Number(r.status) === 1 ? "Awaiting owner decision" : "Now " + STATUS[Number(r.status)].toLowerCase()}`]);
   for (const ev of resolved) { const st = Number(ev.args.status); rows.push([ev, st === 2 ? "ok" : "no", `Request #${ev.args.requestId} · ${STATUS[st]}`]); }
@@ -1048,7 +1217,7 @@ function renderFeed(m, held, paid, gas, resolved, frozen) {
   const ul = $("#feed"); ul.replaceChildren();
   $("#feedEmpty").classList.toggle("hidden", rows.length > 0);
   for (const [ev, k, text] of rows.slice(0, 40)) {
-    const li = document.createElement("li");
+    const li = document.createElement("li"); li.dataset.outcome = k;
     const dot = document.createElement("span"); dot.className = "k " + k; dot.setAttribute("aria-hidden", "true");
     const description = document.createElement("span"); description.textContent = text;
     const tx = document.createElement("span"); tx.className = "tx";
@@ -1068,7 +1237,13 @@ function renderFeed(m, held, paid, gas, resolved, frozen) {
 
 // ---------------------------------------------------------------- agent tester
 let agentWallet = null;
+let paymentInFlight = false;
+let previewSequence = 0;
+let paymentContext = null;
+let paymentResult = null;
 function renderAgent(id, a, m) {
+  if (paymentContext !== paymentKey()) { paymentContext = paymentKey(); paymentResult = null; previewSequence++; showPaymentDecision({ state: "neutral", stage: "preview", title: "Inspect a payment", reason: "No transaction submitted for this selected agent." }); }
+  if (paymentResult) showPaymentDecision(paymentResult);
   const key = agentKey(id), box = $("#agentBox");
   if (!key) { box.classList.add("hidden"); agentWallet = null; return; }
   agentWallet = new ethers.Wallet(key, S.provider);
@@ -1081,37 +1256,59 @@ function renderAgent(id, a, m) {
   previewPay();
 }
 async function previewPay() {
+  const seq = ++previewSequence, context = paymentKey();
   const f = $("#payForm"), v = $("#verdict"), e = S.accounts.find((x) => x.id === S.sel);
-  if (!e || !ethers.isAddress(f.to.value)) { v.textContent = ""; return; }
-  const now = Math.floor(Date.now() / 1000);
-  f.querySelector("[type=submit]").disabled = e.a.frozen || !!(Number(e.a.rules.expiresAt) && now >= Number(e.a.rules.expiresAt));
-  if (e.a.frozen) { v.className = "verdict full stop"; v.textContent = "Blocked: the agent is frozen."; return; }
-  if (Number(e.a.rules.expiresAt) && now >= Number(e.a.rules.expiresAt)) { v.className = "verdict full stop"; v.textContent = "Blocked: the allowance has expired."; return; }
+  if (!e || paymentInFlight) return;
+  const show = (state, text) => {
+    if (seq !== previewSequence || context !== paymentKey() || paymentInFlight) return;
+    v.className = "verdict full " + ({ allowed: "now", pending: "hold", blocked: "stop" }[state] || ""); v.textContent = text;
+    if (!paymentResult) showPaymentDecision({ state, stage: "preview", title: state === "allowed" ? "Preview · autonomous payment possible" : state === "pending" ? "Preview · owner approval would be required" : state === "blocked" ? "Preview · payment would not execute" : "Preview unavailable", reason: text });
+  };
+  const input = [f.to.value, f.amount.value, f.memo.value].join("\n");
+  const current = () => seq === previewSequence && context === paymentKey() && !paymentInFlight && input === [f.to.value, f.amount.value, f.memo.value].join("\n");
   try {
-    const amt = parse(f.amount.value, e.m.dec);
-    const [hold] = await S.al.preview(S.sel, f.to.value, amt);
-    if (Number(hold) === 0) {
-      v.className = "verdict full " + (amt > e.a.balance ? "stop" : "now");
-      v.textContent = amt > e.a.balance ? "Blocked: not enough budget left." : "Will be paid instantly.";
-    } else { v.className = "verdict full hold"; v.textContent = "Will wait for your approval: " + HOLD[Number(hold)].toLowerCase() + "."; }
-  } catch { v.textContent = ""; }
+    const block = await S.provider.getBlock("latest"); if (!current()) return;
+    const expired = Number(e.a.rules.expiresAt) && block.timestamp >= Number(e.a.rules.expiresAt);
+    f.querySelector("[type=submit]").disabled = e.a.frozen || !!expired;
+    if (!ethers.isAddress(f.to.value)) { show("neutral", "Enter a valid recipient to preview the spending policy."); return; }
+    const amount = parse(f.amount.value, e.m.dec);
+    // eth_call executes the real contract without persisting changes. preview() alone
+    // does not check freeze, expiry, invalid amounts or recipient transfer failures.
+    await S.al.connect(agentWallet).pay.staticCall(e.id, f.to.value, amount, f.memo.value);
+    const [hold] = await S.al.preview(e.id, f.to.value, amount); if (!current()) return;
+    if (Number(hold) === 0) show("allowed", "Will be paid instantly if execution succeeds. This dry run does not submit a payment.");
+    else show("pending", "Will wait for your approval: " + HOLD[Number(hold)].toLowerCase() + ". This check creates no request and reserves no funds.");
+  } catch (error) { if (current()) show(isKnownPaymentFailure(error) ? "blocked" : "neutral", friendly(error)); }
 }
 async function payAsAgent(ev) {
   ev.preventDefault();
-  const f = ev.target, e = S.accounts.find((x) => x.id === S.sel), btn = f.querySelector("[type=submit]");
-  btn.disabled = true;
+  if (paymentInFlight) return;
+  const f = ev.target, e = S.accounts.find((x) => x.id === S.sel), btn = f.querySelector("[type=submit]"), context = paymentKey();
+  paymentInFlight = true; previewSequence++; paymentResult = null; btn.disabled = true;
+  showPaymentDecision({ state: "neutral", stage: "submitting", title: "Submitting payment", reason: S.sim ? "The browser EVM is evaluating this payment. No outcome is confirmed yet." : "Submission is in progress. No outcome is confirmed yet." });
   try {
     const al = S.al.connect(agentWallet);
     toast("Agent is sending…");
-    const args = [S.sel, f.to.value, parse(f.amount.value, e.m.dec), f.memo.value];
-    // Tight legacy fees: a held request pays a storage deposit, and default fees would reserve twice that.
+    const args = [e.id, f.to.value, parse(f.amount.value, e.m.dec), f.memo.value];
+    // Preserve existing fee and transaction authorization behavior.
     const opts = S.sim ? {} : { type: 0, gasPrice: BigInt(await S.provider.send("eth_gasPrice", [])) * 105n / 100n, gasLimit: (await al.pay.estimateGas(...args)) * 105n / 100n };
     const tx = await al.pay(...args, opts);
+    if (context === paymentKey()) showPaymentDecision({ state: "neutral", stage: "submitted", title: "Submitted · awaiting confirmation", reason: "Submission is not settlement. Waiting for the transaction receipt.", hash: tx.hash });
     const r = await tx.wait();
-    const held = r.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } }).find((p) => p?.name === "PaymentHeld");
-    toast(held ? "Held for your approval: " + HOLD[Number(held.args.reason)].toLowerCase() : "Paid instantly");
+    const events = r.logs.map((l) => { try { return S.al.interface.parseLog(l); } catch { return null; } });
+    const held = events.find((p) => p?.name === "PaymentHeld" && Number(p.args.accountId) === e.id);
+    const paid = events.find((p) => p?.name === "Paid" && Number(p.args.accountId) === e.id);
+    if (context === paymentKey()) {
+      if (held) recordPaymentResult({ state: "pending", title: "Awaiting owner approval", reason: "This request requires an owner decision. " + HOLD[Number(held.args.reason)] + ". No funds are reserved.", receipt: r, requestId: Number(held.args.requestId) });
+      else if (paid) recordPaymentResult({ state: "allowed", title: "Paid autonomously", reason: "Completed within the active on-chain spending policy.", receipt: r });
+      else recordPaymentResult({ state: "neutral", title: "Confirmed · outcome not identified", reason: "A receipt was received, but no matching payment or request event was found. Inspect transaction activity.", receipt: r });
+    }
+    toast(held ? "Held for your approval: " + HOLD[Number(held.args.reason)].toLowerCase() : paid ? "Paid instantly" : "Transaction confirmed; inspect activity");
     await refresh();
-  } catch (err) { toast(friendly(err), true); } finally { btn.disabled = false; }
+  } catch (err) {
+    if (context === paymentKey()) recordPaymentResult({ state: isKnownPaymentFailure(err) ? "blocked" : "neutral", title: isKnownPaymentFailure(err) ? "Payment not executed" : "Payment outcome unconfirmed", reason: friendly(err) });
+    toast(friendly(err), true);
+  } finally { paymentInFlight = false; btn.disabled = false; previewPay(); }
 }
 
 // ---------------------------------------------------------------- owner actions
@@ -1211,6 +1408,130 @@ async function skipDay() {
   catch (e) { toast(friendly(e), true); } finally { btn.disabled = false; }
 }
 
+// Shared Policy Field primitives. SVG is static; all contract-sourced text uses textContent.
+function policyDiagram() {
+  return `<svg class="pf-diagram" viewBox="0 0 560 330" focusable="false">
+    <path class="pf-boundary" d="M95 40H265L330 105V230L265 295H95L30 230V105Z"/>
+    <path class="pf-boundary-inset" d="M102 53H258L317 112V223L258 282H102L43 223V112Z"/>
+    <text class="pf-diagram-label" x="180" y="77" text-anchor="middle">SPENDING POLICY</text>
+    <path class="pf-path pf-path-allowed" d="M213 155H281L365 108H447"/>
+    <path class="pf-path pf-path-pending" d="M213 174H275L330 228"/>
+    <path class="pf-path pf-path-owner" d="M346 228H447"/>
+    <path class="pf-path pf-path-blocked" d="M180 198V248"/>
+    <g class="pf-agent-node"><rect x="147" y="132" width="66" height="66" rx="20"/><rect class="pf-agent-icon" x="166" y="150" width="28" height="22" rx="7"/><path d="M180 143v7m-7 9h3m8 0h3m-12 7h10"/></g>
+    <text class="pf-agent-label" data-node="agent" x="180" y="119" text-anchor="middle">AI agent</text>
+    <g class="pf-recipient-node"><circle cx="465" cy="108" r="18"/><path d="m458 108 5 5 9-11"/></g>
+    <text class="pf-endpoint-label" x="465" y="151" text-anchor="middle">Trusted recipient</text>
+    <text class="pf-sub-label" data-node="trusted" x="465" y="169" text-anchor="middle">Within the policy</text>
+    <g class="pf-approval-node"><path d="m330 212 16 16-16 16-16-16Z"/><path d="M330 221v8l5 3"/></g>
+    <g class="pf-owner-node"><rect x="447" y="210" width="36" height="36" rx="11"/><path d="M459 226v-5a6 6 0 0 1 12 0v5m-14 0h16v12h-16Z"/></g>
+    <text class="pf-endpoint-label" x="465" y="273" text-anchor="middle">Owner decision</text>
+    <text class="pf-sub-label" data-node="pending" x="465" y="291" text-anchor="middle">Request required</text>
+    <g class="pf-blocked-node"><rect x="167" y="248" width="26" height="26" rx="5"/><path d="m175 256 10 10m0-10-10 10"/></g>
+    <text class="pf-sub-label" data-node="blocked" x="180" y="319" text-anchor="middle">Blocked / not executed</text>
+  </svg>
+  <div class="pf-small-route"><span class="pf-small-agent"><span class="pf-node-mark">●</span> Agent</span><span class="pf-small-boundary">Spending policy</span><span class="pf-small-decision" data-node="smallDecision">✓ Within policy</span></div>`;
+}
+for (const canvas of document.querySelectorAll('[data-policy-diagram]')) canvas.innerHTML = policyDiagram();
+const POLICY_SCENARIOS = {
+  allowed: { title: 'Within the active policy', text: 'Illustrative example: a payment to a trusted recipient fits both caps and the contract balance. It can settle autonomously.', trusted: 'Illustrative allowed path', pending: 'No request in this example', blocked: 'Freeze / expiry guard', endpoint: '✓ Autonomous payment' },
+  pending: { title: 'A decision at the boundary', text: 'Illustrative example: a payment exceeds the per-payment cap. The contract would record a request for owner approval instead of paying. No funds are reserved.', trusted: 'No payment completed', pending: 'Illustrative approval path', blocked: 'Freeze / expiry guard', endpoint: '◇ Owner approval required' },
+  blocked: { title: 'The boundary holds', text: 'Illustrative example: the agent is frozen. Payment cannot execute, and no approval request is created. The owner can unfreeze the agent.', trusted: 'No payment completed', pending: 'No request created', blocked: 'Agent frozen · blocked', endpoint: '⊘ Policy block' },
+};
+function selectPolicyScenario(state) {
+  const root = document.querySelector('#landingField'), scenario = POLICY_SCENARIOS[state];
+  root.dataset.state = state;
+  root.querySelectorAll('[data-scenario]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.scenario === state)));
+  document.querySelector('#scenarioTitle').textContent = scenario.title;
+  document.querySelector('#scenarioText').textContent = scenario.text;
+  for (const [node, value] of Object.entries({ trusted: scenario.trusted, pending: scenario.pending, blocked: scenario.blocked, smallDecision: scenario.endpoint })) root.querySelector(`[data-node="${node}"]`).textContent = value;
+}
+document.querySelectorAll('[data-scenario]').forEach(button => button.addEventListener('click', () => selectPolicyScenario(button.dataset.scenario)));
+selectPolicyScenario('allowed');
+
+async function renderControlField(entry, held, now) {
+  const root = $('#controlField'), { id, a, left, m } = entry;
+  if (S.sel !== id) return;
+  root.setAttribute('aria-busy', 'true');
+  const pending = held.filter(x => Number(x.r.status) === 1).length;
+  const expired = Number(a.rules.expiresAt) && now >= Number(a.rules.expiresAt);
+  root.dataset.state = a.frozen || expired ? 'blocked' : 'active';
+  $('#fieldMode').textContent = S.sim ? 'BROWSER SIMULATION' : net().name;
+  $('#fieldBalance').textContent = `${fmt(a.balance, m.dec)} ${m.sym}`;
+  $('#fieldCap').textContent = `${fmt(a.rules.perPayment, m.dec)} ${m.sym}`;
+  $('#fieldLimit').textContent = `${fmt(a.rules.perPeriod, m.dec)} ${m.sym} / ${PERIOD_NAME[Number(a.rules.period)] || fmtDur(Number(a.rules.period))}`;
+  $('#fieldLeft').textContent = `${fmt(left, m.dec)} ${m.sym}`;
+  $('#fieldAgent').textContent = a.agent;
+  $('#fieldTrust').textContent = a.rules.trustedOnly ? 'Only trusted recipients may qualify for autonomous payment.' : 'Any recipient may qualify, subject to all other policy checks.';
+  $('#fieldExpiry').textContent = Number(a.rules.expiresAt) ? `${expired ? 'Expired' : 'Expires'} ${new Date(Number(a.rules.expiresAt) * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC')}` : 'No expiry configured';
+  $('#fieldPending').textContent = `${pending} awaiting owner approval · no funds reserved`;
+  root.querySelector('[data-node="agent"]').textContent = 'Agent #' + id;
+  root.querySelector('[data-node="pending"]').textContent = `${pending} pending ${pending === 1 ? 'request' : 'requests'}`;
+  root.querySelector('[data-node="blocked"]').textContent = a.frozen ? 'Frozen · spending blocked' : expired ? 'Expired · spending blocked' : 'Freeze / expiry guard';
+  root.querySelector('[data-node="smallDecision"]').textContent = a.frozen ? '⊘ Frozen' : expired ? '⊘ Expired' : '◇ ' + pending + ' pending requests';
+  $('#fieldSummary').textContent = a.frozen ? 'Frozen. This agent cannot pay, refuel or create approval requests.' : expired ? 'Expired. This agent cannot pay or create approval requests until its access is extended.' : 'Active policy. Payments must satisfy both caps, the recipient policy and available contract funds. These routes describe conditions, not completed payments.';
+  $('#fieldRecipients').replaceChildren();
+  $('#fieldTrustNote').textContent = 'Verifying recipients against the contract…';
+  root.querySelector('[data-node="trusted"]').textContent = 'Verifying recipients…';
+  try {
+    // Enumerate candidates from available events, then verify each against the actual mapping.
+    // Never claim completeness: the configured start block or RPC history may omit events.
+    const latest = await S.provider.getBlockNumber();
+    const events = await S.al.queryFilter(S.al.filters.TrustUpdated(id), S.fromBlock, latest);
+    const candidates = [...new Set(events.map(ev => ev.args.recipient))];
+    const verified = (await Promise.all(candidates.map(async recipient => ({ recipient, trusted: await S.al.isTrusted(id, recipient) })))).filter(x => x.trusted);
+    if (S.sel !== id) return;
+    for (const { recipient } of verified) { const li = document.createElement('li'); li.textContent = recipient; $('#fieldRecipients').append(li); }
+    root.querySelector('[data-node="trusted"]').textContent = `${verified.length} verified in history`;
+    $('#fieldTrustNote').textContent = verified.length ? 'Current trust verified by contract reads. Addresses come from available event history; this list may be incomplete. Trust alone does not authorize payment.' : 'No currently trusted recipients found in available history. This is not proof that none exist; history may be incomplete.';
+  } catch {
+    if (S.sel !== id) return;
+    root.querySelector('[data-node="trusted"]').textContent = 'Verification unavailable';
+    $('#fieldTrustNote').textContent = 'Recipient verification is unavailable. Do not infer trust from this diagram; use the payment preview for a contract dry run.';
+  } finally { if (S.sel === id) root.setAttribute('aria-busy', 'false'); }
+}
+function isKnownPaymentFailure(error) {
+  // A transport/provider failure is not proof of a policy rejection or nonexecution.
+  return ['ACTION_REJECTED', 'INVALID_ARGUMENT', 'NUMERIC_FAULT'].includes(error?.code) || error?.code === 4001 || error?.receipt?.status === 0
+    || (error?.code === 'CALL_EXCEPTION' && (typeof error?.data === 'string' || !!error?.revert?.name));
+}
+function paymentKey() { return `${S.chainId}:${S.address}:${S.sel}`; }
+function recordPaymentResult(result) {
+  paymentResult = { ...result, stage: 'result' };
+  showPaymentDecision(paymentResult);
+}
+function showPaymentDecision(result) {
+  const root = $('#paymentDecision'), stage = result.stage || 'result';
+  root.dataset.state = result.state; root.dataset.stage = stage;
+  root.querySelector('.pf-heading .eyebrow').textContent = stage === 'result' ? 'LAST PAYMENT OUTCOME' : stage === 'preview' ? 'PAYMENT PREVIEW' : 'PAYMENT IN PROGRESS';
+  $('#decisionTitle').textContent = result.title; $('#decisionReason').textContent = result.reason;
+  $('#decisionMode').textContent = (S.sim ? 'SIMULATION · ' : '') + ({ preview: 'PREVIEW ONLY', submitting: 'SUBMISSION IN PROGRESS', submitted: 'AWAITING CONFIRMATION', result: result.receipt ? 'CONFIRMED RECEIPT' : 'NO CONFIRMED PAYMENT' }[stage]);
+  const steps = root.querySelectorAll('.pf-journey li');
+  steps[0].lastElementChild.textContent = stage === 'preview' ? 'Payment input' : 'Payment requested';
+  steps[1].lastElementChild.textContent = stage === 'preview' ? 'Contract dry run' : 'Policy evaluation';
+  $('#decisionEndpoint').textContent = stage === 'preview' ? 'Predicted outcome' : stage === 'submitting' || stage === 'submitted' ? 'Not confirmed' : result.state === 'pending' ? 'Request recorded' : result.state === 'allowed' || result.state === 'owner' ? 'Payment completed' : result.state === 'blocked' ? 'Not executed' : 'Outcome unknown';
+  const proof = $('#decisionProof'); proof.replaceChildren();
+  if (result.receipt || result.hash) {
+    const hash = result.receipt?.hash || result.hash;
+    const label = document.createElement('span'); label.textContent = result.requestId != null ? `Request #${result.requestId} · ` : '';
+    const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'pf-proof-copy';
+    copy.textContent = `${S.sim ? 'Simulation tx' : 'Transaction'} ${short(hash)}`; copy.title = S.sim ? 'Copy local simulation hash, not a testnet transaction' : 'Copy transaction hash';
+    copy.onclick = async () => { try { await navigator.clipboard.writeText(hash); toast('Transaction hash copied'); } catch { toast('Could not copy the transaction hash.', true); } };
+    proof.append(label, copy);
+  }
+  proof.classList.toggle('hidden', !proof.childNodes.length);
+}
+
+// Full contract dry runs temporarily checkpoint the in-browser EVM. Queue RPC
+// operations so another request cannot observe that temporary state. Real wallet
+// transports and the simulation's contract/results remain unchanged.
+function serializedSimulationTransport(sim) {
+  let queue = Promise.resolve();
+  const run = fn => { const next = queue.then(fn); queue = next.catch(() => {}); return next; };
+  return { ...sim, request: args => run(() => sim.request(args)), advance: seconds => run(() => sim.advance(seconds)) };
+}
+
+
 // ---------------------------------------------------------------- wiring
 $("#connectBtn").onclick = () => connect().catch((e) => toast(friendly(e), true));
 $("#connectBtn2").onclick = () => connect().catch((e) => toast(friendly(e), true));
@@ -1239,13 +1560,13 @@ $("#fundForm").onsubmit = fundOrWithdraw;
 $("#trustForm").onsubmit = trustEdit;
 $("#freezeBtn").onclick = toggleFreeze;
 $("#payForm").onsubmit = payAsAgent;
-$("#payForm").oninput = () => { clearTimeout(previewPay.t); previewPay.t = setTimeout(previewPay, 250); };
-$("#toStrangerBtn").onclick = () => { $("#payForm").to.value = ethers.Wallet.createRandom().address; previewPay(); };
+$("#payForm").oninput = () => { paymentResult = null; clearTimeout(previewPay.t); previewPay.t = setTimeout(previewPay, 250); };
+$("#toStrangerBtn").onclick = () => { paymentResult = null; $("#payForm").to.value = ethers.Wallet.createRandom().address; previewPay(); };
 $("#copyCfgBtn").onclick = async () => {
   try { await navigator.clipboard.writeText($("#mcpConfig").textContent); toast("Config copied. It contains the agent key, so keep it private."); }
   catch { toast("Couldn't copy. Select the text and copy it manually.", true); }
 };
-$("#toTrustedBtn").onclick = () => { $("#payForm").to.value = S.me; previewPay(); };
+$("#toTrustedBtn").onclick = () => { paymentResult = null; $("#payForm").to.value = S.me; previewPay(); };
 </script>
 </body>
 </html>
