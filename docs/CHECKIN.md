@@ -1,4 +1,6 @@
-# Allowance: Hacker House check-in
+# Allowance: Hacker House check-in — overview
+
+**Current October 24 check-in package:** [CHECKIN-2026-10-24.md](CHECKIN-2026-10-24.md) — updated pitch, two-minute demo, validation notes, screenshots, and remaining items. This shorter page is a project overview.
 
 **Give your AI agent an allowance, not a wallet.** Programmable spending rules for AI agents on Portaldot V3: small payments go through on their own, anything outside the rules waits for the owner, and the rules are enforced by the contract.
 
@@ -10,7 +12,7 @@ Track 4, Ecosystem DApps · Solo builder: Ozan Turan ([@Oziman13](https://github
 |---|---|
 | Live demo | https://oziman13.github.io/allowance/ (connect a wallet on Portaldot V3, or press *Try it without a wallet*) |
 | Repository | https://github.com/Oziman13/allowance |
-| Demo video | to be added (≤ 3 minutes) |
+| Demo video | **Pending creator recording** (not yet published) |
 | Architecture | [docs/ARCHITECTURE.md](ARCHITECTURE.md) |
 | Judging criteria → evidence | [docs/JUDGING.md](JUDGING.md) |
 
@@ -23,7 +25,7 @@ Track 4, Ecosystem DApps · Solo builder: Ozan Turan ([@Oziman13](https://github
 | Deployment transaction | `0xb575397eea5c93908c43f13e4e9aff874f4777e0b4ab61164b36005ea0bcacd5` ([block 102688](https://scanner-testnet-v3.portaldot.dev/#/blocks/102688)) |
 | Explorer | [deployment block 102688](https://scanner-testnet-v3.portaldot.dev/#/blocks/102688), [owner account](https://scanner-testnet-v3.portaldot.dev/#/accounts/5CcDLjHrfoBeL4NX6ZGQzhBbzCrsS7qwFazkzFcF83pWjq3v); every transaction is listed in [PROOF.md](PROOF.md) with block links |
 
-The code on chain is byte-for-byte this repository's build. Six more transactions exercise every rule on chain: an account opened, two instant payments, a payment held for being over the cap, its approval, a freeze and an unfreeze. `python3 script/check_submission.py` re-checks the deployment and the transactions.
+The code on chain is byte-for-byte this repository's build. Six additional transactions demonstrate the core lifecycle on chain: an account opened, two instant payments, a payment held for being over the cap, its approval, a freeze and an unfreeze. `python3 script/check_submission.py` can attempt read-only rechecks when RPC access is available; the October 23 cloud attempt returned `403`, so the recorded chain evidence was not freshly reverified there.
 
 ## Progress
 
@@ -38,7 +40,7 @@ The code on chain is byte-for-byte this repository's build. Six more transaction
 - **Ecosystem guide**: [Getting started with Solidity on Portaldot V3](SOLIDITY-ON-PORTALDOT-V3.md). It covers funding a MetaMask address, what deploying really costs, the storage-deposit pattern, and the testnet's pruned history, all measured on chain.
 - **Business model** written up: open protocol, a paid layer for teams, no token ([README](../README.md#business-model)).
 
-**Development record.** 18 commits on 7 days (Oct 16–22), each one a reviewable step. [Commit history](https://github.com/Oziman13/allowance/commits/main).
+**Development record.** Regular commits since October 16, including UI, demo, and evidence updates through October 23. [Commit history](https://github.com/Oziman13/allowance/commits/main).
 
 ## Outstanding
 
@@ -47,7 +49,7 @@ The code on chain is byte-for-byte this repository's build. Six more transaction
 | Demo video (≤ 3 min, narrated) | A real AI assistant (Claude) paying through Allowance on the testnet: an instant payment, a held payment, the owner's approval, a freeze. |
 | Manage an allowance from a Portaldot (Substrate) wallet | So owners can fund and approve from the Portaldot wallet, not only from MetaMask. |
 | Cheaper requests | Clear a request's storage when it is resolved, so its deposit returns. This is planned for the v2 contract. |
-| Pitch deck | Before the final submission. |
+| Pitch deck | [11-page PDF prepared](Allowance-pitch-deck.pdf); final review and competition upload remain pending. |
 | MCP server on npm | Before the final submission. |
 
 ## Questions for mentors
