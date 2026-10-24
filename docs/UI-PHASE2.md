@@ -1,4 +1,4 @@
-# Phase 2 — The boundaries of autonomy
+# Dashboard redesign, phase 2 (development notes, October 23): the boundaries of autonomy
 
 The Policy Field uses one vocabulary across the landing page, selected-agent
 controls and payment decisions: an agent node, a violet on-chain boundary, a
@@ -105,7 +105,7 @@ verified, honestly incomplete data over a claim that historical RPC data is exha
 The shared field supplements rather than replaces exact financial information.
 
 Real extension-wallet integration, live testnet behavior and production RPC
-performance are not claimed as validated. Before November 5, prioritize human
+performance are not claimed as validated. Before the November 6 final, prioritize human
 screen-reader and extension-wallet checks, robust event-history pagination with
 clear completeness indicators, and navigation between a request and its final
 resolution. Keep this stacked branch unmerged until visual/product review.

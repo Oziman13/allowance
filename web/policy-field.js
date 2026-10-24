@@ -24,9 +24,9 @@ function policyDiagram() {
 }
 for (const canvas of document.querySelectorAll('[data-policy-diagram]')) canvas.innerHTML = policyDiagram();
 const POLICY_SCENARIOS = {
-  allowed: { title: 'Within the active policy', text: 'Illustrative example: a payment to a trusted recipient fits both caps and the contract balance. It can settle autonomously.', trusted: 'Illustrative allowed path', pending: 'No request in this example', blocked: 'Freeze / expiry guard', endpoint: '✓ Autonomous payment' },
-  pending: { title: 'A decision at the boundary', text: 'Illustrative example: a payment exceeds the per-payment cap. The contract would record a request for owner approval instead of paying. No funds are reserved.', trusted: 'No payment completed', pending: 'Illustrative approval path', blocked: 'Freeze / expiry guard', endpoint: '◇ Owner approval required' },
-  blocked: { title: 'The boundary holds', text: 'Illustrative example: the agent is frozen. Payment cannot execute, and no approval request is created. The owner can unfreeze the agent.', trusted: 'No payment completed', pending: 'No request created', blocked: 'Agent frozen · blocked', endpoint: '⊘ Policy block' },
+  allowed: { title: 'Within the active policy', text: 'A payment to a trusted recipient fits both caps and the budget, so it settles on its own.', trusted: 'Paid on its own', pending: 'Nothing to decide', blocked: 'Freeze / expiry guard', endpoint: '✓ Autonomous payment' },
+  pending: { title: 'A decision at the boundary', text: 'A payment is over the per-payment cap. The contract holds it as a request with the agent\'s reason, and you decide.', trusted: 'Not paid yet', pending: 'Waits for you', blocked: 'Freeze / expiry guard', endpoint: '◇ Owner approval required' },
+  blocked: { title: 'The boundary holds', text: 'The agent is frozen. It can\'t pay, refuel or even ask until you unfreeze it.', trusted: 'Not paid', pending: 'No request', blocked: 'Agent frozen · blocked', endpoint: '⊘ Policy block' },
 };
 function selectPolicyScenario(state) {
   const root = document.querySelector('#landingField'), scenario = POLICY_SCENARIOS[state];
@@ -50,16 +50,16 @@ async function renderControlField(entry, held, now) {
   $('#fieldBalance').textContent = `${fmt(a.balance, m.dec)} ${m.sym}`;
   $('#fieldCap').textContent = `${fmt(a.rules.perPayment, m.dec)} ${m.sym}`;
   $('#fieldLimit').textContent = `${fmt(a.rules.perPeriod, m.dec)} ${m.sym} / ${PERIOD_NAME[Number(a.rules.period)] || fmtDur(Number(a.rules.period))}`;
-  $('#fieldLeft').textContent = `${fmt(left, m.dec)} ${m.sym}`;
+  $('#fieldLeft').textContent = `${fmt(spendNow(left, a), m.dec)} ${m.sym}`;
   $('#fieldAgent').textContent = a.agent;
   $('#fieldTrust').textContent = a.rules.trustedOnly ? 'Only trusted recipients may qualify for autonomous payment.' : 'Any recipient may qualify, subject to all other policy checks.';
   $('#fieldExpiry').textContent = Number(a.rules.expiresAt) ? `${expired ? 'Expired' : 'Expires'} ${new Date(Number(a.rules.expiresAt) * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC')}` : 'No expiry configured';
-  $('#fieldPending').textContent = `${pending} awaiting owner approval · no funds reserved`;
+  $('#fieldPending').textContent = `${pending} waiting for your approval`;
   root.querySelector('[data-node="agent"]').textContent = 'Agent #' + id;
   root.querySelector('[data-node="pending"]').textContent = `${pending} pending ${pending === 1 ? 'request' : 'requests'}`;
   root.querySelector('[data-node="blocked"]').textContent = a.frozen ? 'Frozen · spending blocked' : expired ? 'Expired · spending blocked' : 'Freeze / expiry guard';
   root.querySelector('[data-node="smallDecision"]').textContent = a.frozen ? '⊘ Frozen' : expired ? '⊘ Expired' : '◇ ' + pending + ' pending requests';
-  $('#fieldSummary').textContent = a.frozen ? 'Frozen. This agent cannot pay, refuel or create approval requests.' : expired ? 'Expired. This agent cannot pay or create approval requests until its access is extended.' : 'Active policy. Payments must satisfy both caps, the recipient policy and available contract funds. These routes describe conditions, not completed payments.';
+  $('#fieldSummary').textContent = a.frozen ? 'Frozen. This agent cannot pay, refuel or create approval requests.' : expired ? 'Expired. This agent cannot pay or create approval requests until its access is extended.' : 'Active. A payment goes through on its own when it fits both caps, the recipient rule and the budget. Anything else waits for you.';
   $('#fieldRecipients').replaceChildren();
   $('#fieldTrustNote').textContent = 'Verifying recipients against the contract…';
   root.querySelector('[data-node="trusted"]').textContent = 'Verifying recipients…';
@@ -72,12 +72,12 @@ async function renderControlField(entry, held, now) {
     const verified = (await Promise.all(candidates.map(async recipient => ({ recipient, trusted: await S.al.isTrusted(id, recipient) })))).filter(x => x.trusted);
     if (S.sel !== id) return;
     for (const { recipient } of verified) { const li = document.createElement('li'); li.textContent = recipient; $('#fieldRecipients').append(li); }
-    root.querySelector('[data-node="trusted"]').textContent = `${verified.length} verified in history`;
-    $('#fieldTrustNote').textContent = verified.length ? 'Current trust verified by contract reads. Addresses come from available event history; this list may be incomplete. Trust alone does not authorize payment.' : 'No currently trusted recipients found in available history. This is not proof that none exist; history may be incomplete.';
+    root.querySelector('[data-node="trusted"]').textContent = `${verified.length} trusted`;
+    $('#fieldTrustNote').textContent = verified.length ? 'Trusted recipients, each one confirmed by reading the contract.' : 'No trusted recipients yet.';
   } catch {
     if (S.sel !== id) return;
     root.querySelector('[data-node="trusted"]').textContent = 'Verification unavailable';
-    $('#fieldTrustNote').textContent = 'Recipient verification is unavailable. Do not infer trust from this diagram; use the payment preview for a contract dry run.';
+    $('#fieldTrustNote').textContent = 'Couldn\'t read trusted recipients right now. The payment preview still checks with the contract.';
   } finally { if (S.sel === id) root.setAttribute('aria-busy', 'false'); }
 }
 function isKnownPaymentFailure(error) {

@@ -1,4 +1,4 @@
-# Premium UI phase 1
+# Dashboard redesign, phase 1 (development notes, October 23)
 
 The dashboard uses an Autonomous Finance Command Center identity: dark navy
 surfaces, violet policies, cyan simulation/gas, mint settled payments, amber
@@ -51,13 +51,12 @@ real contract bytecode in the existing browser EVM, never sends a testnet
 transaction, and writes screenshots outside the repository. Token injection
 and wallet failure fixtures are test-only; the application uses real data.
 
-## Review and phase 2
+## Status and next steps
 
-Review this feature branch before changing the live site. Do not merge, deploy,
-or publish Pages as part of phase 1. Hardware/extension wallet behavior on the
-live testnet still needs a human check without signing a payment.
+Phase 1 and phase 2 were merged and published on October 23. Real-wallet checks
+are done by hand on the live site, since browser tests use an injected test wallet.
 
-For the November 5 final, prioritize an accessibility audit with assistive
+For the November 6 final, prioritize an accessibility audit with assistive
 technology, real extension-wallet cross-browser checks, event-history pagination
 and request-to-resolution navigation. A later pass can add transaction explorer
 and contract-balance explanations while retaining the clear simulation boundary.

@@ -91,6 +91,8 @@ a.btn { text-decoration: none; color: inherit; display: inline-block; }
 .day-log .st { justify-self: end; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
 .day-log .paid .st { color: var(--paid); background: color-mix(in srgb, var(--paid) 14%, transparent); }
 .day-log .held .st { color: var(--held); background: var(--held-soft); }
+.day-ai { margin: 10px 0 0; font-size: 13px; color: var(--ink-2); }
+.day-ai a { color: inherit; text-decoration: underline; }
 .day-log .ice .st { color: var(--frozen); background: var(--frozen-soft); }
 .day-log .held { background: linear-gradient(90deg, transparent, var(--held-soft) 30%, transparent); }
 .day-proof { display: inline-block; margin-top: 12px; font-size: 14px; font-weight: 600; }
@@ -213,6 +215,17 @@ details.assistant { margin-top: 16px; background: var(--surface); }
 details.assistant pre { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px; overflow-x: auto; font-size: 13px; line-height: 1.45; white-space: pre; }
 dialog { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); padding: 26px; width: min(640px, calc(100vw - 32px)); }
 dialog::backdrop { background: rgba(20, 16, 40, .45); }
+.wallet-list { display: grid; gap: 8px; margin: 0 0 14px; }
+.wallet-list button, .wallet-list a { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: transparent; color: var(--ink); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; text-align: left; }
+.wallet-list button:hover, .wallet-list a:hover, .wallet-list button:focus-visible, .wallet-list a:focus-visible { border-color: var(--violet); }
+.wallet-list img { width: 28px; height: 28px; border-radius: 8px; }
+.wallet-note { color: var(--ink-2); font-size: 14px; margin: 0 0 12px; }
+.wallet-note a { color: inherit; }
+.wallet-copy { width: 100%; margin: 0 0 14px; }
+.wallet-qr { width: 176px; margin: 0 auto 16px; padding: 10px; background: #fff; border-radius: 12px; }
+.wallet-qr svg { display: block; width: 100%; height: auto; }
+.linklike { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; margin-left: 12px; }
+.wallet-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 dialog h2 { margin: 0 0 6px; }
 dialog > p { margin: 0 0 18px; color: var(--ink-2); }
 .dlg-acts { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
@@ -467,9 +480,9 @@ __POLICY_CSS__
   <section class="intro" id="intro">
     <div class="hero">
       <div class="hero-copy">
-        <p class="eyebrow"><span></span> AUTONOMOUS FINANCE, UNDER YOUR CONTROL</p>
+        <p class="eyebrow"><span></span> AN ALLOWANCE, NOT A WALLET · PORTALDOT V3</p>
         <h1>Give AI the freedom to act.<br><em>Keep the power to decide.</em></h1>
-        <p class="lede">On-chain spending boundaries for autonomous agents. Configure trusted recipients, enforce budgets, and review payments that need your decision.</p>
+        <p class="lede">Give your AI agent an allowance, not a wallet. Its spending rules live in a contract on Portaldot V3: small payments go through on their own, anything else waits for you.</p>
         <div class="cta">
           <button class="btn primary big" id="simBtn">Try Interactive Demo <svg class="arrow-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></button>
           <button class="btn big" id="connectBtn2">Connect Wallet</button>
@@ -486,8 +499,8 @@ __POLICY_CSS__
           <button type="button" data-scenario="pending" aria-pressed="false">Owner approval</button>
           <button type="button" data-scenario="blocked" aria-pressed="false">Policy block</button>
         </div>
-        <div class="pf-explanation" aria-live="polite" aria-atomic="true"><b id="scenarioTitle">Within the active policy</b><p id="scenarioText">Illustrative example: a payment to a trusted recipient fits both caps and the contract balance. It can settle autonomously.</p></div>
-        <p class="pf-footnote">Illustrative scenarios, not recorded transactions. The boundary is a policy abstraction; distance does not determine authorization.</p>
+        <div class="pf-explanation" aria-live="polite" aria-atomic="true"><b id="scenarioTitle">Within the active policy</b><p id="scenarioText">A payment to a trusted recipient fits both caps and the contract balance. It can settle autonomously.</p></div>
+        <p class="pf-footnote">Example scenarios. The interactive demo runs the real contract.</p>
       </figure>
     </div>
 
@@ -514,9 +527,10 @@ __POLICY_CSS__
           <li class="held"><span class="blk">#102873</span><span class="what">GPU hour for fine-tuning<small>over the 1 POT cap</small></span><span class="amt">2</span><span class="st">Waiting</span></li>
           <li class="paid"><span class="blk">#102880</span><span class="what">You approved it</span><span class="amt">2</span><span class="st">Paid</span></li>
           <li class="ice"><span class="blk">#102887</span><span class="what">You froze the agent<small>nothing can move</small></span><span class="amt"></span><span class="st">Frozen</span></li>
-          <li class="ice"><span class="blk">#102900</span><span class="what">You unfroze it</span><span class="amt"></span><span class="st">Active</span></li>
+          <li class="paid"><span class="blk">#102900</span><span class="what">You unfroze it</span><span class="amt"></span><span class="st">Active</span></li>
         </ol>
         <a class="day-proof" href="https://github.com/Oziman13/allowance/blob/main/docs/PROOF.md" target="_blank" rel="noopener">Check these transactions on chain</a>
+        <p class="day-ai">On 23 October a real AI assistant, Claude, ran the same flow through the Allowance MCP server: <a href="https://github.com/Oziman13/allowance/blob/main/docs/PROOF.md#a-real-ai-assistant-on-chain-2026-10-23" target="_blank" rel="noopener">see its transactions</a>.</p>
       </figure>
     </section>
 
@@ -559,6 +573,13 @@ __POLICY_CSS__
       <button class="btn primary" id="deployBtn">Deploy Allowance</button>
     </div>
   </section>
+  <section class="hidden" id="netBox">
+    <div class="panel">
+      <h2>Switch to Portaldot V3 Testnet</h2>
+      <p class="hint">Your wallet is on another network. Allowance runs on Portaldot V3 Testnet (chain ID 420420777).</p>
+      <button class="btn primary" id="netBtn">Switch network</button>
+    </div>
+  </section>
 
   <section class="app hidden" id="app">
     <aside class="side">
@@ -584,13 +605,13 @@ __POLICY_CSS__
             <div><dt>Contract-held balance</dt><dd id="fieldBalance">—</dd></div>
             <div><dt>Per-payment cap</dt><dd id="fieldCap">—</dd></div>
             <div><dt>Autonomous period limit</dt><dd id="fieldLimit">—</dd></div>
-            <div><dt>Autonomous allowance remaining</dt><dd id="fieldLeft">—</dd></div>
+            <div><dt>Can spend now without asking</dt><dd id="fieldLeft">—</dd></div>
           </dl>
           <details id="fieldDetails"><summary>Inspect policy &amp; verified recipients</summary>
             <dl class="pf-policy-details"><div><dt>Agent address</dt><dd id="fieldAgent">—</dd></div><div><dt>Recipient policy</dt><dd id="fieldTrust">—</dd></div><div><dt>Expiry</dt><dd id="fieldExpiry">—</dd></div><div><dt>Pending requests</dt><dd id="fieldPending">—</dd></div></dl>
             <p class="hint" id="fieldTrustNote">Reading recipient history…</p><ul id="fieldRecipients" class="pf-recipients"></ul>
           </details>
-          <p class="pf-footnote">Positions are illustrative, not numerical limits. Trusted does not guarantee payment authorization. Pending requests do not reserve funds.</p>
+          <p class="pf-footnote">Waiting requests don't reserve funds: an approval pays from the budget at that moment.</p>
         </section>
 
         <div class="meter-block">
@@ -611,7 +632,7 @@ __POLICY_CSS__
 
         <div class="section">
           <h2>Approval inbox <span class="badge held" id="pendingCount">0 pending</span></h2>
-          <p class="hint">Awaiting owner approval. Pending requests do not reserve funds; review the current balance before deciding.</p>
+          <p class="hint">Payments outside the rules, waiting for you. An approval pays from the budget at that moment.</p>
           <ul class="inbox" id="inbox"></ul>
           <p class="empty hidden" id="inboxEmpty">Nothing to decide. Payments outside the rules will appear here.</p>
         </div>
@@ -695,7 +716,7 @@ __POLICY_CSS__
   </section>
 </main>
 
-<div class="wrap"><footer>Allowance is open source (MIT) and not audited. Keep budgets small. <a href="https://github.com/Oziman13/allowance">Source on GitHub</a></footer></div>
+<div class="wrap"><footer>Allowance is open source (MIT) and not audited. Keep budgets small. <span><a href="https://github.com/Oziman13/allowance">Source on GitHub</a><button type="button" class="linklike" id="phoneBtn">Open on your phone</button></span></footer></div>
 
 <dialog id="openDlg" aria-labelledby="openTitle">
   <form id="openForm" method="dialog">
@@ -718,6 +739,24 @@ __POLICY_CSS__
       <button class="btn primary" id="openSubmit" value="ok">Create allowance</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="walletDlg" aria-labelledby="walletTitle">
+  <h2 id="walletTitle">Connect a wallet</h2>
+  <p id="walletIntro">Allowance runs on the Portaldot V3 testnet. Any EVM wallet works.</p>
+  <div id="walletPick" class="wallet-list hidden" role="group" aria-label="Wallets found in this browser"></div>
+  <div id="walletMobile" class="hidden">
+    <p class="wallet-note">Phone browsers can't reach your wallet app. Open this page inside your wallet instead:</p>
+    <div class="wallet-list" id="walletApps" role="group" aria-label="Open in a wallet app"></div>
+    <button type="button" class="btn wallet-copy" id="walletCopy">Copy link for another wallet's browser</button>
+  </div>
+  <div id="walletNone" class="hidden">
+    <p class="wallet-note" id="walletNoneText">No browser wallet found here. Install one, such as <a href="https://metamask.io/download/" target="_blank" rel="noopener">MetaMask</a>, or scan this with your phone to open the dashboard in your wallet app.</p>
+    <p class="wallet-note hidden" id="walletPhoneText">Scan with your phone’s camera. The dashboard opens and offers to continue in your wallet app.</p>
+    <div class="wallet-qr" role="img" aria-label="QR code for oziman13.github.io/allowance">__SITE_QR__</div>
+  </div>
+  <p class="wallet-note">No wallet at hand? The interactive demo runs the real contract in this browser.</p>
+  <div class="wallet-actions"><button type="button" class="btn" id="walletDemo">Try Interactive Demo</button><button type="button" class="btn" id="walletClose">Close</button></div>
 </dialog>
 
 <div id="toast" role="status" aria-live="polite" aria-atomic="true" role="status" aria-live="polite"></div>
@@ -786,6 +825,89 @@ async function send(label, fn) {
 }
 
 // ---------------------------------------------------------------- connect
+// ---------------------------------------------------------------- wallets
+// Browser wallets announce themselves (EIP-6963), so a page can offer each installed wallet by name.
+// Phone browsers have no wallet at all: the dashboard has to be opened inside the wallet app's own
+// browser, which every major wallet supports through a link.
+const WALLETS = new Map();
+window.addEventListener("eip6963:announceProvider", (e) => {
+  const d = e.detail;
+  if (d?.info?.uuid && d.provider && typeof d.provider.request === "function") WALLETS.set(d.info.uuid, d);
+});
+window.dispatchEvent(new Event("eip6963:requestProvider"));
+const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+const PAGE_URL = location.href.split("#")[0];
+function walletAppLinks(url) {
+  const enc = encodeURIComponent(url);
+  return [ // formats from each wallet's developer documentation
+    ["MetaMask", "https://link.metamask.io/dapp/" + url.replace(/^https?:\/\//, "")],
+    ["Trust Wallet", "https://link.trustwallet.com/open_url?coin_id=60&url=" + enc],
+    ["Coinbase Wallet", "https://go.cb-w.com/dapp?cb_url=" + enc],
+    ["OKX Wallet", "okx://wallet/dapp/url?dappUrl=" + enc],
+  ];
+}
+const announced = () => new Promise((r) => setTimeout(() => r([...WALLETS.values()]), 60));
+// Shows the wallet dialog. mode: "pick" (several wallets), "mobile" (phone, no wallet), "none" (desktop, no wallet).
+// Resolves with the chosen provider, or null if the dialog was closed.
+function walletDialog(mode, list = []) {
+  const dlg = $("#walletDlg");
+  $("#walletPick").classList.toggle("hidden", mode !== "pick");
+  $("#walletMobile").classList.toggle("hidden", mode !== "mobile");
+  $("#walletNone").classList.toggle("hidden", mode !== "none" && mode !== "phone");
+  $("#walletNoneText").classList.toggle("hidden", mode === "phone");
+  $("#walletPhoneText").classList.toggle("hidden", mode !== "phone");
+  $("#walletTitle").textContent = { pick: "Choose a wallet", mobile: "Open in your wallet app", phone: "Open on your phone" }[mode] || "Connect a wallet";
+  return new Promise((resolve) => {
+    let chosen = null;
+    const pick = $("#walletPick"); pick.replaceChildren();
+    for (const w of list) {
+      const b = document.createElement("button"); b.type = "button";
+      if (/^data:image\//.test(w.info.icon || "")) { const img = document.createElement("img"); img.src = w.info.icon; img.alt = ""; b.append(img); }
+      b.append(document.createTextNode(w.info.name || "Wallet"));
+      b.onclick = () => { chosen = w; dlg.close(); };
+      pick.append(b);
+    }
+    const apps = $("#walletApps"); apps.replaceChildren();
+    for (const [name, href] of walletAppLinks(PAGE_URL)) {
+      const l = document.createElement("a"); l.href = href; l.textContent = name; l.rel = "noopener"; apps.append(l);
+    }
+    $("#walletCopy").onclick = async () => {
+      try { await navigator.clipboard.writeText(PAGE_URL); toast("Link copied. Paste it into your wallet app's browser."); }
+      catch { toast(PAGE_URL); }
+    };
+    $("#walletDemo").onclick = () => { dlg.close(); startSimulation(); };
+    $("#walletClose").onclick = () => dlg.close();
+    dlg.addEventListener("close", () => {
+      if (chosen) writeStore("wallet", chosen.info.rdns || chosen.info.name || "");
+      resolve(chosen ? chosen.provider : null);
+    }, { once: true });
+    dlg.showModal();
+  });
+}
+// The wallet to connect: the only one installed, the one the visitor picks, or the help dialog.
+async function chooseWallet() {
+  const list = await announced();
+  if (list.length === 1) { writeStore("wallet", list[0].info.rdns || ""); return list[0].provider; }
+  if (list.length > 1) return walletDialog("pick", list);
+  if (window.ethereum) return window.ethereum;
+  return walletDialog(IS_MOBILE ? "mobile" : "none");
+}
+async function connectWallet() {
+  const eth = await chooseWallet();
+  if (eth) await connect(eth);
+}
+// Portaldot V3 Testnet, as wallets want it for wallet_addEthereumChain.
+const PORTALDOT = { chainId: "0x" + (420420777).toString(16), chainName: "Portaldot V3 Testnet",
+  nativeCurrency: { name: "POT", symbol: "POT", decimals: 18 }, rpcUrls: ["https://test-evm-rpc-v3.portaldot.dev"] };
+async function switchToPortaldot(eth) {
+  try { await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: PORTALDOT.chainId }] }); }
+  catch (e) {
+    const code = e?.code ?? e?.data?.originalError?.code;
+    if (code !== 4902 && !/unrecognized|not been added|unknown chain|not added/i.test(e?.message || "")) throw e;
+    await eth.request({ method: "wallet_addEthereumChain", params: [PORTALDOT] });
+  }
+}
+
 async function connect(eth = window.ethereum) {
   if (!eth) { toast("No wallet found. Install one such as MetaMask, or try the simulation.", true); return; }
   if (eth.isAllowanceSimulation) eth = serializedSimulationTransport(eth);
@@ -796,6 +918,18 @@ async function connect(eth = window.ethereum) {
   S.signer = await S.provider.getSigner();
   S.me = await S.signer.getAddress();
   S.chainId = Number((await S.provider.getNetwork()).chainId);
+  if (!S.sim && !NETWORKS[String(S.chainId)]) {
+    // Not a network Allowance knows: offer Portaldot V3 Testnet. Wallets reload the page through
+    // chainChanged after a switch; the stored flag reconnects without asking again.
+    writeStore("connected", "1");
+    eth.on?.("chainChanged", () => location.reload());
+    $("#intro").classList.add("hidden");
+    $("#netBox").classList.remove("hidden");
+    $("#connectBtn").textContent = short(S.me);
+    $("#netBtn").onclick = () => switchToPortaldot(eth).catch((e) => toast(friendly(e), true));
+    try { await switchToPortaldot(eth); } catch (e) { toast(friendly(e), true); }
+    return;
+  }
   $("#netDot").classList.add("on");
   $("#netName").textContent = net().name;
   document.body.classList.toggle("simulation", S.sim);
@@ -911,6 +1045,8 @@ async function heldRequests(id) {
 async function pendingCount(id) { return (await heldRequests(id)).filter((x) => Number(x.r.status) === 1).length; }
 
 // ---------------------------------------------------------------- rendering
+// What the agent can pay right now without asking: the period allowance, but never more than the budget.
+function spendNow(left, a) { return left < a.balance ? left : a.balance; }
 function renderList() {
   const ul = $("#acctList"); ul.innerHTML = "";
   $("#noAccts").classList.toggle("hidden", S.accounts.length > 0);
@@ -920,7 +1056,7 @@ function renderList() {
     li.innerHTML = `<button type="button" aria-current="${id === S.sel}">
       <span class="row"><span>${esc(a.name || "Agent " + id)}</span>${a.frozen ? '<span class="badge frozen">Frozen</span>' : pending ? `<span class="badge held">${pending} waiting</span>` : ""}</span>
       <span class="mini"><i style="width:${pct}%"></i></span>
-      <span class="sub"><span>${fmt(left, m.dec)} <span class="asset-symbol"></span> available</span><span>per ${PERIOD_NAME[Number(a.rules.period)] || fmtDur(Number(a.rules.period))}</span></span>
+      <span class="sub"><span>${fmt(spendNow(left, a), m.dec)} <span class="asset-symbol"></span> available</span><span>per ${PERIOD_NAME[Number(a.rules.period)] || fmtDur(Number(a.rules.period))}</span></span>
     </button>`;
     li.querySelector(".asset-symbol").textContent = m.sym;
     li.firstElementChild.onclick = () => { S.sel = id; renderList(); renderDetail(id); };
@@ -945,7 +1081,7 @@ async function renderDetail(id) {
   document.querySelectorAll(".sym").forEach((el) => (el.textContent = m.sym));
 
   const cap = a.rules.perPeriod, period = Number(a.rules.period);
-  $("#dLeft").replaceChildren(document.createTextNode(fmt(left, m.dec)));
+  $("#dLeft").replaceChildren(document.createTextNode(fmt(spendNow(left, a), m.dec)));
   const unit = document.createElement("small"); unit.textContent = m.sym; $("#dLeft").append(unit);
   const usedPercent = cap ? Math.max(0, Math.min(100, Number(((cap - left) * 10000n) / cap) / 100)) : 0;
   $("#spendingRing").style.setProperty("--used", usedPercent + "%");
@@ -959,7 +1095,9 @@ async function renderDetail(id) {
   $("#accountStatus").className = "badge " + (a.frozen || expired ? "frozen" : "active");
   $("#dLeftCap").textContent = a.frozen ? "Frozen. The agent can't spend or ask until you unfreeze it."
     : expired ? "Expired. The agent's access has ended."
-    : `left to spend without asking you, out of ${fmt(cap, m.dec)} ${m.sym} per ${PERIOD_NAME[period] || fmtDur(period)}`;
+    : a.balance < left
+      ? `left to spend without asking you. This period's limit still has ${fmt(left, m.dec)} ${m.sym}, but the budget holds only ${fmt(a.balance, m.dec)} ${m.sym}. Add budget to use the rest.`
+      : `left to spend without asking you, out of ${fmt(cap, m.dec)} ${m.sym} per ${PERIOD_NAME[period] || fmtDur(period)}`;
   const resetAt = Number(a.periodStart) + period;
   $("#dReset").textContent = left === cap ? "Nothing spent this period" : (resetAt > now ? "Resets in " + fmtDur(resetAt - now) : "Resets on the next payment");
 
@@ -1278,16 +1416,21 @@ async function skipDay() {
 __POLICY_JS__
 
 // ---------------------------------------------------------------- wiring
-$("#connectBtn").onclick = () => connect().catch((e) => toast(friendly(e), true));
-$("#connectBtn2").onclick = () => connect().catch((e) => toast(friendly(e), true));
+$("#connectBtn").onclick = () => { if (!S.me) connectWallet().catch((e) => toast(friendly(e), true)); };
+$("#connectBtn2").onclick = () => connectWallet().catch((e) => toast(friendly(e), true));
+$("#phoneBtn").onclick = () => walletDialog("phone");
+if (IS_MOBILE) $("#phoneBtn").classList.add("hidden");
 $("#deployBtn").onclick = deploy;
 $("#simBtn").onclick = startSimulation;
 // After a reload, reconnect a wallet that already approved this site. eth_accounts never opens a popup.
-if (window.ethereum && readStore("connected") === "1") {
-  window.ethereum.request({ method: "eth_accounts" })
-    .then((accs) => accs?.length ? connect() : writeStore("connected", ""))
+if (readStore("connected") === "1") announced().then((list) => {
+  const w = list.find((x) => (x.info.rdns || x.info.name) === readStore("wallet"));
+  const eth = w?.provider || (list.length === 1 ? list[0].provider : window.ethereum);
+  if (!eth) return;
+  eth.request({ method: "eth_accounts" })
+    .then((accs) => accs?.length ? connect(eth) : writeStore("connected", ""))
     .catch(() => {});
-}
+});
 $("#feed").addEventListener("click", async (e) => {
   const b = e.target.closest(".hash"); if (!b) return;
   try { await navigator.clipboard.writeText(b.dataset.h); toast("Transaction hash copied"); }

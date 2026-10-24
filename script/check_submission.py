@@ -16,8 +16,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-HACKER_HOUSE_START = datetime(2026, 10, 14, tzinfo=timezone.utc)
-FINAL_DEADLINE = datetime(2026, 11, 6, 7, 0, tzinfo=timezone.utc)  # Nov 6, 07:00 UTC
+HACKER_HOUSE_START = datetime(2026, 10, 13, 16, 0, tzinfo=timezone.utc)  # Oct 13, 16:00 UTC
+FINAL_DEADLINE = datetime(2026, 11, 6, 4, 0, tzinfo=timezone.utc)  # Nov 6, 04:00 UTC (07:00 in UTC+3, as DoraHacks shows it)
 results = []
 
 
@@ -72,7 +72,7 @@ def repo_checks():
     dates = [datetime.fromisoformat(d) for _, d, _ in commits]
     during = [d for d in dates if HACKER_HOUSE_START <= d <= FINAL_DEADLINE]
     check(g, "At least 3 valid commits during the Hacker House", len(during) >= 3, f"{len(during)} commits")
-    check(g, "Code produced during the Hacker House (first commit on or after Oct 14)", min(dates) >= HACKER_HOUSE_START, f"first commit {min(dates):%Y-%m-%d}")
+    check(g, "Code produced during the Hacker House (first commit after the Oct 13 start)", min(dates) >= HACKER_HOUSE_START, f"first commit {min(dates):%Y-%m-%d}")
     days = sorted({d.astimezone(timezone.utc).date() for d in during})
     check(g, "Sustained activity (commits on several days)", len(days) >= 3, f"{len(days)} days: {', '.join(str(d) for d in days)}")
     core = ["src/Allowance.sol", "web/index.src.html", "mcp/index.js", "mcp/lib.js"]

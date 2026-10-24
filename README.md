@@ -12,9 +12,9 @@ Programmable spending rules for AI agents, bots and automated payments on **Port
 
 > Built for the [Portaldot Hacker House 2026](https://dorahacks.io/hackathon/portaldot-hacker-house-2026/detail), Track 4 (Ecosystem DApps).
 >
-> **Live on the Portaldot V3 testnet** at `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` ([proof](#live-on-portaldot-v3-testnet)). **[Open the dashboard](https://oziman13.github.io/allowance/)**: connect a wallet on Portaldot V3, or press *Try it without a wallet* to run the same contract in your browser.
+> **Live on the Portaldot V3 testnet** at `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` ([proof](#live-on-portaldot-v3-testnet)). **[Open the dashboard](https://oziman13.github.io/allowance/)**: connect a wallet on Portaldot V3, or press *Try Interactive Demo* to run the same contract in your browser.
 >
-> **Judges:** [how Allowance maps to each judging criterion](docs/JUDGING.md), with links to the evidence. **October 24 check-in:** [current presentation package and demo script](docs/CHECKIN-2026-10-24.md).
+> **Judges:** [how Allowance maps to each judging criterion](docs/JUDGING.md), with links to the evidence. Check-in (October 24): [docs/CHECKIN.md](docs/CHECKIN.md), with a [two-minute demo](docs/CHECKIN-2026-10-24.md) anyone can repeat.
 
 ## The problem
 
@@ -120,7 +120,9 @@ The dashboard exports a ready-to-paste config for any allowance (**Give this all
 - **Try it as the agent:** the page creates the agent key in your browser, so you can send payments as the agent and watch the rules apply
 - **Give it to an AI assistant:** copy an MCP config for the allowance
 
-**Try it without a wallet.** The page has a simulation mode: it runs the real Allowance bytecode in an in-browser EVM ([EthereumJS](https://github.com/ethereumjs/ethereumjs-monorepo)), seeds a demo agent that has already paid twice and asked twice, and lets you approve, reject, freeze, send as the agent and skip ahead a day to watch the limit reset. Nothing touches a chain and nothing costs money. Source: `web/sim/provider.js`, bundled into `docs/sim.js`.
+**Any wallet, any device.** The dashboard finds every installed browser wallet (EIP-6963) and lets you pick one. If your wallet is on another network, it offers to switch to, or add, Portaldot V3 Testnet. On a phone, where browsers can't reach a wallet app, it opens the page inside MetaMask, Trust Wallet, Coinbase Wallet or OKX, or gives you the link for any other wallet's browser; on a laptop, *Open on your phone* shows a QR code.
+
+**Try it without a wallet.** The page has an interactive demo (*Try Interactive Demo*): it runs the real Allowance bytecode in an in-browser EVM ([EthereumJS](https://github.com/ethereumjs/ethereumjs-monorepo)), seeds a demo agent that has already paid twice and asked twice, and lets you approve, reject, freeze, send as the agent and skip ahead a day to watch the limit reset. Nothing touches a chain and nothing costs money. Source: `web/sim/provider.js`, bundled into `docs/sim.js`.
 
 ```
 forge build && python3 build.py   # writes docs/index.html, docs/abi.json and (with web/sim deps installed) docs/sim.js
@@ -154,7 +156,7 @@ Deployed on 2026-10-19 from the dashboard's *Deploy Allowance* button. The bytec
 | Deployer (owner) | `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` |
 | Agent of account #0 | `0x9C0e1F786b38923519dF2cec05464F95cCd29009` |
 
-Recorded on-chain lifecycle examples (historical evidence; not a fresh RPC verification). Block numbers link to the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (it indexes the Substrate side, so search by block number). Full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go.
+The core lifecycle, on chain. Block numbers link to the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (it indexes the Substrate side, so search by block number). Full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go (last run October 24: 23 passed, 0 failed).
 
 | Block | What happened | Signed by | Tx | Cost |
 |---|---|---|---|---|

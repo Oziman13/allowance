@@ -26,7 +26,8 @@ async function capture(page, name) {
     assert.equal(await page.locator('.skip-link').evaluate(el => el === document.activeElement), true);
     await capture(page, 'after-landing');
     await page.click('#connectBtn2');
-    await page.waitForFunction(() => document.querySelector('#toast').textContent.includes('No wallet found'));
+    await page.waitForSelector('#walletDlg[open] #walletNone:not(.hidden) .wallet-qr svg');
+    await page.click('#walletClose');
     await page.evaluate(() => { window.ethereum = { request: async () => { throw Object.assign(new Error('rejected'), { code: 4001 }); } }; });
     await page.click('#connectBtn2');
     await page.waitForFunction(() => document.querySelector('#toast').textContent.includes('cancelled'));

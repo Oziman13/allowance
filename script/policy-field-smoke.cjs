@@ -39,21 +39,21 @@ async function capture(page, name, selector) {
       assert.equal(await page.evaluate(() => window.__policyDiagram === document.querySelector('#landingField svg')), true);
       await audit(page, 'landing ' + state);
     }
-    assert.match(await page.locator('#scenarioText').innerText(), /Illustrative/);
+    assert.match(await page.locator('#scenarioText').innerText(), /trusted recipient/);
     await capture(page, 'landing-policy-field');
     for (const width of [320, 390, 768, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `landing ${width}px`);
       if (width === 390) await capture(page, 'mobile-policy-field');
     }
-    console.log('PASS landing selector: shared geometry, keyboard, illustrative copy, responsive fallback');
+    console.log('PASS landing selector: shared geometry, keyboard, example copy, responsive fallback');
     await page.click('#simBtn');
     await page.waitForFunction(() => document.querySelector('#controlField').getAttribute('aria-busy') === 'false');
     await page.waitForFunction(() => document.querySelector('#verdict').textContent.includes('Will be paid instantly'));
     assert.equal(await page.locator('#fieldBalance').innerText(), '19 POT');
     assert.equal(await page.locator('#fieldCap').innerText(), '1 POT');
     assert.equal(await page.locator('#fieldLeft').innerText(), '4 POT');
-    assert.match(await page.locator('#fieldPending').textContent(), /2 awaiting.*no funds reserved/);
+    assert.match(await page.locator('#fieldPending').textContent(), /2 waiting for your approval/);
     assert.equal(await page.locator('#fieldRecipients li').count(), 2);
     assert.equal(await page.locator('#controlField').getAttribute('data-state'), 'active');
     assert.equal(await page.locator('#paymentDecision').getAttribute('data-stage'), 'preview');

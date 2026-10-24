@@ -26,13 +26,13 @@ flowchart LR
     MCP -- pay / refuel / preview --> C
     C -- instant payment or approved payment --> R
     C -- events: Paid, PaymentHeld, ... --> D
-    D -. "Try it without a wallet" .-> S
+    D -. "Try Interactive Demo" .-> S
 ```
 
 - **Allowance contract** (`src/Allowance.sol`): holds every account's budget and enforces the rules. The single source of truth. [Live on the Portaldot V3 testnet](../README.md#live-on-portaldot-v3-testnet).
 - **Owner dashboard** (`web/index.src.html` → `docs/index.html`, [live](https://oziman13.github.io/allowance/)): one static page with no backend. It reads everything from the chain (account state and events), and every action is a transaction the owner signs in their own wallet. It opens accounts, shows spending, approves or rejects held payments, freezes agents, changes rules, and lets you try the agent side.
 - **MCP server** (`mcp/`): exposes an account to any AI assistant as five tools (`allowance_status`, `allowance_preview`, `allowance_pay`, `allowance_request`, `allowance_cancel`). It holds only the agent key, so a prompt-injected assistant is still bound by the contract. It refuels the agent's gas from the same budget when needed.
-- **Simulation** (`web/sim/provider.js` → `docs/sim.js`): an in-browser chain that runs the real contract bytecode in EthereumJS and exposes it as a wallet provider, so the unchanged dashboard works without a wallet or test tokens. Loaded only when someone presses *Try it without a wallet*.
+- **Simulation** (`web/sim/provider.js` → `docs/sim.js`): an in-browser chain that runs the real contract bytecode in EthereumJS and exposes it as a wallet provider, so the unchanged dashboard works without a wallet or test tokens. Loaded only when someone presses *Try Interactive Demo*.
 
 Nothing here is a trusted server. The dashboard and the MCP server are conveniences; the rules live in the contract.
 
