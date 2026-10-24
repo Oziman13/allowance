@@ -12,7 +12,7 @@ Programmable spending rules for AI agents, bots and automated payments on **Port
 
 > Built for the [Portaldot Hacker House 2026](https://dorahacks.io/hackathon/portaldot-hacker-house-2026/detail), Track 4 (Ecosystem DApps).
 >
-> **Live on the Portaldot V3 testnet** at `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` ([proof](#live-on-portaldot-v3-testnet)). **[Open the dashboard](https://oziman13.github.io/allowance/)**: connect a wallet on Portaldot V3, or press *Try Interactive Demo* to run the same contract in your browser.
+> **Live on the Portaldot V3 testnet** at `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` ([proof](#live-on-portaldot-v3-testnet)). **[Open the dashboard](https://oziman13.github.io/allowance/)** · **[Watch the 2-minute demo](https://youtu.be/fxO8grGr4PY)**: connect a wallet on Portaldot V3, or press *Try Interactive Demo* to run the same contract in your browser.
 >
 > **Judges:** [how Allowance maps to each judging criterion](docs/JUDGING.md), with links to the evidence. Check-in (October 24): [docs/CHECKIN.md](docs/CHECKIN.md), with a [two-minute demo](docs/CHECKIN-2026-10-24.md) anyone can repeat.
 

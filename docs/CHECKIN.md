@@ -11,7 +11,7 @@ Track 4, Ecosystem DApps · Solo builder: Ozan Turan ([@Oziman13](https://github
 | Live demo | https://oziman13.github.io/allowance/ (connect a wallet on Portaldot V3, or press *Try Interactive Demo* to run the real contract in your browser, no wallet needed) |
 | Repository | https://github.com/Oziman13/allowance |
 | Pitch deck | [Allowance-pitch-deck.pdf](Allowance-pitch-deck.pdf) (11 pages) |
-| Demo video | Interim: https://youtu.be/yvvykjl9Z44 · the narrated ≤ 3 minute video follows before the final |
+| Demo video | https://youtu.be/fxO8grGr4PY (2:21, narrated, captions): the interactive demo, Claude on the testnet, and wallet support |
 | Two-minute demo script and screenshots | [CHECKIN-2026-10-24.md](CHECKIN-2026-10-24.md) |
 | Architecture | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Judging criteria → evidence | [JUDGING.md](JUDGING.md) |
@@ -51,7 +51,7 @@ The code on chain is byte-for-byte this repository's build. 14 more transactions
 
 | Item | Plan |
 |---|---|
-| Narrated demo video (≤ 3 min) | Claude paying through Allowance on the testnet, the owner's approval and a freeze. Before the final. |
+| Final demo video | A new recording for the final, including owner actions from a Portaldot account. |
 | Owner actions from a Portaldot (Substrate) account | Approve and freeze from a native Portaldot account, sent on chain, so V3's two sides work together. Next step, from October 25. |
 | Security review | Automated analysis (Slither, Aderyn) and a written threat model (`SECURITY.md`) before the final. The contract is not audited. |
 | MCP server on npm | Before the final submission. |

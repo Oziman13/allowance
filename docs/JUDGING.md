@@ -65,7 +65,7 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 | Item | Plan |
 |---|---|
 | Use of V3's Substrate side (WASM / multi-chain) | Today Allowance uses V3's EVM side. Next: let an owner fund and manage an allowance from a Portaldot (Substrate) wallet, not only from MetaMask. |
-| Narrated demo video (≤ 3 minutes) | Before the final; an interim video is on the DoraHacks page. |
+| Demo video (≤ 3 minutes) | Done: [2:21 narrated demo](https://youtu.be/fxO8grGr4PY). A new recording for the final will add the Portaldot-account owner actions. |
 | Pitch deck | Done: [Allowance-pitch-deck.pdf](Allowance-pitch-deck.pdf), 11 pages. |
 | MCP server published on npm | Before the final submission. |
 | Block explorer links | Done: every transaction in [PROOF.md](PROOF.md) links to its block on the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/). |
