@@ -132,7 +132,18 @@ via_ir = true
 - **MetaMask reserves gas limit × max fee up front.** With a deploy this large, its default max fee (about 2 × base fee) can exceed your balance even though the real cost fits. Send a legacy transaction with an explicit `gasPrice` (current price + 5%) and a tight `gasLimit` (estimate + 1%). That's what Allowance's dashboard does.
 - **Discord help tickets:** the server's filter blocked our messages that contained the word "pot". If your message disappears, rephrase it (for example, "testnet funds").
 
-## 6. Checklist
+## 6. Reach your contract from a Substrate account
+
+A contract on the EVM side is not only for MetaMask users. Measured on 2026-10-25 (runtime `portaldot-v3` 3002):
+
+- **Dry-run any function from a `5…` account** with the runtime API `reviveApi.call(origin, contract, value, gasLimit, storageDepositLimit, data)`: `data` is ordinary ABI calldata (ethers' `encodeFunctionData`), and the result's `data` decodes with the same ABI. In the result, bit 0 of `flags` means the call reverted.
+- **`reviveApi.address(account)`** gives the `0x` address the contract sees as `msg.sender`. For the twin of a MetaMask address it is that address; for an ordinary Portaldot account it is derived from the account.
+- **Map once before acting:** an ordinary account sends `revive.mapAccount()` once; `revive.originalAccount(h160)` tells you whether it has. Then `revive.call` sends a real call from that account.
+- **polkadot.js over HTTPS works** (`HttpProvider` on `https://test-node-v3.portaldot.dev`) where a WebSocket can't get through a proxy.
+
+Allowance's [`substrate/check.mjs`](../substrate/check.mjs) does all of this read-only, in about 60 lines.
+
+## 7. Checklist
 
 - [ ] MetaMask network added (chain ID 420420777)
 - [ ] Separate deployer account created

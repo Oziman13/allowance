@@ -198,6 +198,12 @@ Not audited. Keep budgets small.
 
 **Growth path.** First, integrations with AI and game projects on the Portaldot testnet. Then a mainnet launch with the v2 contract. After that, game guild treasuries, subscriptions and team spending. Revenue grows with the number of agent payments on Portaldot, which is the same on-chain activity the ecosystem wants.
 
+## Before the final (November 6)
+
+- **Owners on Portaldot's native side.** Manage an allowance from a Portaldot (Substrate) wallet, not only from MetaMask: map the account, then open, freeze and approve as `revive.call` extrinsics from the browser extension. Step 1 is done: [`substrate/check.mjs`](substrate/check.mjs) reads the live contract from a `5…` account (October 25).
+- **Allowances in Portaldot Assets tokens.** The contract already takes any ERC-20, and Portaldot's Assets tokens are reachable from Solidity through the Assets precompile, so a budget can be held in a native asset.
+- **Security:** automated analysis (Slither, Aderyn) and a written threat model.
+
 ## Roadmap after the Hacker House
 
 Cheaper requests on V3: clear a request's storage when it is approved, rejected or cancelled, so its deposit (~15 POT on the testnet today) goes back instead of staying locked. Security review and Portaldot mainnet launch, a JS/TS SDK for other Portaldot projects, per-recipient limits and spend categories, integrations with iSwap and Portaldot game projects, and approval notifications in Portaldot Wallet.
@@ -206,7 +212,7 @@ Cheaper requests on V3: clear a request's storage when it is approved, rejected 
 
 The idea of rule-bound agent budgets builds on an earlier proof of concept by the same author on another chain: [Leash on Arc](https://github.com/Oziman13/leash). **No code from that project is reused.** This repository is a new codebase, written for Portaldot V3 during the Hacker House (from October 14, 2026), with a different design: multi-account and multi-asset (POT and ERC-20), configurable periods, expiry, key rotation and typed hold reasons.
 
-Open-source dependencies: [Foundry](https://github.com/foundry-rs/foundry) / forge-std (testing and deployment), [ethers](https://github.com/ethers-io/ethers.js) (dashboard and MCP server), [EthereumJS](https://github.com/ethereumjs/ethereumjs-monorepo) (simulation mode, MPL-2.0, bundled unmodified), [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) and [zod](https://github.com/colinhacks/zod) (MCP server), Sora, Inter and JetBrains Mono (dashboard typefaces, SIL OFL 1.1, embedded locally); ethers 6.13.4 is also served locally, so the page does not depend on external font or script CDNs.
+Open-source dependencies: [Foundry](https://github.com/foundry-rs/foundry) / forge-std (testing and deployment), [ethers](https://github.com/ethers-io/ethers.js) (dashboard and MCP server), [EthereumJS](https://github.com/ethereumjs/ethereumjs-monorepo) (simulation mode, MPL-2.0, bundled unmodified), [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) and [zod](https://github.com/colinhacks/zod) (MCP server), [polkadot.js API](https://github.com/polkadot-js/api) (Substrate tools, Apache-2.0), Sora, Inter and JetBrains Mono (dashboard typefaces, SIL OFL 1.1, embedded locally); ethers 6.13.4 is also served locally, so the page does not depend on external font or script CDNs.
 
 ## License
 
