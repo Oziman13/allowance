@@ -1,0 +1,265 @@
+{
+  "network": {
+    "name": "Portaldot V3 Testnet",
+    "chainId": 420420777,
+    "rpc": "https://test-evm-rpc-v3.portaldot.dev"
+  },
+  "contract": "0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f",
+  "deployBlock": 102688,
+  "deployTx": "0xb575397eea5c93908c43f13e4e9aff874f4777e0b4ab61164b36005ea0bcacd5",
+  "codeBytes": 9757,
+  "codeKeccak256": "0x56ffa90f52558eef0d1c4fbad4f301987a8f10e23f1531c1b0fb1fb44767decd",
+  "readAtBlock": 206637,
+  "readAt": "2026-10-26T18:07:47.006Z",
+  "events": [
+    {
+      "block": 102805,
+      "tx": "0x78ac0568ed36152d46d4513cb02498a48ad8356e523244fa8f5ce4b845251b2a",
+      "event": "Funded",
+      "args": {
+        "accountId": "0",
+        "from": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "10000000000000000000"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102805"
+    },
+    {
+      "block": 102805,
+      "tx": "0x78ac0568ed36152d46d4513cb02498a48ad8356e523244fa8f5ce4b845251b2a",
+      "event": "RulesUpdated",
+      "args": {
+        "accountId": "0",
+        "rules": [
+          "1000000000000000000",
+          "5000000000000000000",
+          "86400",
+          "0",
+          true
+        ]
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102805"
+    },
+    {
+      "block": 102805,
+      "tx": "0x78ac0568ed36152d46d4513cb02498a48ad8356e523244fa8f5ce4b845251b2a",
+      "event": "TrustUpdated",
+      "args": {
+        "accountId": "0",
+        "recipient": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "trusted": true
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102805"
+    },
+    {
+      "block": 102805,
+      "tx": "0x78ac0568ed36152d46d4513cb02498a48ad8356e523244fa8f5ce4b845251b2a",
+      "event": "AccountOpened",
+      "args": {
+        "accountId": "0",
+        "owner": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "agent": "0x9C0e1F786b38923519dF2CeC05464f95ccD29009",
+        "asset": "0x0000000000000000000000000000000000000000",
+        "name": "Research agent"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102805"
+    },
+    {
+      "block": 102805,
+      "tx": "0x78ac0568ed36152d46d4513cb02498a48ad8356e523244fa8f5ce4b845251b2a",
+      "event": "Refueled",
+      "args": {
+        "accountId": "0",
+        "agent": "0x9C0e1F786b38923519dF2CeC05464f95ccD29009",
+        "amount": "20000000000000000000"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102805"
+    },
+    {
+      "block": 102861,
+      "tx": "0xed29e4bfff912b6007f4fd3637bff1dd91f23eb81ea941338d055785356392bc",
+      "event": "Paid",
+      "args": {
+        "accountId": "0",
+        "to": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "400000000000000000",
+        "memo": "Market data feed"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102861"
+    },
+    {
+      "block": 102867,
+      "tx": "0x457d60e94e399d0bab59819a327577aaa23caa20c8e496323204858ec0ba43db",
+      "event": "Paid",
+      "args": {
+        "accountId": "0",
+        "to": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "600000000000000000",
+        "memo": "Market data feed"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102867"
+    },
+    {
+      "block": 102873,
+      "tx": "0xecad8e81a07a67f856ff8f5eb4f19466f977cc5a760eaa986d40b2945f42ddeb",
+      "event": "PaymentHeld",
+      "args": {
+        "requestId": "0",
+        "accountId": "0",
+        "to": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "2000000000000000000",
+        "reason": "1",
+        "memo": "GPU hour for fine-tuning"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102873"
+    },
+    {
+      "block": 102880,
+      "tx": "0x96b6a6d33101809951285d25f25442c4295aaaf5951b27dcd53011bc223f473a",
+      "event": "Paid",
+      "args": {
+        "accountId": "0",
+        "to": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "2000000000000000000",
+        "memo": "GPU hour for fine-tuning"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102880"
+    },
+    {
+      "block": 102880,
+      "tx": "0x96b6a6d33101809951285d25f25442c4295aaaf5951b27dcd53011bc223f473a",
+      "event": "RequestResolved",
+      "args": {
+        "requestId": "0",
+        "accountId": "0",
+        "status": "2"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102880"
+    },
+    {
+      "block": 102887,
+      "tx": "0x49e0a87959d0d58c58688ecab82b304ce44f403424fa2f994b8ecc9b02150752",
+      "event": "FrozenSet",
+      "args": {
+        "accountId": "0",
+        "frozen": true
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102887"
+    },
+    {
+      "block": 102900,
+      "tx": "0x37c0ccee5a7bfc38c3ecc7455a8ca2c37816c9c7a6e2e7915d77db101350090e",
+      "event": "FrozenSet",
+      "args": {
+        "accountId": "0",
+        "frozen": false
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/102900"
+    },
+    {
+      "block": 159822,
+      "tx": "0xc26b7d632cc5d334dfc46c5c8cb8d31aac22cf69036cd7661bd9b08c0bf0899b",
+      "event": "Paid",
+      "args": {
+        "accountId": "0",
+        "to": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "300000000000000000",
+        "memo": "Market data API access"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/159822"
+    },
+    {
+      "block": 160081,
+      "tx": "0xf1afa9d061b0300fe257959445b8168b935f5ab8ca173980ac8f42b9eb483108",
+      "event": "PaymentHeld",
+      "args": {
+        "requestId": "1",
+        "accountId": "0",
+        "to": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "2000000000000000000",
+        "reason": "1",
+        "memo": "GPU hour for fine-tuning"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/160081"
+    },
+    {
+      "block": 160115,
+      "tx": "0x1131fd1d74fd94d8278b743f60d6ea7f3a84eeb7d029cb96429e468a4e16838d",
+      "event": "Paid",
+      "args": {
+        "accountId": "0",
+        "to": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "2000000000000000000",
+        "memo": "GPU hour for fine-tuning"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/160115"
+    },
+    {
+      "block": 160115,
+      "tx": "0x1131fd1d74fd94d8278b743f60d6ea7f3a84eeb7d029cb96429e468a4e16838d",
+      "event": "RequestResolved",
+      "args": {
+        "requestId": "1",
+        "accountId": "0",
+        "status": "2"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/160115"
+    },
+    {
+      "block": 160197,
+      "tx": "0xb60b8adad44bf3068b55a7672150d4956732785e2f66b999c631368b44a824b7",
+      "event": "PaymentHeld",
+      "args": {
+        "requestId": "2",
+        "accountId": "0",
+        "to": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "2000000000000000000",
+        "reason": "1",
+        "memo": "Purchase of 1 GPU hour (2 POT), requested by user"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/160197"
+    },
+    {
+      "block": 160213,
+      "tx": "0x8be27fd120405d37c4d8329f676b03d113dee62451fceadcfbd38d5460924435",
+      "event": "Paid",
+      "args": {
+        "accountId": "0",
+        "to": "0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547",
+        "amount": "2000000000000000000",
+        "memo": "Purchase of 1 GPU hour (2 POT), requested by user"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/160213"
+    },
+    {
+      "block": 160213,
+      "tx": "0x8be27fd120405d37c4d8329f676b03d113dee62451fceadcfbd38d5460924435",
+      "event": "RequestResolved",
+      "args": {
+        "requestId": "2",
+        "accountId": "0",
+        "status": "2"
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/160213"
+    },
+    {
+      "block": 160231,
+      "tx": "0x8427471d9b800c41d30ba811b96f96231916c439c2f8a2784435a842a5bd9d2d",
+      "event": "FrozenSet",
+      "args": {
+        "accountId": "0",
+        "frozen": true
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/160231"
+    },
+    {
+      "block": 160258,
+      "tx": "0xf3845cc8686585566c4c1dca1c98f8a708131fc5eac89d9eab573b8b133219f8",
+      "event": "FrozenSet",
+      "args": {
+        "accountId": "0",
+        "frozen": false
+      },
+      "explorer": "https://scanner-testnet-v3.portaldot.dev/#/blocks/160258"
+    }
+  ]
+}
