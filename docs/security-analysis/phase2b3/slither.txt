@@ -1,0 +1,49 @@
+
+Detector: arbitrary-send-eth
+Allowance._send(address,address,uint256) (src/Allowance.sol#419-429) sends eth to arbitrary user
+	Dangerous calls:
+	- (ok,None) = to.call{value: amount}() (src/Allowance.sol#423)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+
+Detector: reentrancy-balance
+Reentrancy in Allowance._pull(address,address,uint256) (src/Allowance.sol#432-439):
+	External call allowing reentrancy:
+	- (ok,ret) = asset.call(abi.encodeWithSignature(transferFrom(address,address,uint256),from,address(this),amount)) (src/Allowance.sol#434-435)
+	Balance read before the call:
+	- before = IERC20(asset).balanceOf(address(this)) (src/Allowance.sol#433)
+	Possible stale balance used after the call in a condition:
+	- received == 0 (src/Allowance.sol#438)
+		- stale variable `received`
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities
+
+Detector: incorrect-equality
+Allowance._pull(address,address,uint256) (src/Allowance.sol#432-439) uses a dangerous strict equality:
+	- received == 0 (src/Allowance.sol#438)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+
+Detector: timestamp
+Allowance._agentOf(uint256) (src/Allowance.sol#138-143) uses timestamp for comparisons
+	Dangerous comparisons:
+	- a.rules.expiresAt != 0 && block.timestamp >= a.rules.expiresAt (src/Allowance.sol#142)
+Allowance._request(uint256) (src/Allowance.sol#382-385) uses timestamp for comparisons
+	Dangerous comparisons:
+	- requestId >= _requests.length (src/Allowance.sol#383)
+Allowance._roll(Allowance.Account) (src/Allowance.sol#400-405) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= uint256(a.periodStart) + a.rules.period (src/Allowance.sol#401)
+Allowance._left(Allowance.Account) (src/Allowance.sol#407-410) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= uint256(a.periodStart) + a.rules.period (src/Allowance.sol#408)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+
+Detector: low-level-calls
+Low level call in Allowance._send(address,address,uint256) (src/Allowance.sol#419-429):
+	- (ok,None) = to.call{value: amount}() (src/Allowance.sol#423)
+	- (ok,ret) = asset.call(abi.encodeWithSignature(transfer(address,uint256),to,amount)) (src/Allowance.sol#425)
+Low level call in Allowance._pull(address,address,uint256) (src/Allowance.sol#432-439):
+	- (ok,ret) = asset.call(abi.encodeWithSignature(transferFrom(address,address,uint256),from,address(this),amount)) (src/Allowance.sol#434-435)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+. analyzed (2 contracts with 102 detectors), 9 result(s) found
+'forge clean' running (wd: /workspace/allowance)
+'forge config --json' running
+'forge build --build-info --deny never --skip ./test/** ./script/** --force' running (wd: /workspace/allowance)
