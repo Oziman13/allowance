@@ -69,15 +69,21 @@ sequenceDiagram
 | `spentInPeriod`, `periodStart` | instant spending in the current fixed window |
 | `frozen` | kill switch |
 
-One agent key may hold several accounts (for example a POT account for gas and payments and a stablecoin account for subscriptions). Each account has exactly one asset, which keeps the accounting simple and auditable.
+One agent key may hold several accounts (for example a POT account for gas and payments and a stablecoin account for subscriptions). Each account has one asset, but accounts using the same ERC-20 share actual token backing. The ledger assumes predictable balances and transfer debits; see the [supported-asset policy](../SECURITY.md#supported-assets).
 
 ## Security properties
 
-1. Without an owner approval, an account cannot lose more than `perPeriod` in any period (payments and gas refuels combined). Fuzz-tested.
-2. A frozen or expired account cannot move funds or create requests.
-3. Resolved requests (approved, rejected, cancelled) are final.
-4. Every state-changing function that moves funds is guarded against reentrancy, and state is updated before transfers.
-5. A failed transfer reverts the whole operation, so the budget is never debited for money that did not move.
+1. For native POT and compatible honest tokens under unchanged policy, successful autonomous `pay` and native `refuel` debits share the budget and fixed-window `perPeriod` cap. Each call also respects `perPayment`. The native-account fuzz test checks fixed windows, not rolling intervals or arbitrary-token solvency. Owner approvals and withdrawals are outside autonomous caps.
+2. Freeze/expiry block new agent payments, refuels and requests. Owner withdrawals and approval/rejection of pre-existing holds remain possible. Rotation revokes the old agent's authority but does not invalidate old requests; the current agent can cancel them even while frozen/expired.
+3. Resolved requests (approved, rejected, cancelled) are final. Holds reserve no funds, and an approval uses the original recipient/amount and current budget without consuming autonomous period capacity.
+4. All fund-moving entry points share a reentrancy guard. Payout effects precede external transfers; inbound token funding measures the received amount across a guarded external call.
+5. Reverts, false token returns and malformed return data roll back the operation. Successful/no-data token returns do not prove honest transfers; `Paid.amount` is nominal, not guaranteed net recipient receipt.
+
+Windows start at account creation and roll to the next `pay`/`refuel` block time after the configured duration. Two limits may be spent close together across a boundary. The owner may change policy; the contract has no invoice-splitting check.
+
+Gas seeds are outside autonomous period accounting. Refuels share the caps but bypass recipient trust to pay the agent. Both become unrestricted wallet funds; actual gas/storage costs paid there are not individually capped by Allowance. Freeze and rotation cannot recover wallet funds.
+
+Contract `preview` classifies a hold reason; it does not check full executability. Even a `pay.staticCall` is only a snapshot. Token economics, stale requests, lifetime-counter bounds and retained request storage are documented in [SECURITY.md](../SECURITY.md) and the [Phase 2A internal review](SECURITY-REVIEW-PHASE2A.md). This is not an independently audited deployment.
 
 ## Cost on Portaldot V3
 

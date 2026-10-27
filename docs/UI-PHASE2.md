@@ -39,6 +39,17 @@ Neither distance nor boundary size determines authorization.
   text data. Color is supplemented by labels, endpoint shapes and lifecycle steps.
   Route completion is brief, receipt-driven and disabled under reduced motion.
 
+## Security interpretation
+
+The field and preview visualize recorded policy; they do not reserve funds or certify token backing.
+Fixed windows are not rolling limits. Owner-approved payments use budget without consuming autonomous
+period capacity, and old holds survive freeze, expiry, rotation and policy changes. Freeze blocks new
+agent payments/refuels/requests, not owner approval of an existing hold. Native seeds/refuels become
+unrestricted agent-wallet funds; actual wallet gas costs are not individually capped by Allowance.
+Token event amounts are nominal, not proof of net receipt. See the [security and asset policy](../SECURITY.md)
+for compatible-token assumptions and testnet limitations. This documentation correction changes no UI
+behavior or generated website files.
+
 ## Source and build
 
 `web/policy-field.css` and `web/policy-field.js` contain the shared primitives.

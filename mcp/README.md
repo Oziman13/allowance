@@ -1,13 +1,13 @@
 # allowance-mcp
 
-An MCP server that gives an AI assistant (Claude, Cursor, any MCP client) a budget on **Portaldot V3** that it **cannot overspend**.
+An MCP server that gives an AI assistant (Claude, Cursor, any MCP client) access to a budget on **Portaldot V3 testnet**, with autonomous escrow debits bounded by on-chain rules for native POT and compatible tokens.
 
-The assistant holds only the *agent* key of an [Allowance](https://github.com/Oziman13/allowance) account. Every rule lives in the Allowance contract, so a confused, jailbroken or prompt-injected assistant is still bound by it:
+The assistant holds only the *agent* key of an [Allowance](https://github.com/Oziman13/allowance) account. Escrow rules live in the Allowance contract, so the assistant cannot bypass them by skipping the MCP client. The owner is trusted, and funds already in the agent wallet are outside that boundary:
 
 - payments inside the rules settle immediately
-- payments outside them are held for the owner, with the assistant's memo and the reason
+- valid payments outside autonomous caps or recipient rules are held for the owner, with the assistant's memo and the reason
 - the owner can freeze the agent at any time, and the allowance can expire
-- gas is refuelled from the same POT budget, under the same limits
+- native refuel withdrawals share payment caps; gas seeds and later wallet use have a separate security boundary
 
 ## Tools
 
@@ -19,7 +19,14 @@ The assistant holds only the *agent* key of an [Allowance](https://github.com/Oz
 | `allowance_request` | Approved, rejected or still pending |
 | `allowance_cancel` | Withdraw one of its own pending requests |
 
-Five tools on purpose: the assistant gets exactly what it needs to spend, and nothing that could move funds around the rules.
+Five tools on purpose: the assistant gets the account's agent operations, not owner powers. The agent key can still sign transactions outside these tools. This testnet software is not independently audited or recommended for production funds; read the [security and asset policy](https://github.com/Oziman13/allowance/blob/main/SECURITY.md).
+
+## Security boundaries
+
+- `can_spend_now_without_asking` is total remaining autonomous period capacity bounded by budget; `max_single_payment_without_asking` also applies the per-payment cap. Recipient rules and current state still matter. Limits use fixed windows, not rolling intervals.
+- Owner-approved requests debit budget without consuming autonomous period capacity. Requests survive freeze, expiry, rotation and policy changes; owners must explicitly reject suspicious old holds. The current agent can cancel, including while frozen/expired.
+- Preview is advisory, not a reservation. `paid` requires a successful receipt and a matching contract event, but its amount is nominal token accounting, not proof of net receipt for arbitrary tokens. Unsupported rebasing or sender-surcharge assets can make shared token backing insolvent; no token allowlist is enforced on chain.
+- Preserve any transaction hash on uncertain submission/confirmation, check the original outcome, and do not automatically resend. Never replace an uncertain payment with another payment merely because confirmation was unavailable.
 
 ## Setup
 
@@ -55,7 +62,7 @@ Five tools on purpose: the assistant gets exactly what it needs to spend, and no
 | `ALLOWANCE_RPC` | no | the network's public RPC |
 | `ALLOWANCE_ACCOUNT_ID` | no | the newest allowance this agent controls |
 
-**Gas on Portaldot V3.** Instant payments cost the agent about 0.03 POT. Asking for approval (a held payment) stores a request on chain, and V3 charges the sender a storage deposit for it: about 15 POT on the testnet today. Give the agent enough starting gas on the dashboard if it will ask for approvals. Details: [Solidity on Portaldot V3](../docs/SOLIDITY-ON-PORTALDOT-V3.md).
+**Gas on Portaldot V3.** Instant payments cost the agent about 0.03 POT. Asking for approval (a held payment) stores a request on chain, and V3 charges the sender a storage deposit for it: about 15 POT in the recorded testnet runs. These are historical measurements, not current fee estimates. Keep only enough starting gas for the intended testnet operations. A zero-gas agent cannot submit its own refuel; refueling is conditional on budget and rules. The initial seed is outside period caps, and refuels bypass recipient trust to reach the agent. Both become freely spendable wallet funds. Gas/storage costs paid by that wallet are not individually metered against the allowance cap. ERC-20 accounts need separately supplied native gas. Details: [Solidity on Portaldot V3](../docs/SOLIDITY-ON-PORTALDOT-V3.md).
 
 ## Tests
 
