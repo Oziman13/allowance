@@ -111,6 +111,8 @@ test("full MCP round trip: a frozen allowance stops the assistant with a clear m
     assert.match(blocked.content[0].text, /frozen/);
     const st = JSON.parse((await mcp.callTool({ name: "allowance_status", arguments: {} })).content[0].text);
     assert.equal(st.state, "frozen by owner");
+    assert.equal(st.can_spend_now_without_asking, "0 POT");
+    assert.equal(st.max_single_payment_without_asking, "0 POT");
   } finally {
     await mcp.close();
   }
@@ -196,20 +198,26 @@ test("audit: refuel does not consume the budget reserved for an instant payment"
 for (const kind of ["pending", "reverted", "timeout", "replacement"]) {
   test(`audit: ${kind} transaction never reports paid`, async () => {
     const c = await fresh({ seed: "1" });
-    const fake = async () => ({ hash: ethers.ZeroHash, wait: async () => {
-      if (kind === "pending") return null;
-      if (kind === "reverted") throw Object.assign(new Error("reverted"), { receipt: { status: 0, hash: ethers.ZeroHash } });
-      throw Object.assign(new Error(kind), { code: kind === "replacement" ? "TRANSACTION_REPLACED" : "TIMEOUT" });
-    } });
+    let submissions = 0;
+    const fake = async () => {
+      submissions++;
+      return { hash: ethers.ZeroHash, wait: async () => {
+        if (kind === "pending") return null;
+        if (kind === "reverted") throw Object.assign(new Error("reverted"), { receipt: { status: 0, hash: ethers.ZeroHash } });
+        throw Object.assign(new Error(kind), { code: kind === "replacement" ? "TRANSACTION_REPLACED" : "TIMEOUT" });
+      } };
+    };
     fake.staticCall = async () => [true, 0n];
     fake.estimateGas = async () => 100000n;
     Object.defineProperty(c.contract, "pay", { value: fake });
     await assert.rejects(c.pay(shop, "0.1", "audit"), e => {
       const message = explain(e, c.iface);
+      if (kind !== "reverted") assert.equal(e.transactionHash, ethers.ZeroHash);
       assert.match(message, kind === "reverted" ? /reverted/ : /not confirmed/);
       assert.match(message, new RegExp(ethers.ZeroHash));
       return true;
     });
+    assert.equal(submissions, 1, "uncertain payment must not be automatically resubmitted");
   });
 }
 
@@ -234,3 +242,42 @@ test("audit: a preview is advisory when the owner freezes before payment", async
   await assert.rejects(c.pay(shop, "0.1", "audit"));
   assert.equal((await c.status()).budget_left, "2 POT");
 });
+
+// Receipts are simulated here to exercise event identity checks without sending payments.
+for (const eventName of ["Paid", "PaymentHeld"]) {
+  for (const mismatch of ["contract", "account", "recipient", "amount", "memo", null]) {
+    test(`integration: ${eventName} ${mismatch || "matching"} evidence`, async () => {
+      const c = await fresh({ seed: "1" });
+      const address = await c.contract.getAddress();
+      const recipient = mismatch === "recipient" ? ethers.Wallet.createRandom().address : shop;
+      const args = [BigInt(c.accountId) + (mismatch === "account" ? 1n : 0n), recipient,
+        E("0.1") + (mismatch === "amount" ? 1n : 0n)];
+      if (eventName === "PaymentHeld") args.unshift(42n);
+      if (eventName === "PaymentHeld") args.push(1);
+      args.push(mismatch === "memo" ? "other" : "audit");
+      const encoded = c.iface.encodeEventLog(c.iface.getEvent(eventName), args);
+      const log = { ...encoded, address: mismatch === "contract" ? ethers.Wallet.createRandom().address : address.toLowerCase() };
+      let submissions = 0;
+      const fake = async () => {
+        submissions++;
+        return { hash: ethers.ZeroHash, wait: async () => ({ status: 1, logs: [log] }) };
+      };
+      fake.staticCall = async () => [eventName === "Paid", 0n];
+      fake.estimateGas = async () => 100000n;
+      Object.defineProperty(c.contract, "pay", { value: fake });
+      if (mismatch) {
+        await assert.rejects(c.pay(shop.toLowerCase(), "0.1", "audit"), e => {
+          assert.equal(e.transactionHash, ethers.ZeroHash);
+          assert.match(explain(e, c.iface), /not confirmed/);
+          return true;
+        });
+      } else {
+        const result = await c.pay(shop.toLowerCase(), "0.1", "audit");
+        assert.equal(result.result, eventName === "Paid" ? "paid" : "held for owner approval");
+        assert.equal(result.tx, ethers.ZeroHash);
+        if (eventName === "PaymentHeld") assert.equal(result.request_id, 42);
+      }
+      assert.equal(submissions, 1);
+    });
+  }
+}
