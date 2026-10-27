@@ -36,8 +36,8 @@ The code on chain is byte-for-byte this repository's build. 14 more transactions
 
 **Done**
 
-- **Contract** (`src/Allowance.sol`). Accounts that an owner funds and an agent key spends from, in POT or any ERC-20. Each account has a per-payment cap, a cap per period, trusted recipients, an expiry, a freeze switch and key rotation. A payment outside the rules is held with the agent's reason; the owner approves it (optionally trusting the recipient) or rejects it. The agent's gas comes from the same budget, under the same caps.
-- **Tests and CI.** 27 contract tests, including a 1,000-run fuzz test of the core guarantee (money that leaves without the owner's approval never exceeds the period limit), plus 6 end-to-end tests of the MCP server over the MCP protocol. Both suites run on every push.
+- **Contract** (`src/Allowance.sol`). Accounts that an owner funds and an agent key spends from, in POT or compatible ERC-20 tokens ([current asset policy](../SECURITY.md#supported-assets)). Each account has a per-payment cap, a cap per period, trusted recipients, an expiry, a freeze switch and key rotation. A payment outside the rules is held with the agent's reason; the owner approves it (optionally trusting the recipient) or rejects it. Native refuel withdrawals share autonomous payment caps; initial gas seeds and subsequent wallet spending have the separate boundary documented in [SECURITY.md](../SECURITY.md).
+- **Tests and CI (October 24 baseline).** 27 contract tests, including a 1,000-run fuzz test of the core guarantee (autonomous native payment/refuel debits stay within each fixed-window limit under unchanged rules), plus 6 local-chain MCP tests including protocol coverage. Both suites run on every push; current totals are listed in the [README](../README.md#tests).
 - **Deployed on Portaldot V3 testnet** and exercised on chain (above), including by a real AI assistant.
 - **Owner dashboard** on GitHub Pages, redesigned on October 23: the agent's spending policy drawn as a field, a spending ring, an approval inbox, freeze, rules, budget and trusted recipients, and an activity feed with copyable transaction hashes. It works with any browser wallet, on desktop and from a phone's wallet app.
 - **Interactive demo**: the real contract bytecode runs in an in-browser EVM with a demo agent already spending, so anyone can try every rule without a wallet or test tokens.
@@ -53,9 +53,9 @@ The code on chain is byte-for-byte this repository's build. 14 more transactions
 |---|---|
 | Final demo video | A new recording for the final, including owner actions from a Portaldot account. |
 | Owner actions from a Portaldot (Substrate) account | Approve and freeze from a native Portaldot account, sent on chain, so V3's two sides work together. Next step, from October 25. |
-| Security review | Automated analysis (Slither, Aderyn) and a written threat model (`SECURITY.md`) before the final. The contract is not audited. |
+| Security review | October 27 update: [Phase 2A internal review](SECURITY-REVIEW-PHASE2A.md) and [security policy](../SECURITY.md) available. Slither and Aderyn were unavailable; their analysis remains pending. Not independently audited. |
 | MCP server on npm | Before the final submission. |
-| Cheaper requests | Clear a request's storage when it is resolved, so its deposit returns. Planned for the v2 contract. |
+| Cheaper requests | Evaluate cleanup and deposit-refund attribution for v2; the current contract has no request cleanup path. |
 
 ## Questions for mentors
 
