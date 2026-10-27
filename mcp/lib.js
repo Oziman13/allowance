@@ -33,15 +33,16 @@ const ERRORS = {
 };
 
 export function explain(err, iface) {
+  if (err?.transactionHash) return `Transaction ${err.transactionHash} was submitted, but its outcome is not confirmed. Check its receipt before sending another payment. ${err.message || ""}`;
   const data = err?.data || err?.info?.error?.data || err?.error?.data;
   let name = err?.revert?.name;
   if (!name && data) { try { name = iface.parseError(data)?.name; } catch {} }
   if (name) return ERRORS[name] || name;
   const msg = err?.shortMessage || err?.message || String(err);
   if (/insufficient funds/i.test(msg)) return "The agent doesn't have enough POT for this transaction's gas and storage deposit (asking for approval stores a request on chain). Nothing was sent. Ask the user to top up the agent's gas.";
-  // Node rejections ethers can't parse ("could not coalesce error"): show the node's own words.
+  // RPC errors ethers can't parse ("could not coalesce error"): show the node's own words.
   const raw = err?.error?.message || err?.info?.error?.message;
-  if (raw) return `The network rejected the transaction (${raw}${err?.error?.code ? `, code ${err.error.code}` : ""}). Nothing was sent. Don't retry in a loop; tell the user.`;
+  if (raw) return `The network returned an error (${raw}${err?.error?.code ? `, code ${err.error.code}` : ""}). Submission or confirmation may be uncertain. Check the transaction status before retrying; don't retry in a loop.`;
   return msg;
 }
 
@@ -110,6 +111,7 @@ export async function createClient(o) {
     const { a, left } = await account();
     const t = await now();
     const expired = Number(a.rules.expiresAt) !== 0 && t >= Number(a.rules.expiresAt);
+    const capacity = a.frozen || expired ? 0n : left < a.balance ? left : a.balance;
     const resetIn = Number(a.periodStart) + Number(a.rules.period) - t;
     return {
       allowance: a.name || `#${id}`,
@@ -117,8 +119,9 @@ export async function createClient(o) {
       network: net.name,
       state: a.frozen ? "frozen by owner" : expired ? "expired" : "active",
       // The period limit caps what the agent may spend alone; the budget caps what exists. Show the smaller.
-      can_spend_now_without_asking: fmt(left < a.balance ? left : a.balance),
-      note: "Payments the owner approves don't count against the period limit; they still come out of the budget.",
+      can_spend_now_without_asking: fmt(capacity),
+      max_single_payment_without_asking: fmt(capacity < a.rules.perPayment ? capacity : a.rules.perPayment),
+      note: "Spending capacity is total for this period; each instant payment also has a per-payment cap and recipient rules. Payments the owner approves don't count against the period limit; they still come out of the budget.",
       period_limit: `${fmt(a.rules.perPeriod)} per ${periodName(Number(a.rules.period))}`,
       period_resets_in: left === a.rules.perPeriod ? "nothing spent this period" : resetIn > 0 ? duration(resetIn) : "on the next payment",
       per_payment_limit: fmt(a.rules.perPayment),
@@ -132,11 +135,13 @@ export async function createClient(o) {
 
   async function preview(to, amount) {
     const { a } = await account();
-    if (!ethers.isAddress(to)) return { result: "invalid", reason: "Not a valid 0x address." };
+    if (!ethers.isAddress(to) || to.toLowerCase() === ethers.ZeroAddress || to.toLowerCase() === o.address.toLowerCase()) return { result: "invalid", reason: "Recipient must be a valid address other than zero or the Allowance contract." };
     const t = await now();
     if (a.frozen) return { result: "blocked", reason: ERRORS.AccountFrozen };
     if (Number(a.rules.expiresAt) && t >= Number(a.rules.expiresAt)) return { result: "blocked", reason: ERRORS.AccountExpired };
-    const amt = parse(amount);
+    let amt;
+    try { amt = parse(amount); } catch { return { result: "invalid", reason: "Invalid amount for this asset's decimals." }; }
+    if (amt <= 0n || amt >= (1n << 128n)) return { result: "invalid", reason: "Amount must be positive and fit in uint128 base units." };
     const [hold, left] = await al.preview(id, to, amt);
     if (Number(hold) !== 0) return { result: "needs owner approval", reason: HOLD[Number(hold)], left_this_period: fmt(left) };
     if (amt > a.balance) return { result: "blocked", reason: ERRORS.InsufficientBudget };
@@ -145,29 +150,45 @@ export async function createClient(o) {
 
   // Keep enough native POT on the agent to pay for its own transactions.
   // The refuel comes out of the same budget and counts against the same limits.
-  async function ensureGas() {
+  // Reserve the pending instant payment so refuelling cannot block it or turn it into a hold.
+  async function ensureGas(reserved = 0n) {
     if (!meta.native) return null;
     const bal = await provider.getBalance(agent.address);
     if (bal >= minGas) return null;
     const { a, left } = await account();
     let amt = minGas * 2n;
-    for (const cap of [a.rules.perPayment, left, a.balance]) if (amt > cap) amt = cap;
+    for (const cap of [a.rules.perPayment, left > reserved ? left - reserved : 0n, a.balance > reserved ? a.balance - reserved : 0n]) if (amt > cap) amt = cap;
     if (amt === 0n) return null;
     const tx = await send("refuel", id, amt);
-    await tx.wait();
+    await confirmed(tx);
     return { refueled: fmt(amt), tx: link(tx.hash) };
+  }
+
+  async function confirmed(tx) {
+    try {
+      const receipt = await tx.wait();
+      if (!receipt || receipt.status !== 1) throw new Error("No successful receipt.");
+      return receipt;
+    } catch (err) {
+      if (err.receipt?.status === 0) throw new Error(`Transaction ${err.receipt.hash || tx.hash} reverted. The requested action was not completed.`);
+      // A successful replacement may be a cancellation or a different call. Never infer payment.
+      throw Object.assign(new Error(`Could not confirm the requested transaction: ${err.shortMessage || err.message}`), { transactionHash: tx.hash });
+    }
   }
 
   async function pay(to, amount, memo) {
     await account();
     if (!ethers.isAddress(to)) throw new Error("Not a valid 0x address.");
     const amt = parse(amount);
-    await al.pay.staticCall(id, to, amt, memo); // fails fast, without spending gas, if frozen, expired or out of budget
-    const gas = await ensureGas();
+    const [settles] = await al.pay.staticCall(id, to, amt, memo); // fails fast, without spending gas, if frozen, expired or out of budget
+    const gas = await ensureGas(settles ? amt : 0n);
     const t0 = Date.now();
     const tx = await send("pay", id, to, amt, memo);
-    const rcpt = await tx.wait();
-    const held = rcpt.logs.map((l) => { try { return al.interface.parseLog(l); } catch { return null; } }).find((p) => p?.name === "PaymentHeld");
+    const rcpt = await confirmed(tx);
+    const events = rcpt.logs.filter(l => l.address?.toLowerCase() === o.address.toLowerCase()).map((l) => { try { return al.interface.parseLog(l); } catch { return null; } });
+    const matches = p => p && p.args.accountId === BigInt(id) && p.args.to.toLowerCase() === to.toLowerCase() && p.args.amount === amt && p.args.memo === memo;
+    const held = events.find(p => p?.name === "PaymentHeld" && matches(p));
+    if (!held && !events.some(p => p?.name === "Paid" && matches(p))) throw Object.assign(new Error("Could not confirm payment from receipt events."), { transactionHash: tx.hash });
     const out = held
       ? { result: "held for owner approval", request_id: Number(held.args.requestId), reason: HOLD[Number(held.args.reason)], amount: fmt(amt), next_step: "Tell the user it is waiting for their approval. Check later with allowance_request.", tx: link(tx.hash) }
       : { result: "paid", amount: fmt(amt), to, memo, confirmed_in_ms: Date.now() - t0, tx: link(tx.hash) };
@@ -183,7 +204,7 @@ export async function createClient(o) {
 
   async function cancel(requestId) {
     const tx = await send("cancel", requestId);
-    await tx.wait();
+    await confirmed(tx);
     return { request_id: Number(requestId), status: "cancelled", tx: link(tx.hash) };
   }
 

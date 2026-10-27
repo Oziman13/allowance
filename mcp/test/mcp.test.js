@@ -7,7 +7,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { ethers } from "ethers";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { createClient, ABI } from "../lib.js";
+import { createClient, ABI, explain } from "../lib.js";
 
 const PORT = 8546;
 const RPC = `http://127.0.0.1:${PORT}`;
@@ -111,7 +111,173 @@ test("full MCP round trip: a frozen allowance stops the assistant with a clear m
     assert.match(blocked.content[0].text, /frozen/);
     const st = JSON.parse((await mcp.callTool({ name: "allowance_status", arguments: {} })).content[0].text);
     assert.equal(st.state, "frozen by owner");
+    assert.equal(st.can_spend_now_without_asking, "0 POT");
+    assert.equal(st.max_single_payment_without_asking, "0 POT");
   } finally {
     await mcp.close();
   }
 });
+
+async function fresh({ budget = "2", seed = "0.01", expiresAt = 0 } = {}) {
+  const wallet = ethers.Wallet.createRandom();
+  const rules = { perPayment: E("1"), perPeriod: E("3"), period: 86400, expiresAt, trustedOnly: false };
+  const receipt = await (await al.openAccount(wallet.address, ethers.ZeroAddress, "audit", rules, [], E(budget), E(seed), { value: E(budget) + E(seed) })).wait();
+  const id = Number(receipt.logs.map(l => { try { return al.interface.parseLog(l); } catch { return null; } }).find(p => p?.name === "AccountOpened").args.accountId);
+  return createClient({ key: wallet.privateKey, address: await al.getAddress(), network: "local", rpc: RPC, accountId: id });
+}
+
+test("audit: preview rejects contract-invalid addresses and amounts", async () => {
+  const c = await fresh();
+  for (const to of [ethers.ZeroAddress, await al.getAddress(), "bad"]) {
+    assert.equal((await c.preview(to, "0.1")).result, "invalid");
+    await assert.rejects(c.pay(to, "0.1", "audit"));
+  }
+  for (const amount of ["0", "-1", "bad", ethers.formatEther(1n << 128n)]) {
+    assert.equal((await c.preview(shop, amount)).result, "invalid");
+    await assert.rejects(c.pay(shop, amount, "audit"));
+  }
+});
+
+test("audit: frozen and expired capacity is zero; single payment differs from capacity", async () => {
+  const c = await fresh();
+  assert.equal((await c.status()).can_spend_now_without_asking, "2 POT");
+  assert.equal((await c.status()).max_single_payment_without_asking, "1 POT");
+  await (await al.setFrozen(c.accountId, true)).wait();
+  assert.equal((await c.status()).can_spend_now_without_asking, "0 POT");
+  const expired = await fresh({ expiresAt: 1 });
+  assert.equal((await expired.status()).can_spend_now_without_asking, "0 POT");
+});
+
+test("audit: held requests may exceed budget; instant payments may not", async () => {
+  const c = await fresh({ budget: "0.2" });
+  assert.equal((await c.preview(shop, "0.5")).result, "blocked");
+  assert.equal((await c.preview(shop, "2")).result, "needs owner approval");
+  assert.equal((await c.pay(shop, "2", "audit")).result, "held for owner approval");
+});
+
+test("audit: zero gas cannot bootstrap refuel and does not move budget", async () => {
+  const c = await fresh({ seed: "0" });
+  await assert.rejects(c.pay(shop, "0.1", "audit"));
+  assert.equal((await c.status()).budget_left, "2 POT");
+});
+
+for (const amount of ["0", "-1", "bad", ethers.formatEther(1n << 128n)]) {
+  test(`audit: invalid preview amount ${amount}`, async () => {
+    const c = await fresh();
+    assert.equal((await c.preview(shop, amount)).result, "invalid");
+  });
+}
+for (const state of ["frozen", "expired"]) {
+  test(`audit: ${state} reports zero spending capacity`, async () => {
+    const c = await fresh({ expiresAt: state === "expired" ? 1 : 0 });
+    if (state === "frozen") await (await al.setFrozen(c.accountId, true)).wait();
+    assert.equal((await c.status()).can_spend_now_without_asking, "0 POT");
+    assert.equal((await c.preview(shop, "0.1")).result, "blocked");
+    await assert.rejects(c.pay(shop, "0.1", "audit"));
+  });
+}
+test("audit: RPC timeout does not assert nothing was sent", () => {
+  assert.doesNotMatch(explain({ info: { error: { message: "upstream timeout" } } }, al.interface), /Nothing was sent/);
+});
+
+test("audit: successful receipt without payment evidence is not paid", async () => {
+  const c = await fresh({ seed: "1" });
+  const fake = async () => ({ hash: ethers.ZeroHash, wait: async () => ({ status: 1, logs: [] }) });
+  fake.staticCall = async () => [true, 0n];
+  fake.estimateGas = async () => 100000n;
+  Object.defineProperty(c.contract, "pay", { value: fake });
+  await assert.rejects(c.pay(shop, "0.1", "audit"), /confirm/i);
+});
+
+test("audit: refuel does not consume the budget reserved for an instant payment", async () => {
+  const c = await fresh({ budget: "0.1" });
+  assert.equal((await c.preview(shop, "0.1")).result, "pays instantly");
+  assert.equal((await c.pay(shop, "0.1", "audit")).result, "paid");
+});
+
+for (const kind of ["pending", "reverted", "timeout", "replacement"]) {
+  test(`audit: ${kind} transaction never reports paid`, async () => {
+    const c = await fresh({ seed: "1" });
+    let submissions = 0;
+    const fake = async () => {
+      submissions++;
+      return { hash: ethers.ZeroHash, wait: async () => {
+        if (kind === "pending") return null;
+        if (kind === "reverted") throw Object.assign(new Error("reverted"), { receipt: { status: 0, hash: ethers.ZeroHash } });
+        throw Object.assign(new Error(kind), { code: kind === "replacement" ? "TRANSACTION_REPLACED" : "TIMEOUT" });
+      } };
+    };
+    fake.staticCall = async () => [true, 0n];
+    fake.estimateGas = async () => 100000n;
+    Object.defineProperty(c.contract, "pay", { value: fake });
+    await assert.rejects(c.pay(shop, "0.1", "audit"), e => {
+      const message = explain(e, c.iface);
+      if (kind !== "reverted") assert.equal(e.transactionHash, ethers.ZeroHash);
+      assert.match(message, kind === "reverted" ? /reverted/ : /not confirmed/);
+      assert.match(message, new RegExp(ethers.ZeroHash));
+      return true;
+    });
+    assert.equal(submissions, 1, "uncertain payment must not be automatically resubmitted");
+  });
+}
+
+test("audit: refuel preserves period capacity and exhausted limits still allow requests", async () => {
+  const c = await fresh({ budget: "5", seed: "1" });
+  for (const amount of ["1", "1", "0.9"]) await (await c.contract.refuel(c.accountId, E(amount))).wait();
+  await provider.send("anvil_setBalance", [c.agent.address, ethers.toQuantity(E("0.01"))]);
+  assert.equal((await c.pay(shop, "0.1", "audit")).result, "paid");
+  assert.equal((await c.status()).can_spend_now_without_asking, "0 POT");
+  const held = await c.pay(shop, "0.1", "audit");
+  assert.equal(held.result, "held for owner approval");
+  assert.equal(held.gas_refuel, undefined);
+  await provider.send("evm_increaseTime", [86400]);
+  await provider.send("evm_mine", []);
+  assert.equal((await c.status()).can_spend_now_without_asking, "2 POT");
+});
+
+test("audit: a preview is advisory when the owner freezes before payment", async () => {
+  const c = await fresh();
+  assert.equal((await c.preview(shop, "0.1")).result, "pays instantly");
+  await (await al.setFrozen(c.accountId, true)).wait();
+  await assert.rejects(c.pay(shop, "0.1", "audit"));
+  assert.equal((await c.status()).budget_left, "2 POT");
+});
+
+// Receipts are simulated here to exercise event identity checks without sending payments.
+for (const eventName of ["Paid", "PaymentHeld"]) {
+  for (const mismatch of ["contract", "account", "recipient", "amount", "memo", null]) {
+    test(`integration: ${eventName} ${mismatch || "matching"} evidence`, async () => {
+      const c = await fresh({ seed: "1" });
+      const address = await c.contract.getAddress();
+      const recipient = mismatch === "recipient" ? ethers.Wallet.createRandom().address : shop;
+      const args = [BigInt(c.accountId) + (mismatch === "account" ? 1n : 0n), recipient,
+        E("0.1") + (mismatch === "amount" ? 1n : 0n)];
+      if (eventName === "PaymentHeld") args.unshift(42n);
+      if (eventName === "PaymentHeld") args.push(1);
+      args.push(mismatch === "memo" ? "other" : "audit");
+      const encoded = c.iface.encodeEventLog(c.iface.getEvent(eventName), args);
+      const log = { ...encoded, address: mismatch === "contract" ? ethers.Wallet.createRandom().address : address.toLowerCase() };
+      let submissions = 0;
+      const fake = async () => {
+        submissions++;
+        return { hash: ethers.ZeroHash, wait: async () => ({ status: 1, logs: [log] }) };
+      };
+      fake.staticCall = async () => [eventName === "Paid", 0n];
+      fake.estimateGas = async () => 100000n;
+      Object.defineProperty(c.contract, "pay", { value: fake });
+      if (mismatch) {
+        await assert.rejects(c.pay(shop.toLowerCase(), "0.1", "audit"), e => {
+          assert.equal(e.transactionHash, ethers.ZeroHash);
+          assert.match(explain(e, c.iface), /not confirmed/);
+          return true;
+        });
+      } else {
+        const result = await c.pay(shop.toLowerCase(), "0.1", "audit");
+        assert.equal(result.result, eventName === "Paid" ? "paid" : "held for owner approval");
+        assert.equal(result.tx, ethers.ZeroHash);
+        if (eventName === "PaymentHeld") assert.equal(result.request_id, 42);
+      }
+      assert.equal(submissions, 1);
+    });
+  }
+}
