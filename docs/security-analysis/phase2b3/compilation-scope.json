@@ -1,0 +1,24 @@
+{
+  "source_sha256": "3a84a84647c051aa2015316d86ffbf70777ae824932fe7e9c5ad875a7df27474",
+  "derived_from": "initial Slither raw compilations JSON; full compiler AST omitted from committed artifacts",
+  "units": [
+    {
+      "unit": "9dd9a944c685d996",
+      "compiler": {
+        "compiler": "solc",
+        "version": "0.8.28",
+        "optimized": true
+      },
+      "sources": [
+        "src/Allowance.sol"
+      ]
+    }
+  ],
+  "foundry_configuration": {
+    "solc_version": "0.8.28",
+    "evm_version": "cancun",
+    "optimizer": true,
+    "optimizer_runs": 1,
+    "via_ir": true
+  }
+}

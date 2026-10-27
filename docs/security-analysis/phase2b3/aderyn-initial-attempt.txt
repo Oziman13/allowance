@@ -1,0 +1,21 @@
+
+---------------------------------
+# Configuration
+---------------------------------
+Root - /workspace/allowance
+Source - /workspace/allowance/src
+Remappings - [
+    "forge-std/=lib/forge-std/src/",
+]
+EVM version - cancun
+---------------------------------
+# Source Scope
+---------------------------------
+Include Filepaths Containing - No specific criteria.
+Exclude Filepaths Containing - No specific criteria.
+Auto Excluding - No Files.
+---------------------------------
+# Compiling Abstract Syntax Trees
+---------------------------------
+Failed to Derive AST & EVM Info: Read-only file system (os error 30)
+Error making context: Failed to Derive AST / EVM info
