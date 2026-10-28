@@ -460,6 +460,7 @@ footer { margin-top:16px; font-size:10px; display:flex; flex-wrap:wrap; justify-
 .command-map .map-note { font-size:10px; }
 @media(max-width:560px) { .account-title { gap:10px; } .map-note { line-height:1.7; } }
 __POLICY_CSS__
+__NATIVE_CSS__
 </style>
 </head>
 <body>
@@ -473,6 +474,7 @@ __POLICY_CSS__
     <nav class="top-nav" aria-label="Main navigation"><a href="#howTitle">How it works</a><a href="https://github.com/Oziman13/allowance/tree/main/docs" target="_blank" rel="noopener">Documentation <svg class="arrow-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a></nav>
     <div class="net"><span class="dot" id="netDot"></span><span id="netName">Not connected</span></div>
     <button class="btn primary" id="connectBtn">Connect Wallet</button>
+    <button class="btn" id="nativeBtn" aria-haspopup="dialog">Native wallet · Read-only</button>
   </header>
 </div>
 
@@ -757,6 +759,43 @@ __POLICY_CSS__
   </div>
   <p class="wallet-note">No wallet at hand? The interactive demo runs the real contract in this browser.</p>
   <div class="wallet-actions"><button type="button" class="btn" id="walletDemo">Try Interactive Demo</button><button type="button" class="btn" id="walletClose">Close</button></div>
+</dialog>
+
+<dialog id="nativeWalletDlg" aria-labelledby="nativeTitle" aria-describedby="nativeDescription">
+  <div class="native-head">
+    <div class="native-topline"><span class="native-tag">NATIVE ACCOUNT · READ-ONLY</span><button class="btn" id="nativeClose" type="button">Close</button></div>
+    <p class="eyebrow">PORTALDOT V3 TESTNET / IDENTITY INSPECTOR</p>
+    <h2 id="nativeTitle">Your account. Verified boundaries.</h2>
+    <p id="nativeDescription">Inspect your native identity, runtime mapping and stored allowance ownership. Account access shares public addresses only. No signatures or transactions.</p>
+  </div>
+  <div class="native-body">
+    <div class="native-connect">
+      <label>Native extension<select id="nativeSource" aria-label="Native extension"></select></label>
+      <button class="btn primary" id="nativeConnect" type="button" disabled>Connect native accounts</button>
+    </div>
+    <label class="native-account-label">Authorized account<select id="nativeAccount" disabled><option value="">Choose an authorized account</option></select></label>
+    <p id="nativeStatus" role="status" aria-live="polite" aria-atomic="true">Loading the read-only account adapter…</p>
+    <dl class="native-grid">
+      <div><dt>AccountId32 bytes</dt><dd id="nativeAccountId">Not selected</dd></div>
+      <div><dt>SS58 · format 42 encoding</dt><dd id="nativeSS58">Not selected</dd></div>
+      <div><dt>Contract-visible H160</dt><dd id="nativeH160">Unverified</dd></div>
+      <div><dt>Reverse mapping</dt><dd id="nativeMapping">Unverified</dd></div>
+      <div class="native-wide"><dt>Verified genesis</dt><dd id="nativeGenesis">Unverified</dd></div>
+      <div><dt>Runtime versions</dt><dd id="nativeRuntime">Unverified</dd></div>
+      <div><dt>Runtime capabilities · not write compatibility</dt><dd id="nativeCapabilities">Unverified</dd></div>
+      <div class="native-wide"><dt>Substrate finalized snapshot</dt><dd id="nativeBlock">Unavailable</dd></div>
+      <div class="native-wide"><dt>Configured Allowance contract · Portaldot V3 testnet</dt><dd id="nativeContract"></dd></div>
+      <div class="native-wide"><dt>Deployed code / EVM read snapshot</dt><dd id="nativeCode">Unverified / not checked</dd></div>
+    </dl>
+    <h3>Read-only allowances</h3>
+    <p class="native-muted" id="nativeOwnership">Ownership unavailable. No zero balance or ownership assumption.</p>
+    <ul id="nativeAllowances" aria-label="Verified stored owner matches"></ul>
+    <div class="native-limit"><p>Owner writes are unavailable in this mode: mapping, funding, freeze, approvals and withdrawal are not enabled. A matching public address or reverse entry does not prove native signing control of a MetaMask owner. Reads are snapshots from the configured RPCs, not a proof of execution or an independent audit.</p></div>
+    <div class="native-actions">
+      <button class="btn" id="nativeRefresh" type="button" disabled>Refresh reads</button>
+      <button class="btn" id="nativeDisconnect" type="button" disabled>Disconnect</button>
+    </div>
+  </div>
 </dialog>
 
 <div id="toast" role="status" aria-live="polite" aria-atomic="true" role="status" aria-live="polite"></div>
@@ -1414,6 +1453,33 @@ async function skipDay() {
 }
 
 __POLICY_JS__
+
+// Native reads stay outside S, the EVM signer and the transaction/deployment helpers.
+let nativePanel, nativeLoading;
+const nativeDialog = $("#nativeWalletDlg");
+$("#nativeContract").textContent = NETWORKS["420420777"].allowance;
+$("#nativeClose").onclick = () => nativeDialog.close();
+$("#nativeBtn").onclick = async () => {
+  nativeDialog.showModal();
+  try {
+    if (!window.AllowanceNative) {
+      nativeLoading ||= loadScript("native-wallet.js").catch(e => { nativeLoading = null; throw e; });
+      await nativeLoading;
+    }
+    if (!nativeDialog.open) return;
+    nativePanel ||= window.AllowanceNative.mount(nativeDialog, NETWORKS["420420777"], ABI);
+    nativePanel.open();
+  } catch {
+    $("#nativeStatus").textContent = "Native adapter unavailable. Close and retry. No wallet access or transaction was requested.";
+  }
+};
+// A switch back to an EVM entry point invalidates native results before its existing handler.
+for (const id of ["connectBtn", "connectBtn2", "simBtn", "walletDemo"]) {
+  $("#" + id).addEventListener("click", () => {
+    nativePanel?.disconnect();
+    if (nativeDialog.open) nativeDialog.close();
+  }, { capture: true });
+}
 
 // ---------------------------------------------------------------- wiring
 $("#connectBtn").onclick = () => { if (!S.me) connectWallet().catch((e) => toast(friendly(e), true)); };
