@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the dashboard: inject ABI, bytecode and network config into web/index.src.html -> docs/index.html.
 Run `forge build` first. GitHub Pages serves docs/."""
-import base64, hashlib, json, pathlib, shutil, subprocess
+import base64, hashlib, json, pathlib, shutil, subprocess, tempfile
 root = pathlib.Path(__file__).parent
 art = json.loads((root / "out/Allowance.sol/Allowance.json").read_text())
 nets = json.loads((root / "config/networks.json").read_text())
@@ -18,6 +18,7 @@ fonts = "\n".join(
     % (family, weight, base64.b64encode((root / f"web/fonts/{slug}-latin-{weight}-normal.woff2").read_bytes()).decode())
     for family, slug, weights in font_sets for weight in weights)
 html = (html.replace("__POLICY_CSS__", (root / "web/policy-field.css").read_text())
+            .replace("__NATIVE_CSS__", (root / "web/native-wallet.css").read_text())
             .replace("__POLICY_JS__", (root / "web/policy-field.js").read_text())
             .replace("__SITE_QR__", (root / "web/site-qr.svg").read_text())  # script/make_qr.py
             .replace("__FONTS__", fonts)
@@ -45,5 +46,41 @@ if (sim / "node_modules/.bin/esbuild").exists():
     print("docs/sim.js bundled,", (root / "docs/sim.js").stat().st_size // 1024, "KB")
 else:
     print("web/sim/node_modules missing: kept the existing docs/sim.js (run `npm install` in web/sim to rebuild it)")
+# Native SDK loads only on explicit panel open. Reuses the pinned simulation esbuild.
+native = root / "substrate"
+if (sim / "node_modules/.bin/esbuild").exists() and (native / "node_modules/@polkadot/api").exists():
+    with tempfile.TemporaryDirectory(prefix="allowance-native-build-") as tmp:
+        meta = pathlib.Path(tmp) / "bundle.json"
+        subprocess.run([str(sim / "node_modules/.bin/esbuild"), "browser/entry.mjs", "--bundle", "--format=iife", "--minify",
+                        "--platform=browser", "--target=es2022", "--legal-comments=eof", f"--metafile={meta}",
+                        f"--outfile={root / 'docs/native-wallet.js'}",
+                        "--banner:js=/* Allowance native read-only adapter (MIT). Pinned SDK dependencies: substrate/package-lock.json; licenses: vendor/native-wallet-LICENSES.txt. */"],
+                       cwd=native, check=True, capture_output=True)
+        packages = {}
+        for name in json.loads(meta.read_text())["inputs"]:
+            path = (native / name).resolve().parent
+            while path != root and path != path.parent:
+                package = path / "package.json"
+                if package.exists():
+                    info = json.loads(package.read_text())
+                    if "name" not in info:
+                        path = path.parent
+                        continue
+                    if "node_modules" in path.parts:
+                        licenses = sorted(set(path.glob("LICENSE*")) | set(path.glob("LICENCE*")) | set(path.glob("COPYING*")))
+                        packages[info["name"]] = (f'{info["name"]}@{info["version"]} ({info.get("license", "see package")})\n'
+                                                 + f'https://registry.npmjs.org/{info["name"]}/{info["version"]}\n'
+                                                 + "\n".join(p.read_text() for p in licenses if p.is_file()))
+                    break
+                path = path.parent
+        license_text = ("Third-party packages in the lazy native-wallet bundle. Generated from pinned npm packages.\n\n"
+                        + "\n\n".join(packages[key] for key in sorted(packages)))
+        (root / "docs/vendor/native-wallet-LICENSES.txt").write_text(
+            "\n".join(line.rstrip() for line in license_text.splitlines()) + "\n")
+    print("docs/native-wallet.js bundled,", (root / "docs/native-wallet.js").stat().st_size // 1024, "KB")
+elif not (root / "docs/native-wallet.js").exists():
+    raise RuntimeError("Native bundle missing: run npm ci in substrate and web/sim")
+else:
+    print("Native build dependencies missing: kept docs/native-wallet.js; run npm ci in substrate and web/sim to rebuild")
 (root / "docs/abi.json").write_text(json.dumps(art["abi"], indent=1))
 print("docs/index.html written,", len(html) // 1024, "KB; networks:", ", ".join(v["name"] for v in by_chain.values()))
