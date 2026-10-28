@@ -63,8 +63,8 @@ export class NativeController {
       this.unsubscribe = null;
       this.session = null;
       this.invalidate();
-      this.emit({ accounts: [], selected: '', status: e.code === 'unsupported' ? 'unsupported' : 'authorization-failed',
-        message: e.code === 'unsupported' ? e.message : 'Account access was rejected or unavailable. You can try connecting again.' });
+      this.emit({ accounts: [], selected: '', status: e?.code === 'unsupported' ? 'unsupported' : 'authorization-failed',
+        message: e?.code === 'unsupported' ? e.message : 'Account access was rejected or unavailable. You can try connecting again.' });
     }
   }
   accept(list) {
@@ -104,7 +104,7 @@ export class NativeController {
       this.emit({ status: snapshot.status, message: snapshot.message, snapshot });
     } catch (e) {
       if (generation !== this.generation) return;
-      this.emit({ status: e.code || 'rpc-unavailable', message: e.code ? e.message : 'RPC unavailable or incompatible. Identity and balances remain unverified.', snapshot: null });
+      this.emit({ status: e?.code || 'rpc-unavailable', message: e?.code ? e.message : 'RPC unavailable or incompatible. Identity and balances remain unverified.', snapshot: null });
     } finally { clearTimeout(timer); }
   }
 }

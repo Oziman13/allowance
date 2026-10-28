@@ -216,3 +216,87 @@ test('positive RPC boundary rejects all submission/signing/mapping methods befor
   assert.equal(reads, 1);
   await assert.rejects(readRpc('unused', 'eth_call', [], undefined, EVM_READS, async () => ({ ok: true, json: async () => ({ id: 1, error: 'failed' }) })));
 });
+
+// Phase 3B-2 validation: deterministic failure evidence, never live-chain observations.
+test('null/undefined extension rejection is handled as authorization failure', async () => {
+  for (const rejection of [null, undefined]) {
+    const e = extension();
+    e.injected.reviewed.enable = async () => { throw rejection; };
+    const c = controller(e);
+    await c.connect('reviewed');
+    assert.equal(c.state.status, 'authorization-failed');
+    assert.equal(c.state.snapshot, null);
+    assert.equal(c.state.selected, '');
+  }
+});
+test('null/undefined read rejection is handled as RPC unavailable', async () => {
+  for (const rejection of [null, undefined]) {
+    const c = controller(extension([{ address: id }, { address: other }]), async () => { throw rejection; });
+    await c.connect('reviewed');
+    await c.select(id);
+    assert.equal(c.state.status, 'rpc-unavailable');
+    assert.equal(c.state.snapshot, null);
+    c.disconnect();
+  }
+});
+test('code-only reads also reject a changed finalized snapshot', async () => {
+  await assert.rejects(readOwnership({ net, iface, h160, signal: new AbortController().signal,
+    rpc: evmRpc({ reorg: true }).rpc, checkOwner: false }), { code: 'unverified' });
+});
+test('HTTP 403, unavailable endpoint and malformed JSON-RPC never supply identity data', async () => {
+  const failures = [
+    async () => ({ ok: false, status: 403 }),
+    async () => { throw new TypeError('Failed to fetch'); },
+    async () => ({ ok: true, json: async () => { throw new SyntaxError('Bad JSON'); } }),
+    ...[null, [], {}, { id: 2, result: GENESIS }, { id: 1, error: { code: -32601, message: 'No such method' } }]
+      .map(response => async () => ({ ok: true, json: async () => response })),
+  ];
+  for (const fetcher of failures) {
+    await assert.rejects(readRpc('mock endpoint', 'chain_getBlockHash', [0], undefined, SUBSTRATE_READS, fetcher));
+  }
+  const abort = new AbortController(); abort.abort();
+  let fetched = false;
+  await assert.rejects(readRpc('mock endpoint', 'eth_call', [], abort.signal, EVM_READS, async () => { fetched = true; }));
+  assert.equal(fetched, false);
+});
+test('malformed runtime H160 and reverse Option fail without an ownership read', async () => {
+  for (const malformed of ['h160', 'reverse']) {
+    const mock = apiMock(), evm = evmRpc();
+    if (malformed === 'h160') mock.at.call.reviveApi.address = async () => '0x1234';
+    else mock.at.query.revive.originalAccount = async () => ({ isSome: true, isNone: true });
+    await assert.rejects(createInspector(net, iface, { createApi: mock.createApi, rpc: evm.rpc })(account, new AbortController().signal), { code: 'unverified' });
+    assert.equal(evm.calls.length, 0);
+  }
+});
+test('malformed EVM block/code/ABI data does not become empty ownership or a zero budget', async () => {
+  const signal = new AbortController().signal;
+  for (const replacement of [{ method: 'eth_getBlockByNumber', value: null },
+    { method: 'eth_getBlockByNumber', value: { number: 'invalid', hash: block.hash } },
+    { method: 'eth_getCode', value: '0x1' }, { method: 'eth_call', value: '0x' }]) {
+    const good = evmRpc();
+    const rpc = (...args) => args[1] === replacement.method ? replacement.value : good.rpc(...args);
+    await assert.rejects(readOwnership({ net, iface, h160, signal, rpc }));
+  }
+});
+test('disconnect, account selection and extension change cancel in-flight results', async () => {
+  for (const action of ['disconnect', 'account', 'extension']) {
+    const e = extension([{ address: id }, { address: other }]);
+    const first = deferred();
+    const seen = [];
+    const c = controller(e, async (selected, signal) => {
+      seen.push({ id: selected.id, signal });
+      return seen.length === 1 ? first.promise : { status: 'verified', h160: contract };
+    });
+    await c.connect('reviewed');
+    const pending = c.select(id);
+    if (action === 'disconnect') c.disconnect();
+    else if (action === 'account') await c.select(other);
+    else { e.injected.second = e.injected.reviewed; await c.connect('second'); }
+    assert.equal(seen[0].signal.aborted, true);
+    first.resolve({ status: 'verified', h160 }); await pending; await tick();
+    assert.notEqual(c.state.snapshot?.h160, h160);
+    if (action === 'account') assert.equal(c.state.snapshot.h160, contract);
+    else assert.equal(c.state.snapshot, null);
+    c.disconnect();
+  }
+});

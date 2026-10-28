@@ -1,0 +1,50 @@
+{
+  "baseline": "6ef252f0606041a32c9040dbd2fdc66baa8537e8",
+  "results": [
+    {
+      "label": "pages",
+      "utc": "2026-10-28T09:08:13.960813+00:00",
+      "url": "https://oziman13.github.io/allowance/",
+      "request": null,
+      "curl_exit": 56,
+      "http_code": "000",
+      "headers": "HTTP/1.1 403 Forbidden\ncontent-length: 16\ncontent-type: text/plain\ndate: Wed, 28 Oct 2026 09:08:13 GMT\nserver: envoy\nconnection: close\n\n",
+      "stderr": "curl: (56) CONNECT tunnel failed, response 403\n",
+      "response_body": null
+    },
+    {
+      "label": "substrate-genesis",
+      "utc": "2026-10-28T09:08:13.979523+00:00",
+      "url": "https://test-node-v3.portaldot.dev",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "chain_getBlockHash",
+        "params": [
+          0
+        ]
+      },
+      "curl_exit": 56,
+      "http_code": "000",
+      "headers": "HTTP/1.1 403 Forbidden\ncontent-length: 16\ncontent-type: text/plain\ndate: Wed, 28 Oct 2026 09:08:13 GMT\nserver: envoy\nconnection: close\n\n",
+      "stderr": "curl: (56) CONNECT tunnel failed, response 403\n",
+      "response_body": null
+    },
+    {
+      "label": "evm-chain",
+      "utc": "2026-10-28T09:08:13.995632+00:00",
+      "url": "https://test-evm-rpc-v3.portaldot.dev",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_chainId",
+        "params": []
+      },
+      "curl_exit": 56,
+      "http_code": "000",
+      "headers": "HTTP/1.1 403 Forbidden\ncontent-length: 16\ncontent-type: text/plain\ndate: Wed, 28 Oct 2026 09:08:13 GMT\nserver: envoy\nconnection: close\n\n",
+      "stderr": "curl: (56) CONNECT tunnel failed, response 403\n",
+      "response_body": null
+    }
+  ]
+}

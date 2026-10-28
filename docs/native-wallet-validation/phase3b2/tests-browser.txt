@@ -1,0 +1,48 @@
+LOCAL browser regressions on http://127.0.0.1:8001. NOT a live Pages test.
+Native wallets/RPCs are MOCKED; EVM simulation stays local.
+
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules node script/ui-smoke.cjs
+Exit code: 0
+PASS wallet absent and wallet rejection states; keyboard skip link
+PASS real EVM: approval, trust, rejection, paid/held, freeze blocking, unfreeze and daily reset
+PASS real EVM: rule update, budget funding and withdrawal
+PASS hostile token metadata renders as text in account list, amount and activity
+PASS injected wallet connect/no-contract UI; no signing or transaction request
+PASS desktop/tablet/mobile layouts (1440, 768, 390, 320), expanded forms and reduced motion
+
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules node script/wallet-smoke.cjs
+Exit code: 0
+PASS desktop without a wallet: install link, QR to open on a phone, demo from the dialog
+PASS phone without a wallet: MetaMask, Trust, Coinbase, OKX links and copy-link
+PASS several wallets (EIP-6963): picker, only the chosen wallet is asked, choice remembered
+PASS reload reconnects the remembered wallet, no dialog
+PASS wrong network: Portaldot V3 Testnet added with chain 0x190f1ca9, POT, official RPC; no deploy offer
+PASS network already in the wallet: plain switch, nothing added
+PASS low budget: "can spend now" = min(period allowance, budget) = 2 POT, with the reason
+PASS no uncaught errors
+
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules node script/policy-field-smoke.cjs
+Exit code: 0
+PASS landing selector: shared geometry, keyboard, example copy, responsive fallback
+PASS control field: verified balance/caps/allowance/trust/pending and narrow-screen details
+PASS payment lifecycle: preview/submission/receipt, autonomous, pending without reservation, distinct owner payment
+PASS frozen, chain expiry, and insufficient-balance failure; no false approval requests
+PASS selected-agent isolation: real account creation, policy values, no stale transaction outcome
+PASS unknown transport failure classification and zero uncaught browser errors
+
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules node script/checkin-smoke.cjs
+Exit code: 0
+PASS fresh browser: landing → policy explanation → simulation → rules/allowance → paid → held → approved → frozen/blocked → unfrozen
+PASS real contract semantics, desktop/tablet/mobile, keyboard focus, no missing assets or console errors, no external asset requests
+PASS independent fresh mobile session: repeatable seed; external traffic blocked without replacing assets or results
+
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules UI_EVIDENCE_DIR=docs/native-wallet-validation/phase3b2 node script/native-wallet-smoke.cjs
+Exit code: 0
+PASS production lazy bundle: absent extension, no auto permission, Escape/focus restoration
+PASS production bundle: Error/null rejected permission and unsupported extension
+PASS production bundle: mocked HTTP 503/403, unavailable endpoint and malformed JSON stay unverified, no EVM deployment fallback or state mutation
+PASS mocked positive UI: selection/switch/disconnect, SS58 bytes, safe names, 1440/768/390/320, axe WCAG A/AA
+PASS mocked UI failure states: unmapped/conflicting/wrong network/missing API/RPC failure/owner mismatch
+PASS stale response after close discarded; simulation identity retained and native state cleared
+PASS MetaMask-style signer/provider/account retained; EVM mode entry clears native results without EVM submission
+PASS no signing/provider access, native/public-chain write requests, or uncaught errors

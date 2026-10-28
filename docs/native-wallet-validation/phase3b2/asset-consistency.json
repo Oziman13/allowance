@@ -1,0 +1,26 @@
+{
+  "baseline": "6ef252f0606041a32c9040dbd2fdc66baa8537e8",
+  "scope": "LOCAL committed Pages files versus local build; live site inaccessible, not a deployed asset attestation",
+  "utc": "2026-10-28T09:09:04.986496+00:00",
+  "build_exit": 0,
+  "all_baseline_files_reproduce": true,
+  "sha256": {
+    "docs/index.html": "4bfbdf98ac6d74065a7c4f9a5ea16001ed1014d4c537d5d1308137e5c36217e6",
+    "docs/native-wallet.js": "9f6370363bad9da1528f66566e3267adeae04fddc228e79e9f7467d5b4134db0",
+    "docs/sim.js": "558d7b56f36d0e865e10251d04445d2ead9253e5bbca6cccbad018bb66bbf9e9",
+    "docs/abi.json": "3fd0c4afbb73674a5b9af42d950a2d983023166033072a137305fba0c83963e9",
+    "docs/vendor/ethers-6.13.4.umd.min.js": "fd66c04651929c6a37806a37e8217e6b6aac07c7e816ad478f52690b7429bc61",
+    "docs/vendor/native-wallet-LICENSES.txt": "8683f676cab4a138cfb4364f34acc6bc23cf366e05ef1943a358703337775294"
+  },
+  "feature_build_sha256": {
+    "docs/index.html": "4bfbdf98ac6d74065a7c4f9a5ea16001ed1014d4c537d5d1308137e5c36217e6",
+    "docs/native-wallet.js": "96c24301d3d1f0aa6a19628662f8d02701a8689c4153832bd35cb129cd140d39",
+    "docs/sim.js": "558d7b56f36d0e865e10251d04445d2ead9253e5bbca6cccbad018bb66bbf9e9",
+    "docs/abi.json": "3fd0c4afbb73674a5b9af42d950a2d983023166033072a137305fba0c83963e9",
+    "docs/vendor/ethers-6.13.4.umd.min.js": "fd66c04651929c6a37806a37e8217e6b6aac07c7e816ad478f52690b7429bc61",
+    "docs/vendor/native-wallet-LICENSES.txt": "8683f676cab4a138cfb4364f34acc6bc23cf366e05ef1943a358703337775294"
+  },
+  "changed_generated_assets": [
+    "docs/native-wallet.js"
+  ]
+}

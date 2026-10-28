@@ -1,0 +1,40 @@
+LOCAL VALIDATION, not live-chain evidence.
+Command: npm test --prefix substrate
+Exit code: 0
+
+
+> allowance-substrate@0.1.0 test
+> node browser/native.test.mjs
+
+✔ no permission on construction/discovery; unavailable wallet fails safely (3.584776ms)
+✔ user rejects account authorization (0.319832ms)
+✔ unsupported provider rejected; signing support is unnecessary and never accessed (6.488558ms)
+✔ multiple accounts require selection; account changes immediately invalidate, late RPC cannot restore (2.656547ms)
+✔ disconnect unsubscribes, clears identity and ignores late authorization/subscription (5.736149ms)
+✔ synchronous subscription beats stale initial account response (1.902325ms)
+✔ RPC deadline fails closed without zero balances even when backend ignores cancellation (34.71042ms)
+✔ only authorized AccountId32 identities accepted; SS58 reencoding preserves bytes (1.280849ms)
+✔ network genesis/runtime and versions must verify (0.752499ms)
+✔ mapping absent, conflicting and fallback-shaped cases remain distinct (0.382984ms)
+✔ runtime inspection uses finalized metadata/read API and checks exact reverse identity (13.138744ms)
+✔ wrong genesis, missing read API and reverse RPC failure never become unmapped (0.949681ms)
+✔ partial decorated version is supported; mismatched upgrade metadata fails closed (3.845811ms)
+✔ real pinned SDK initializes through read firewall with official generic metadata (not Portaldot evidence) (436.070505ms)
+✔ ownership verifies actual stored owner, chain, deployed code and stable finalized snapshot (8.046601ms)
+✔ EVM read failures preserve confirmed mapping but never present empty ownership or budgets (0.585634ms)
+✔ positive RPC boundary rejects all submission/signing/mapping methods before fetch (0.724558ms)
+✔ null/undefined extension rejection is handled as authorization failure (0.355765ms)
+✔ null/undefined read rejection is handled as RPC unavailable (1.039432ms)
+✔ code-only reads also reject a changed finalized snapshot (0.143782ms)
+✔ HTTP 403, unavailable endpoint and malformed JSON-RPC never supply identity data (0.578453ms)
+✔ malformed runtime H160 and reverse Option fail without an ownership read (0.528188ms)
+✔ malformed EVM block/code/ABI data does not become empty ownership or a zero budget (0.795412ms)
+✔ disconnect, account selection and extension change cancel in-flight results (8.913219ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2261.97145

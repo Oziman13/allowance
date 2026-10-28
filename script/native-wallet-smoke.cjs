@@ -51,7 +51,8 @@ function inject(spec) {
   const authorized = { accounts };
   for (const name of ['signer', 'provider']) Object.defineProperty(authorized, name, { get() { window.nativeSigns++; throw new Error('Forbidden signing/provider access'); } });
   window.injectedWeb3 = { 'Fixture extension': { async enable() {
-    window.nativePermissions++; if (spec.reject) throw new Error('Rejected'); return authorized;
+    window.nativePermissions++; if (spec.rejectNull) throw null;
+    if (spec.reject) throw new Error('Rejected'); return authorized;
   } } };
 }
 
@@ -60,14 +61,20 @@ function inject(spec) {
   const errors = [], writes = [];
   async function open(spec, mocked = true) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1050 }, reducedMotion: 'reduce' });
-    const page = await context.newPage();
+    const page = await context.newPage(), consoleErrors = [], missingAssets = [];
     page.on('pageerror', e => errors.push(e.message));
+    page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
+    page.on('response', response => {
+      if (new URL(response.url()).origin === new URL(base).origin && response.status() >= 400) missingAssets.push(response.url());
+    });
     await page.route('**/*', async route => {
       const request = route.request(); const url = new URL(request.url());
       if (url.origin !== new URL(base).origin) {
         const body = request.postData() || '';
         if (/submitExtrinsic|submitAndWatch|sendTransaction|sendRawTransaction|personal_sign|signPayload|mapAccount/.test(body)) writes.push(body);
-        return route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"deliberately unavailable in browser test"}' });
+        if (spec?.rpcFailure === 'network') return route.abort('internetdisconnected');
+        if (spec?.rpcFailure === 'malformed') return route.fulfill({ contentType: 'application/json', body: '{' });
+        return route.fulfill({ status: spec?.rpcFailure === 403 ? 403 : 503, contentType: 'application/json', body: '{"error":"deliberately unavailable in browser test"}' });
       }
       if (mocked && url.pathname.endsWith('/native-wallet.js')) return route.fulfill({ contentType: 'application/javascript', body: fixture });
       return route.continue();
@@ -78,7 +85,8 @@ function inject(spec) {
     assert.equal(await page.evaluate(() => window.nativePermissions || 0), 0, 'no automatic authorization');
     await page.click('#nativeBtn');
     await page.waitForFunction(() => window.AllowanceNative && document.querySelector('#nativeWalletDlg').dataset.state);
-    return { context, page };
+    assert.deepEqual(missingAssets, [], 'no missing same-origin assets');
+    return { context, page, consoleErrors };
   }
   async function capture(page, name) {
     if (!evidence) return;
@@ -87,7 +95,8 @@ function inject(spec) {
     await page.screenshot({ path: path.join(evidence, name + '.png') });
   }
   try {
-    let { context, page } = await open(null, false);
+    let { context, page, consoleErrors } = await open(null, false);
+    assert.deepEqual(consoleErrors, [], 'clean local panel has no console errors');
     assert.equal(await page.locator('#nativeConnect').isDisabled(), true);
     assert.match(await page.locator('#nativeStatus').innerText(), /No supported native extension/);
     assert.equal(await page.locator('#deployBox').isVisible(), false);
@@ -97,24 +106,26 @@ function inject(spec) {
     await context.close();
     console.log('PASS production lazy bundle: absent extension, no auto permission, Escape/focus restoration');
 
-    for (const [spec, state] of [[{ reject: true }, 'authorization-failed'], [{ unsupported: true }, 'unsupported']]) {
+    for (const [spec, state] of [[{ reject: true }, 'authorization-failed'], [{ rejectNull: true }, 'authorization-failed'], [{ unsupported: true }, 'unsupported']]) {
       ({ context, page } = await open({ accounts: [{ address: id }], ...spec }, false));
       await page.click('#nativeConnect');
       await page.waitForFunction(state => document.querySelector('#nativeWalletDlg').dataset.state === state, state);
       assert.equal(await page.evaluate(() => nativeSigns), 0); await context.close();
     }
-    console.log('PASS production bundle: rejected permission and unsupported extension');
+    console.log('PASS production bundle: Error/null rejected permission and unsupported extension');
 
-    ({ context, page } = await open({ accounts: [{ address: id }] }, false));
-    await page.click('#nativeConnect');
-    await page.waitForFunction(() => document.querySelector('#nativeWalletDlg').dataset.state === 'rpc-unavailable');
-    assert.match(await page.locator('#nativeMapping').innerText(), /Unverified/);
-    assert.match(await page.locator('#nativeOwnership').innerText(), /unavailable/);
-    assert.equal(await page.locator('#deployBox').isVisible(), false);
-    assert.equal(await page.evaluate(() => nativeSigns), 0);
-    assert.equal(await page.evaluate(() => S.me), null);
-    await context.close();
-    console.log('PASS production bundle: mocked RPC 503 stays unverified, no EVM deployment fallback or state mutation');
+    for (const rpcFailure of [503, 403, 'network', 'malformed']) {
+      ({ context, page } = await open({ accounts: [{ address: id }], rpcFailure }, false));
+      await page.click('#nativeConnect');
+      await page.waitForFunction(() => document.querySelector('#nativeWalletDlg').dataset.state === 'rpc-unavailable');
+      assert.match(await page.locator('#nativeMapping').innerText(), /Unverified/);
+      assert.match(await page.locator('#nativeOwnership').innerText(), /unavailable/);
+      assert.equal(await page.locator('#deployBox').isVisible(), false);
+      assert.equal(await page.evaluate(() => nativeSigns), 0);
+      assert.equal(await page.evaluate(() => S.me), null);
+      await context.close();
+    }
+    console.log('PASS production bundle: mocked HTTP 503/403, unavailable endpoint and malformed JSON stay unverified, no EVM deployment fallback or state mutation');
 
     ({ context, page } = await open({ accounts: [{ address: id, name: 'Public fixture Alpha' }, { address: other, name: 'Public fixture Beta' }] }));
     await page.click('#nativeConnect');
