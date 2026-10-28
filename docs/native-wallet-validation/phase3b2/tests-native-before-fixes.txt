@@ -1,0 +1,72 @@
+LOCAL VALIDATION, not live-chain evidence.
+Command: npm test --prefix substrate (new regression tests, baseline production implementation)
+Exit code: 1
+
+
+> allowance-substrate@0.1.0 test
+> node browser/native.test.mjs
+
+✔ no permission on construction/discovery; unavailable wallet fails safely (2.810081ms)
+✔ user rejects account authorization (0.264239ms)
+✔ unsupported provider rejected; signing support is unnecessary and never accessed (3.797016ms)
+✔ multiple accounts require selection; account changes immediately invalidate, late RPC cannot restore (2.836841ms)
+✔ disconnect unsubscribes, clears identity and ignores late authorization/subscription (1.56064ms)
+✔ synchronous subscription beats stale initial account response (1.821054ms)
+✔ RPC deadline fails closed without zero balances even when backend ignores cancellation (31.947126ms)
+✔ only authorized AccountId32 identities accepted; SS58 reencoding preserves bytes (1.684833ms)
+✔ network genesis/runtime and versions must verify (0.851526ms)
+✔ mapping absent, conflicting and fallback-shaped cases remain distinct (0.609108ms)
+✔ runtime inspection uses finalized metadata/read API and checks exact reverse identity (12.098047ms)
+✔ wrong genesis, missing read API and reverse RPC failure never become unmapped (1.166058ms)
+✔ partial decorated version is supported; mismatched upgrade metadata fails closed (2.749402ms)
+✔ real pinned SDK initializes through read firewall with official generic metadata (not Portaldot evidence) (497.572442ms)
+✔ ownership verifies actual stored owner, chain, deployed code and stable finalized snapshot (8.472568ms)
+✔ EVM read failures preserve confirmed mapping but never present empty ownership or budgets (0.49517ms)
+✔ positive RPC boundary rejects all submission/signing/mapping methods before fetch (0.7529ms)
+✖ null/undefined extension rejection is handled as authorization failure (0.778898ms)
+✖ null/undefined read rejection is handled as RPC unavailable (0.901018ms)
+✖ code-only reads also reject a changed finalized snapshot (0.634996ms)
+✔ HTTP 403, unavailable endpoint and malformed JSON-RPC never supply identity data (0.597651ms)
+✔ malformed runtime H160 and reverse Option fail without an ownership read (0.632122ms)
+✔ malformed EVM block/code/ABI data does not become empty ownership or a zero budget (1.182793ms)
+✔ disconnect, account selection and extension change cancel in-flight results (10.329615ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 21
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2306.563507
+
+✖ failing tests:
+
+test at browser/native.test.mjs:221:1
+✖ null/undefined extension rejection is handled as authorization failure (0.778898ms)
+  TypeError: Cannot read properties of null (reading 'code')
+      at NativeController.connect (file:///workspace/allowance/substrate/browser/controller.mjs:66:57)
+      at async TestContext.<anonymous> (file:///workspace/allowance/substrate/browser/native.test.mjs:226:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at browser/native.test.mjs:232:1
+✖ null/undefined read rejection is handled as RPC unavailable (0.901018ms)
+  TypeError: Cannot read properties of null (reading 'code')
+      at NativeController.select (file:///workspace/allowance/substrate/browser/controller.mjs:107:29)
+      at async TestContext.<anonymous> (file:///workspace/allowance/substrate/browser/native.test.mjs:236:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at browser/native.test.mjs:242:1
+✖ code-only reads also reject a changed finalized snapshot (0.634996ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///workspace/allowance/substrate/browser/native.test.mjs:243:3)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: [Object],
+    operator: 'rejects',
+    diff: 'simple'
+  }

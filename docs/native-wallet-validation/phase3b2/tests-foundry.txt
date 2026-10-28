@@ -1,0 +1,106 @@
+LOCAL VALIDATION, not live-chain evidence.
+Command: /workspace/.allowance-tools/node_modules/@foundry-rs/forge-linux-amd64/bin/forge test --use /workspace/.allowance-tools/solc-0.8.28 --fuzz-seed 0x3b2 -vv
+Exit code: 0
+
+No files changed, compilation skipped
+
+Ran 19 tests for test/audit/Phase2A.t.sol:Phase2AAuditTest
+[PASS] test_I01_currentAgentCanCancelWhileFrozenAndExpired() (gas: 396571)
+[PASS] test_I01_staleRequestsRequireOwnerButSurviveFreezeExpiryRotationAndRules() (gas: 486729)
+[PASS] test_I02_gasRefuelCanBeSpentAtUntrustedRecipientOutsideContract() (gas: 456194)
+[PASS] test_I03_dishonestTrueReturnCanReportPaymentWithoutTransfer() (gas: 873383)
+[PASS] test_I03_recipientFeeMeansPaidAmountIsGrossNotNet() (gas: 937364)
+[PASS] test_I04_contractPreviewIsOnlyAHoldClassifier() (gas: 306827)
+[PASS] test_L01_lifetimeCounterOverflowBlocksPayAndApproveButOwnerCanWithdraw() (gas: 857924)
+[PASS] test_M01_negativeRebaseMakesClaimsInsolventAndFirstWithdrawerWins() (gas: 829075)
+[PASS] test_M01_senderSurchargeConsumesAnotherAccountsBacking() (gas: 1149175)
+[PASS] test_allOwnerEntryPointsRejectStranger() (gas: 390577)
+[PASS] test_callbacksBlockAllSixFundMovingEntryPointsAcrossAccounts() (gas: 946850)
+[PASS] test_exactExpiryBlocksInstantHeldAndRefuelButOwnerKeepsControl() (gas: 282443)
+[PASS] test_fixedWindowsPermitTwoLimitsNearBoundaryButNotWithinOneWindow() (gas: 559759)
+[PASS] test_incomingNoReturnWorksAndFalseMalformedRollBackOpenAndFund() (gas: 1394699)
+[PASS] test_nativeAccountingConservesValueAndThirdPartyFundingGrantsNoRights() (gas: 504821)
+[PASS] test_revokedAgentCannotPayRefuelOrCancelOldRequest_newAgentCanCancel() (gas: 419447)
+[PASS] test_tokenCallbackCannotReenterNativeAccountEvenWhenAuthorizedAgentOfBoth() (gas: 1190538)
+[PASS] test_tokenFalseMalformedAndBlacklistRevertAtomically_noDataWorks() (gas: 972497)
+[PASS] test_unsolicitedTokensAreUncreditedAndStandardAccountsStayIsolated() (gas: 1005699)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 5.91ms (4.22ms CPU time)
+
+Ran 10 tests for test/audit/TokenCompatibility.t.sol:TokenCompatibilityTest
+[PASS] test_blacklistRevertsPayApprovalAndWithdrawalWithoutAccountingLoss() (gas: 985623)
+[PASS] test_callbackTokenWithdrawalSucceedsWithoutReenteringOtherAsset() (gas: 1209305)
+[PASS] test_falseReturnsDoNotCreditDepositsOrDebitFailedWithdrawals() (gas: 1596676)
+[PASS] test_honestNoReturnOnBothDirectionsDepositFundPayWithdraw() (gas: 788590)
+[PASS] test_inboundRecipientFeeCreditsDeltaAndAllowsFullCreditedWithdrawal() (gas: 779910)
+[PASS] test_malformedReturnsDoNotCreditDepositsOrDebitFailedWithdrawals() (gas: 1596767)
+[PASS] test_outboundRecipientFeeKeepsBackingButReducesPaymentAndWithdrawalReceipt() (gas: 956662)
+[PASS] test_positiveRebaseInsideFundingCreditsOtherAccountsYieldToFunder() (gas: 983338)
+[PASS] test_positiveRebaseOutsideFundingLeavesUnallocatedSurplus() (gas: 972685)
+[PASS] test_standardTokenDepositFundPayWithdraw() (gas: 770515)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 4.47ms (4.01ms CPU time)
+
+Ran 27 tests for test/Allowance.t.sol:AllowanceTest
+[PASS] testFuzz_instantSpendingNeverExceedsPeriodLimit(uint256) (runs: 1000, μ: 1960638, ~: 1950467)
+[PASS] test_approveAndTrust_nextPaymentIsInstant() (gas: 516585)
+[PASS] test_approve_paysAndDoesNotUseThePeriodLimit() (gas: 482918)
+[PASS] test_approve_reentrancyBlocked() (gas: 726459)
+[PASS] test_erc20_account_paysAndHolds() (gas: 847640)
+[PASS] test_erc20_falseReturn_reverts() (gas: 786025)
+[PASS] test_erc20_feeOnTransfer_creditsWhatArrived() (gas: 728199)
+[PASS] test_erc20_rejectsNativeValueAndRefuel() (gas: 729159)
+[PASS] test_expiry_endsTheSession() (gas: 384576)
+[PASS] test_freeze_blocksEverythingTheAgentDoes() (gas: 394826)
+[PASS] test_fund_byAnyone() (gas: 347415)
+[PASS] test_onlyOwnerResolves_onlyAgentCancels() (gas: 437394)
+[PASS] test_open_native_depositsAndSeedsGas() (gas: 340217)
+[PASS] test_open_rejectsBadInput() (gas: 53987)
+[PASS] test_pay_insufficientBudget_reverts_butLargeRequestCanBeHeld() (gas: 497234)
+[PASS] test_pay_onlyAgent() (gas: 333961)
+[PASS] test_pay_overPerPayment_isHeld() (gas: 434798)
+[PASS] test_pay_overPeriod_isHeld_thenResetsNextPeriod() (gas: 554185)
+[PASS] test_pay_untrustedRecipient_isHeld() (gas: 479154)
+[PASS] test_pay_withinRules_settlesInstantly() (gas: 377875)
+[PASS] test_preview_matchesPay() (gas: 338910)
+[PASS] test_refuel_countsAgainstTheSameLimit() (gas: 450739)
+[PASS] test_refusingRecipient_revertsWholePayment() (gas: 407093)
+[PASS] test_resolvedRequestsAreFinal() (gas: 527742)
+[PASS] test_rotateAgent_oldKeyIsLockedOut() (gas: 407229)
+[PASS] test_untrust_removesInstantAccess() (gas: 412533)
+[PASS] test_withdraw_onlyOwner() (gas: 358997)
+Suite result: ok. 27 passed; 0 failed; 0 skipped; finished in 2.71s (2.71s CPU time)
+
+Ran 2 tests for test/invariant/AllowanceStateful.t.sol:AllowanceStatefulTest
+[PASS] invariant_referenceLedgerPermissionsAndBacking() (runs: 128, calls: 16384, reverts: 0)
+
+╭------------------+----------+-------+---------+----------╮
+| Contract         | Selector | Calls | Reverts | Discards |
++==========================================================+
+| AllowanceHandler | advance  | 1339  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | donate   | 1449  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | freeze   | 1324  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | fund     | 1352  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | open     | 1398  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | pay      | 1389  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | policy   | 1350  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | refuel   | 1316  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | resolve  | 1416  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | rotate   | 1351  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | trust    | 1383  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | withdraw | 1317  | 0       | 0        |
+╰------------------+----------+-------+---------+----------╯
+
+[PASS] test_handlerScriptExercisesSuccessesDenialsAndOldRequests() (gas: 3077492)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 48.70s (48.73s CPU time)
+
+Ran 4 test suites in 48.76s (51.42s CPU time): 58 tests passed, 0 failed, 0 skipped (58 total tests)

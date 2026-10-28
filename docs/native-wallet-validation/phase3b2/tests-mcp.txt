@@ -1,0 +1,54 @@
+LOCAL VALIDATION, not live-chain evidence.
+Command: ANVIL=/workspace/.allowance-tools/node_modules/@foundry-rs/anvil-linux-amd64/bin/anvil npm test --prefix mcp
+Exit code: 0
+
+
+> allowance-mcp@0.1.0 test
+> node --test test/*.test.js
+
+✔ finds the agent's allowance and reports its rules (981.242035ms)
+✔ preview tells the three outcomes apart (411.660072ms)
+✔ pays inside the rules, refuelling its own gas from the same budget (541.421295ms)
+✔ a payment outside the rules is held, then the owner approves it (438.791471ms)
+✔ the agent can withdraw its own request (439.373869ms)
+allowance-mcp: agent 0x4056c8443c6AfE86C364347B5fD5474B4A816081, allowance #0 on Local (anvil)
+✔ full MCP round trip: a frozen allowance stops the assistant with a clear message (1544.264949ms)
+✔ audit: preview rejects contract-invalid addresses and amounts (617.785568ms)
+✔ audit: frozen and expired capacity is zero; single payment differs from capacity (935.701899ms)
+✔ audit: held requests may exceed budget; instant payments may not (664.990595ms)
+✔ audit: zero gas cannot bootstrap refuel and does not move budget (528.460255ms)
+✔ audit: invalid preview amount 0 (357.640661ms)
+✔ audit: invalid preview amount -1 (197.042826ms)
+✔ audit: invalid preview amount bad (218.088526ms)
+✔ audit: invalid preview amount 340282366920938463463.374607431768211456 (153.21851ms)
+✔ audit: frozen reports zero spending capacity (448.014138ms)
+✔ audit: expired reports zero spending capacity (388.799291ms)
+✔ audit: RPC timeout does not assert nothing was sent (7.621244ms)
+✔ audit: successful receipt without payment evidence is not paid (227.509525ms)
+✔ audit: refuel does not consume the budget reserved for an instant payment (396.952609ms)
+✔ audit: pending transaction never reports paid (188.627154ms)
+✔ audit: reverted transaction never reports paid (219.916402ms)
+✔ audit: timeout transaction never reports paid (249.767977ms)
+✔ audit: replacement transaction never reports paid (198.393222ms)
+✔ audit: refuel preserves period capacity and exhausted limits still allow requests (1219.473495ms)
+✔ audit: a preview is advisory when the owner freezes before payment (531.445291ms)
+✔ integration: Paid contract evidence (247.944461ms)
+✔ integration: Paid account evidence (139.423111ms)
+✔ integration: Paid recipient evidence (185.379145ms)
+✔ integration: Paid amount evidence (153.122648ms)
+✔ integration: Paid memo evidence (199.233629ms)
+✔ integration: Paid matching evidence (174.301371ms)
+✔ integration: PaymentHeld contract evidence (187.420171ms)
+✔ integration: PaymentHeld account evidence (138.944717ms)
+✔ integration: PaymentHeld recipient evidence (193.448269ms)
+✔ integration: PaymentHeld amount evidence (158.934007ms)
+✔ integration: PaymentHeld memo evidence (145.969653ms)
+✔ integration: PaymentHeld matching evidence (182.083642ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15113.295053

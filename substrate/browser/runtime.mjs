@@ -69,7 +69,14 @@ export async function readOwnership({ net, iface, h160, signal, rpc = readRpc, c
   if (!block || !hex(block.hash, 32) || !/^0x[0-9a-f]+$/i.test(block.number)) fail('unverified', 'EVM finalized block is unavailable. No latest-block fallback was used.');
   const code = await call('eth_getCode', [net.allowance, block.number]);
   if (typeof code !== 'string' || !/^0x(?:[0-9a-f]{2})+$/i.test(code)) fail('unverified', 'Configured contract has no verified deployed code. This panel cannot deploy.');
-  if (!checkOwner) return { block: block.number, hash: block.hash, code: 'present', contract: net.allowance };
+  const checkSnapshot = async () => {
+    const end = await call('eth_getBlockByNumber', [block.number, false]);
+    if (end?.hash !== block.hash) fail('unverified', 'EVM snapshot changed during the read. Refresh to recheck.');
+  };
+  if (!checkOwner) {
+    await checkSnapshot();
+    return { block: block.number, hash: block.hash, code: 'present', contract: net.allowance };
+  }
   const read = async (method, args) => iface.decodeFunctionResult(method,
     await call('eth_call', [{ to: net.allowance, data: iface.encodeFunctionData(method, args) }, block.number]));
   const [ids] = await read('accountsOfOwner', [h160]);
@@ -80,8 +87,7 @@ export async function readOwnership({ net, iface, h160, signal, rpc = readRpc, c
     accounts.push({ id: id.toString(), owner: a.owner, name: a.name, asset: a.asset,
       balance: a.balance.toString(), frozen: a.frozen, expiresAt: a.rules.expiresAt.toString() });
   }
-  const end = await call('eth_getBlockByNumber', [block.number, false]);
-  if (end?.hash !== block.hash) fail('unverified', 'EVM snapshot changed during the read. Refresh to recheck.');
+  await checkSnapshot();
   return { accounts, total: ids.length, block: block.number, hash: block.hash, code: 'present', contract: net.allowance };
 }
 
