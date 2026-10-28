@@ -471,10 +471,9 @@ __NATIVE_CSS__
       <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M3 12h26" stroke="currentColor" stroke-width="2.4"/><rect x="7" y="17" width="9" height="4" rx="2" fill="var(--violet)"/></svg>
       Allowance
     </div>
-    <nav class="top-nav" aria-label="Main navigation"><a href="#howTitle">How it works</a><a href="https://github.com/Oziman13/allowance/tree/main/docs" target="_blank" rel="noopener">Documentation <svg class="arrow-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a></nav>
+    <nav class="top-nav" aria-label="Main navigation"><a href="#howTitle">How it works</a><a href="https://github.com/Oziman13/allowance/blob/main/docs/JUDGING.md" target="_blank" rel="noopener">Jury guide &amp; evidence <svg class="arrow-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a></nav>
     <div class="net"><span class="dot" id="netDot"></span><span id="netName">Not connected</span></div>
     <button class="btn primary" id="connectBtn">Connect Wallet</button>
-    <button class="btn" id="nativeBtn" aria-haspopup="dialog">Native wallet · Read-only</button>
   </header>
 </div>
 
@@ -484,7 +483,7 @@ __NATIVE_CSS__
       <div class="hero-copy">
         <p class="eyebrow"><span></span> AN ALLOWANCE, NOT A WALLET · PORTALDOT V3</p>
         <h1>Give AI the freedom to act.<br><em>Keep the power to decide.</em></h1>
-        <p class="lede">Give your AI agent an allowance, not a wallet. Its spending rules live in a contract on Portaldot V3: small payments go through on their own, anything else waits for you.</p>
+        <p class="lede">Give your AI agent an allowance, not a wallet. Its spending rules live in a contract on Portaldot V3: eligible payments go through on their own, valid requests outside the policy wait for you.</p>
         <div class="cta">
           <button class="btn primary big" id="simBtn">Try Interactive Demo <svg class="arrow-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></button>
           <button class="btn big" id="connectBtn2">Connect Wallet</button>
@@ -509,9 +508,9 @@ __NATIVE_CSS__
     <section class="how" aria-labelledby="howTitle">
       <h2 id="howTitle">Freedom to act. A framework you define.</h2>
       <ol>
-        <li><b>Set the rules.</b> Open an allowance for an agent key: a budget, a cap per payment, a cap per day or week, and who it may pay without asking.</li>
-        <li><b>The agent pays.</b> Inside the rules, payments settle at once, gas included. The contract checks every payment, so the agent can't skip the check.</li>
-        <li><b>You decide the rest.</b> Anything outside the rules waits with the agent's reason. Approve it, trust the recipient for next time, or reject it. Freeze the agent with one click.</li>
+        <li><b>Set the rules.</b> Give an agent a budget, a cap per payment and a cap per fixed spending window. Choose who it may pay without asking.</li>
+        <li><b>The agent pays.</b> Eligible payments inside the rules can settle autonomously. Native gas refuel withdrawals share the caps; wallet fees and initial gas seeds have separate boundaries.</li>
+        <li><b>You decide the rest.</b> Valid out-of-policy requests may wait for approval. Invalid, frozen or expired calls can fail. Freeze blocks new agent payments, refuels and requests; owner actions remain available.</li>
       </ol>
     </section>
 
@@ -521,14 +520,14 @@ __NATIVE_CSS__
           <b id="dayTitle">Control, proven on chain</b>
           <span>Recorded on the Portaldot V3 testnet, 19 October 2026</span>
         </figcaption>
-        <p class="day-rules"><span>Research agent</span> may pay up to <b>1 POT</b> at a time and <b>5 POT</b> a day, to trusted recipients only.</p>
+        <p class="day-rules"><span>Research agent</span> may pay up to <b>1 POT</b> at a time and <b>5 POT</b> per fixed 24-hour window, to trusted recipients only.</p>
         <div class="day-meter" role="img" aria-label="1 of 5 POT spent without asking"><span></span></div>
         <ol class="day-log">
           <li class="paid"><span class="blk">#102861</span><span class="what">Market data feed</span><span class="amt">0.4</span><span class="st">Paid</span></li>
           <li class="paid"><span class="blk">#102867</span><span class="what">Market data feed</span><span class="amt">0.6</span><span class="st">Paid</span></li>
           <li class="held"><span class="blk">#102873</span><span class="what">GPU hour for fine-tuning<small>over the 1 POT cap</small></span><span class="amt">2</span><span class="st">Waiting</span></li>
           <li class="paid"><span class="blk">#102880</span><span class="what">You approved it</span><span class="amt">2</span><span class="st">Paid</span></li>
-          <li class="ice"><span class="blk">#102887</span><span class="what">You froze the agent<small>nothing can move</small></span><span class="amt"></span><span class="st">Frozen</span></li>
+          <li class="ice"><span class="blk">#102887</span><span class="what">You froze the agent<small>new agent operations blocked; owner controls remain</small></span><span class="amt"></span><span class="st">Frozen</span></li>
           <li class="paid"><span class="blk">#102900</span><span class="what">You unfroze it</span><span class="amt"></span><span class="st">Active</span></li>
         </ol>
         <a class="day-proof" href="https://github.com/Oziman13/allowance/blob/main/docs/PROOF.md" target="_blank" rel="noopener">Check these transactions on chain</a>
@@ -542,9 +541,9 @@ __NATIVE_CSS__
         <thead><tr><th scope="col">You gave it</th><th scope="col">It can</th></tr></thead>
         <tbody>
           <tr><th scope="row">A wallet key</th><td>Spend everything in the wallet.</td></tr>
-          <tr><th scope="row">A proxy account</th><td>Act for you. Proxies limit which calls, not how much.</td></tr>
+          <tr><th scope="row">A call-permission-only proxy</th><td>Use allowed calls. Call permissions alone don't set a spending budget.</td></tr>
           <tr><th scope="row">A confirm button in an app</th><td>Skip it. The check lives in the app, not on chain.</td></tr>
-          <tr class="us"><th scope="row">An allowance</th><td>Spend within your caps, to recipients you trust. Everything else waits for you, enforced by the contract.</td></tr>
+          <tr class="us"><th scope="row">An allowance</th><td>Make eligible payments within the budget and caps. Valid out-of-policy requests may wait for your decision, enforced by the contract.</td></tr>
         </tbody>
       </table>
     </section>
@@ -552,9 +551,9 @@ __NATIVE_CSS__
     <section class="fit" aria-labelledby="fitTitle">
       <h2 id="fitTitle">Made for Portaldot V3</h2>
       <div class="fit-grid">
-        <p><b>Gas comes from the same budget.</b> Gas on Portaldot is POT, so the agent refuels from its allowance, under the same caps. Five POT a day means five POT a day.</p>
-        <p><b>Cheap where it matters.</b> V3 charges for new storage, so instant payments only update what's there: 0.03 POT each, measured on chain.</p>
-        <p><b>Works with AI assistants.</b> An MCP server gives Claude, Cursor or any MCP client five tools: check, preview, pay, request, cancel. It holds only the agent key.</p>
+        <p><b>Capped native gas refuels.</b> Refuel withdrawals share autonomous payment caps. Initial seeds and wallet funds are separate; fees and deposits aren't individually metered. A zero-gas agent cannot submit its own refuel.</p>
+        <p><b>Measured on V3.</b> Instant payments updated existing storage and cost about 0.03 POT in October 19/23 testnet recordings. Costs depend on runtime and state; these aren't price guarantees.</p>
+        <p><b>Works with AI assistants.</b> Five MCP tools let a compatible client check, preview, pay, request and cancel. Rules bound authorized escrow operations, not everything an assistant does with its wallet.</p>
       </div>
       <p class="fit-contract">Contract on the V3 testnet: <code>0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f</code> <button class="btn small" id="copyContractBtn" type="button">Copy address</button></p>
     </section>
@@ -567,6 +566,35 @@ __NATIVE_CSS__
       <a class="btn small" href="./">Leave simulation</a>
     </div>
   </div>
+
+  <section class="demo-guide hidden" id="demoGuide" aria-labelledby="demoGuideTitle">
+    <p class="eyebrow">WALLET-FREE WALKTHROUGH · LOCAL SIMULATION</p>
+    <h2 id="demoGuideTitle">See the boundary in action</h2>
+    <ol class="demo-steps" aria-label="Demo lifecycle">
+      <li data-demo-step="paid"><a href="#agentBox" data-demo-jump="payment">1 · Pay 0.1 POT</a></li>
+      <li data-demo-step="held"><a href="#agentBox" data-demo-jump="payment">2 · Request 2.5 POT</a></li>
+      <li data-demo-step="approved"><button type="button" id="demoReviewRequest" disabled>3 · Review your new request</button></li>
+      <li data-demo-step="frozen"><a href="#freezeRow" data-demo-jump="freeze">4 · Freeze the agent</a></li>
+      <li><a href="#simProof" data-demo-jump="proof">5 · See real testnet proof</a></li>
+    </ol>
+    <p id="demoGuideStatus" role="status" aria-live="polite" aria-atomic="true">Use the trusted recipient for a 0.1 POT payment, then request 2.5 POT. Navigation never submits a transaction.</p>
+  </section>
+
+  <details class="sim-proof hidden" id="simProof">
+    <summary>Recorded Claude testnet proof · 23 October 2026</summary>
+    <div class="sim-proof-body">
+      <p class="eyebrow">HISTORICAL PORTALDOT V3 EVENTS · SEPARATE FROM THIS SIMULATION</p>
+      <h2 tabindex="-1" id="simProofTitle">A real agent payment, then an owner decision</h2>
+      <ol>
+        <li><b>Agent payment · 0.3 POT.</b> Recorded Paid event, block 159822.</li>
+        <li><b>Held request · 2 POT, not paid.</b> Request #2 recorded at block 160197.</li>
+        <li><b>Owner-authorized payment · 2 POT.</b> Paid and RequestResolved events at block 160213.</li>
+        <li><b>Agent frozen.</b> FrozenSet at block 160231. The project reports the MCP then refused a payment; that refusal produced no new transaction.</li>
+      </ol>
+      <p>These are recorded testnet transfers attributed to Claude through MCP in the project record. The recipient was the documented owner address; API service delivery was not independently verified. This panel is not a live Claude session.</p>
+      <div class="proof-links"><a href="https://github.com/Oziman13/allowance/blob/main/docs/PROOF.md#a-real-ai-assistant-on-chain-2026-10-23" target="_blank" rel="noopener">Full hashes &amp; recorded events ↗</a><a href="https://github.com/Oziman13/allowance/blob/main/evidence/onchain.json" target="_blank" rel="noopener">Source event export ↗</a><a href="https://youtu.be/fxO8grGr4PY" target="_blank" rel="noopener">Historical 2:21 check-in video ↗</a></div>
+    </div>
+  </details>
 
   <section class="hidden" id="deployBox">
     <div class="panel">
@@ -604,11 +632,14 @@ __NATIVE_CSS__
           <div class="pf-canvas" data-policy-diagram="control" aria-hidden="true"></div>
           <p class="pf-summary" id="fieldSummary" aria-live="polite">Reading the selected agent's spending environment.</p>
           <dl class="pf-readings">
-            <div><dt>Contract-held balance</dt><dd id="fieldBalance">—</dd></div>
+            <div><dt>Recorded account budget</dt><dd id="fieldBalance">—</dd></div>
             <div><dt>Per-payment cap</dt><dd id="fieldCap">—</dd></div>
-            <div><dt>Autonomous period limit</dt><dd id="fieldLimit">—</dd></div>
-            <div><dt>Can spend now without asking</dt><dd id="fieldLeft">—</dd></div>
+            <div><dt>Autonomous fixed-window limit</dt><dd id="fieldLimit">—</dd></div>
+            <div><dt>Available autonomous capacity this window</dt><dd id="fieldLeft">—</dd></div>
+            <div class="pf-single"><dt>Maximum single autonomous payment</dt><dd id="fieldSingle">—</dd></div>
           </dl>
+          <p class="pf-footnote" id="fieldSpendingNote">Reading the account snapshot and chain time. No spending amount is assumed.</p>
+          <p class="pf-footnote">Single-payment amounts apply only to eligible recipients. The payment preview checks the chosen address and execution; it is not a guarantee of settlement.</p>
           <details id="fieldDetails"><summary>Inspect policy &amp; verified recipients</summary>
             <dl class="pf-policy-details"><div><dt>Agent address</dt><dd id="fieldAgent">—</dd></div><div><dt>Recipient policy</dt><dd id="fieldTrust">—</dd></div><div><dt>Expiry</dt><dd id="fieldExpiry">—</dd></div><div><dt>Pending requests</dt><dd id="fieldPending">—</dd></div></dl>
             <p class="hint" id="fieldTrustNote">Reading recipient history…</p><ul id="fieldRecipients" class="pf-recipients"></ul>
@@ -617,7 +648,7 @@ __NATIVE_CSS__
         </section>
 
         <div class="meter-block">
-          <div class="budget-overview"><div class="spending-ring" id="spendingRing" role="img"><div><b id="ringPercent"></b><span>limit used</span></div></div><div class="budget-copy"><p class="eyebrow">AUTONOMOUS ALLOWANCE</p>
+          <div class="budget-overview"><div class="spending-ring" id="spendingRing" role="img"><div><b id="ringPercent"></b><span>limit used</span></div></div><div class="budget-copy"><p class="eyebrow">AVAILABLE CAPACITY · THIS FIXED WINDOW</p>
           <div class="left-num" id="dLeft"></div>
           <p class="left-cap" id="dLeftCap"></p>
           </div></div>
@@ -685,7 +716,7 @@ __NATIVE_CSS__
           <p class="empty hidden" id="feedEmpty">No activity yet.</p>
         </div>
 
-        <div class="agent hidden" id="agentBox">
+        <div class="agent hidden" id="agentBox" tabindex="-1">
           <p class="eyebrow">AGENT WORKSPACE</p><h2>Test an agent payment</h2>
           <p>This browser holds the agent key for this allowance. Send a payment the way your agent would and watch the rules apply.</p>
           <form class="grid" id="payForm">
@@ -706,9 +737,10 @@ __NATIVE_CSS__
             <h3 id="decisionTitle">Inspect a payment</h3><p id="decisionReason">A preview checks the active policy. It does not send a payment.</p>
             <p class="pf-decision-proof hidden" id="decisionProof"></p>
           </section>
+          <a class="review-held hidden" id="reviewHeldRequest" href="#inbox">Review this exact held request</a>
           <details class="assistant">
             <summary>Give this allowance to an AI assistant</summary>
-            <p class="hint">Paste this into your MCP client (Claude Desktop, Claude Code, Cursor). The assistant gets only the agent key; the rules above still apply to everything it does. Setup steps are in <a href="https://github.com/Oziman13/allowance/tree/main/mcp" target="_blank" rel="noopener">mcp/README.md</a>.</p>
+            <p class="hint">Paste this into a compatible MCP client. The assistant gets only the agent key. Contract rules bound its authorized escrow operations; wallet funds and owner exceptions have separate boundaries. Setup steps are in <a href="https://github.com/Oziman13/allowance/tree/main/mcp" target="_blank" rel="noopener">mcp/README.md</a>.</p>
             <pre id="mcpConfig" tabindex="0"></pre>
             <button class="btn small" type="button" id="copyCfgBtn">Copy config</button>
           </details>
@@ -718,7 +750,7 @@ __NATIVE_CSS__
   </section>
 </main>
 
-<div class="wrap"><footer>Allowance is open source (MIT) and not audited. Keep budgets small. <span><a href="https://github.com/Oziman13/allowance">Source on GitHub</a><button type="button" class="linklike" id="phoneBtn">Open on your phone</button></span></footer></div>
+<div class="wrap"><footer><span>Testnet only · not independently audited. Keep budgets small. <a href="https://github.com/Oziman13/allowance/blob/main/SECURITY.md" target="_blank" rel="noopener">Security boundaries</a></span><span class="technical-links"><a href="https://github.com/Oziman13/allowance">Source on GitHub</a><button type="button" class="linklike" id="phoneBtn">Open on your phone</button><button class="linklike" id="nativeBtn" aria-haspopup="dialog">Native identity inspector · Read-only</button></span></footer></div>
 
 <dialog id="openDlg" aria-labelledby="openTitle">
   <form id="openForm" method="dialog">
@@ -735,7 +767,7 @@ __NATIVE_CSS__
       <label class="check full"><input type="checkbox" name="trustedOnly" checked> Only trusted recipients get instant payments</label>
       <label class="full">Trusted recipient (optional)<input type="text" name="trusted" placeholder="0x… defaults to your own address" autocomplete="off" spellcheck="false"></label>
     </div>
-    <p class="hint">Gas is POT on Portaldot. It's sent to the agent now and counted as spent.</p>
+    <p class="hint">Starting gas is POT sent directly to the agent. It counts in total spent, outside autonomous caps, and becomes unrestricted wallet funds.</p>
     <div class="dlg-acts">
       <button class="btn" value="cancel" formnovalidate>Cancel</button>
       <button class="btn primary" id="openSubmit" value="ok">Create allowance</button>
@@ -745,7 +777,7 @@ __NATIVE_CSS__
 
 <dialog id="walletDlg" aria-labelledby="walletTitle">
   <h2 id="walletTitle">Connect a wallet</h2>
-  <p id="walletIntro">Allowance runs on the Portaldot V3 testnet. Any EVM wallet works.</p>
+  <p id="walletIntro">Owner writes use a compatible EVM wallet on Portaldot V3 Testnet. Native identity inspection is a separate read-only tool.</p>
   <div id="walletPick" class="wallet-list hidden" role="group" aria-label="Wallets found in this browser"></div>
   <div id="walletMobile" class="hidden">
     <p class="wallet-note">Phone browsers can't reach your wallet app. Open this page inside your wallet instead:</p>
@@ -765,7 +797,7 @@ __NATIVE_CSS__
   <div class="native-head">
     <div class="native-topline"><span class="native-tag">NATIVE ACCOUNT · READ-ONLY</span><button class="btn" id="nativeClose" type="button">Close</button></div>
     <p class="eyebrow">PORTALDOT V3 TESTNET / IDENTITY INSPECTOR</p>
-    <h2 id="nativeTitle">Your account. Verified boundaries.</h2>
+    <h2 id="nativeTitle">Inspect your native identity</h2>
     <p id="nativeDescription">Inspect your native identity, runtime mapping and stored allowance ownership. Account access shares public addresses only. No signatures or transactions.</p>
   </div>
   <div class="native-body">
@@ -798,7 +830,7 @@ __NATIVE_CSS__
   </div>
 </dialog>
 
-<div id="toast" role="status" aria-live="polite" aria-atomic="true" role="status" aria-live="polite"></div>
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="vendor/ethers-6.13.4.umd.min.js"></script>
 <script>
@@ -806,6 +838,7 @@ __NATIVE_CSS__
 const ABI = __ABI__;
 const BYTECODE = "__BYTECODE__";
 const NETWORKS = __NETWORKS__;      // config/networks.json, keyed by chainId
+__SPENDING_JS__
 const NATIVE = ethers.ZeroAddress;
 const HOLD = ["", "Larger than the per-payment cap", "Over this period's limit", "Recipient isn't trusted"];
 const STATUS = ["", "Pending", "Approved", "Rejected", "Cancelled"];
@@ -1046,16 +1079,40 @@ async function assetMeta(asset) {
   return (S.meta[asset] = { sym, dec: Number(dec) });
 }
 
+let spendingReadSequence = 0, spendingSnapshotAvailable = false, spendingLoadPending = false;
 async function loadAccounts() {
-  const ids = (await S.al.accountsOfOwner(S.me)).map(Number);
-  S.accounts = [];
-  for (const id of ids) {
-    const [a, left] = await S.al.getAccount(id);
-    S.accounts.push({ id, a, left, m: await assetMeta(a.asset), pending: await pendingCount(id) });
-  }
-  if (S.sel == null && S.accounts.length) S.sel = S.accounts[S.accounts.length - 1].id;
+  const sequence = ++spendingReadSequence;
+  spendingSnapshotAvailable = false; spendingLoadPending = true;
+  markSpendingUnavailable('Reading the account snapshot and chain time…');
   renderList();
-  if (S.sel != null) await renderDetail(S.sel);
+  try {
+    const block = await S.provider.getBlock('latest');
+    if (!block || !Number.isSafeInteger(block.timestamp) || !Number.isSafeInteger(block.number) || !block.hash) throw new Error('Chain snapshot unavailable');
+    // Preserve existing latest-state RPC calls, including the simulation transport.
+    // Accept financial data only when its authoritative chain head stays unchanged.
+    const ids = (await S.al.accountsOfOwner(S.me)).map(Number), next = [];
+    for (const id of ids) {
+      const [a, left] = await S.al.getAccount(id);
+      next.push({ id, a, left, chainTime: block.timestamp, snapshotBlock: block.number,
+        m: await assetMeta(a.asset) });
+    }
+    const end = await S.provider.getBlock('latest');
+    if (end?.hash !== block.hash) throw new Error('Account snapshot changed during the read');
+    // History can take longer; it does not redefine the financial snapshot above.
+    for (const entry of next) entry.pending = await pendingCount(entry.id);
+    if (sequence !== spendingReadSequence) return;
+    S.accounts = next; spendingSnapshotAvailable = true; spendingLoadPending = false;
+    if (S.sel == null && S.accounts.length) S.sel = S.accounts[S.accounts.length - 1].id;
+    renderList();
+    if (S.sel != null) await renderDetail(S.sel);
+  } catch (error) {
+    if (sequence === spendingReadSequence) {
+      spendingSnapshotAvailable = false; spendingLoadPending = false;
+      markSpendingUnavailable('Account or chain-time read unavailable. No current spending amount is assumed. Refresh when the connection recovers.');
+      renderList();
+    }
+    throw error;
+  }
 }
 async function refresh() { if (S.al) await loadAccounts().catch(() => {}); }
 
@@ -1084,18 +1141,35 @@ async function heldRequests(id) {
 async function pendingCount(id) { return (await heldRequests(id)).filter((x) => Number(x.r.status) === 1).length; }
 
 // ---------------------------------------------------------------- rendering
-// What the agent can pay right now without asking: the period allowance, but never more than the budget.
-function spendNow(left, a) { return left < a.balance ? left : a.balance; }
+function spendingFor(entry) { return SpendingView.summarize(spendingSnapshotAvailable ? entry : null, entry?.chainTime); }
+function spendingText(amount, m) { return amount == null ? 'Unavailable' : `${fmt(amount, m.dec)} ${m.sym}`; }
+const windowDuration = period => ({ 3600: '1 hour', 86400: '24 hours', 604800: '7 days', 2592000: '30 days' }[period] || fmtDur(period));
+function markSpendingUnavailable(reason) {
+  const placeholder = spendingLoadPending ? 'Reading…' : 'Unavailable';
+  for (const id of ['fieldBalance', 'fieldLeft', 'fieldSingle', 'fieldCap', 'fieldLimit', 'dLeft', 'fBalance', 'fPerPay', 'fTotal']) $('#'+id).textContent = placeholder;
+  $('#ringPercent').textContent = '—';
+  $('#spendingRing').setAttribute('aria-label', 'Spending usage unverified');
+  $('#dReset').textContent = '';
+  $('#accountStatus').textContent = spendingLoadPending ? 'Reading snapshot…' : 'Snapshot unavailable';
+  $('#accountStatus').className = 'badge';
+  $('#controlField').dataset.state = 'neutral';
+  $('#controlField').setAttribute('aria-busy', String(spendingLoadPending));
+  $('#fieldSpendingNote').textContent = reason;
+  $('#dLeftCap').textContent = reason;
+  updateDemoGuide();
+}
 function renderList() {
   const ul = $("#acctList"); ul.innerHTML = "";
   $("#noAccts").classList.toggle("hidden", S.accounts.length > 0);
-  for (const { id, a, left, m, pending } of [...S.accounts].reverse()) {
+  $('#noAccts').textContent = spendingSnapshotAvailable ? "You haven't given any agent an allowance yet." : spendingLoadPending ? 'Reading allowances…' : 'Account list unavailable. No empty budget or ownership list is assumed.';
+  for (const entry of [...S.accounts].reverse()) {
+    const { id, a, left, m, pending } = entry, view = spendingFor(entry);
     const cap = a.rules.perPeriod, used = cap - left, pct = cap ? Number((used * 100n) / cap) : 0;
     const li = document.createElement("li");
     li.innerHTML = `<button type="button" aria-current="${id === S.sel}">
       <span class="row"><span>${esc(a.name || "Agent " + id)}</span>${a.frozen ? '<span class="badge frozen">Frozen</span>' : pending ? `<span class="badge held">${pending} waiting</span>` : ""}</span>
       <span class="mini"><i style="width:${pct}%"></i></span>
-      <span class="sub"><span>${fmt(spendNow(left, a), m.dec)} <span class="asset-symbol"></span> available</span><span>per ${PERIOD_NAME[Number(a.rules.period)] || fmtDur(Number(a.rules.period))}</span></span>
+      <span class="sub"><span>${view.capacity == null ? 'Unavailable' : fmt(view.capacity, m.dec)} <span class="asset-symbol"></span> capacity</span><span>fixed window</span></span>
     </button>`;
     li.querySelector(".asset-symbol").textContent = m.sym;
     li.firstElementChild.onclick = () => { S.sel = id; renderList(); renderDetail(id); };
@@ -1112,6 +1186,8 @@ function fmtDur(s) {
 
 async function renderDetail(id) {
   const entry = S.accounts.find((x) => x.id === id); if (!entry || S.sel !== id) return;
+  if (!spendingSnapshotAvailable) { markSpendingUnavailable('Current snapshot unavailable. Spending eligibility is unverified.'); return; }
+  const sequence = spendingReadSequence;
   const { a, left, m } = entry;
   $("#detail").classList.remove("hidden");
   $("#controlField").setAttribute("aria-busy", "true");
@@ -1119,24 +1195,23 @@ async function renderDetail(id) {
   $("#dWho").textContent = (a.asset === NATIVE ? m.sym : m.sym + " (ERC-20)") + " · agent " + short(a.agent);
   document.querySelectorAll(".sym").forEach((el) => (el.textContent = m.sym));
 
-  const cap = a.rules.perPeriod, period = Number(a.rules.period);
-  $("#dLeft").replaceChildren(document.createTextNode(fmt(spendNow(left, a), m.dec)));
-  const unit = document.createElement("small"); unit.textContent = m.sym; $("#dLeft").append(unit);
+  const cap = a.rules.perPeriod, period = Number(a.rules.period), view = spendingFor(entry);
+  $('#dLeft').replaceChildren(document.createTextNode(view.capacity == null ? 'Unavailable' : fmt(view.capacity, m.dec)));
+  if (view.capacity != null) { const unit = document.createElement('small'); unit.textContent = m.sym; $('#dLeft').append(unit); }
   const usedPercent = cap ? Math.max(0, Math.min(100, Number(((cap - left) * 10000n) / cap) / 100)) : 0;
   $("#spendingRing").style.setProperty("--used", usedPercent + "%");
   $("#spendingRing").classList.toggle("blocked", a.frozen);
   $("#spendingRing").setAttribute("aria-label", `${usedPercent}% of autonomous spending limit used${a.frozen ? "; agent frozen" : ""}`);
   $("#ringPercent").textContent = usedPercent + "%";
-  const block = await S.provider.getBlock("latest");
-  if (S.sel !== id) return;
-  const now = block.timestamp, expired = Number(a.rules.expiresAt) && now >= Number(a.rules.expiresAt);
+  const now = entry.chainTime, expired = view.state === 'expired';
   $("#accountStatus").textContent = a.frozen ? "Frozen · blocked" : expired ? "Expired · blocked" : "Active · policy enforced";
   $("#accountStatus").className = "badge " + (a.frozen || expired ? "frozen" : "active");
   $("#dLeftCap").textContent = a.frozen ? "Frozen. The agent can't spend or ask until you unfreeze it."
     : expired ? "Expired. The agent's access has ended."
+    : view.state === 'paused' ? view.reason
     : a.balance < left
-      ? `left to spend without asking you. This period's limit still has ${fmt(left, m.dec)} ${m.sym}, but the budget holds only ${fmt(a.balance, m.dec)} ${m.sym}. Add budget to use the rest.`
-      : `left to spend without asking you, out of ${fmt(cap, m.dec)} ${m.sym} per ${PERIOD_NAME[period] || fmtDur(period)}`;
+      ? `This period's limit still has ${fmt(left, m.dec)} ${m.sym}, but the budget holds only ${fmt(a.balance, m.dec)} ${m.sym}. Capacity is limited by that budget; a single payment also respects its own cap.`
+      : `capacity across eligible payments in this fixed ${windowDuration(period)} window, not one payment. Maximum single payment: ${spendingText(view.single, m)}.`;
   const resetAt = Number(a.periodStart) + period;
   $("#dReset").textContent = left === cap ? "Nothing spent this period" : (resetAt > now ? "Resets in " + fmtDur(resetAt - now) : "Resets on the next payment");
 
@@ -1147,8 +1222,8 @@ async function renderDetail(id) {
 
   const fr = $("#freezeRow"); fr.classList.toggle("on", a.frozen);
   $("#freezeText").innerHTML = a.frozen
-    ? "<b>This agent is frozen.</b>It can't pay, refuel gas or ask for approvals."
-    : "<b>Freeze this agent</b>If something looks wrong, stop everything in one transaction. You can unfreeze later.";
+    ? "<b>This agent is frozen.</b>No new agent payments, refuels or requests. The owner can still withdraw or approve an existing request."
+    : "<b>Freeze this agent</b>Block new agent payments, refuels and requests. Owner actions and funds already in the agent wallet have separate boundaries.";
   $("#freezeBtn").textContent = a.frozen ? "Unfreeze" : "Freeze agent";
   $("#freezeBtn").className = a.frozen ? "btn" : "btn ice";
 
@@ -1166,17 +1241,20 @@ async function renderDetail(id) {
     logs(S.al.filters.RequestResolved(null, id)),
     logs(S.al.filters.FrozenSet(id)),
   ]);
-  if (S.sel !== id) return;
+  if (S.sel !== id || sequence !== spendingReadSequence) return;
   // The starting gas is sent when the account is opened and doesn't count against the period limit.
   const opened = await logs(S.al.filters.AccountOpened(id));
   const openTx = new Set(opened.map((ev) => ev.transactionHash));
   for (const ev of gas) ev.seed = openTx.has(ev.transactionHash);
-  if (S.sel !== id) return;
+  if (S.sel !== id || sequence !== spendingReadSequence) return;
   renderInbox(held.filter((x) => Number(x.r.status) === 1), m);
   await renderMeter(entry, paid, gas, resolved);
   renderFeed(m, held, paid, gas, resolved, frozen);
+  if (S.sel !== id || sequence !== spendingReadSequence) return;
   await renderControlField(entry, held, now);
+  if (S.sel !== id || sequence !== spendingReadSequence) return;
   renderAgent(id, a, m);
+  updateDemoGuide();
 }
 
 async function renderMeter({ a, left, m }, paid, gas, resolved) {
@@ -1219,6 +1297,7 @@ function renderInbox(pending, m) {
   $("#pendingCount").textContent = pending.length + " pending";
   for (const { rid, r } of pending.reverse()) {
     const li = document.createElement("li"); li.className = "req"; li.dataset.requestId = String(rid);
+    li.id = `request-${rid}`; li.tabIndex = -1; li.setAttribute('aria-label', `Pending request #${rid}`);
     li.innerHTML = `<div class="top"><span class="memo">${esc(r.memo)}</span><span class="amt">${fmt(r.amount, m.dec)} ${esc(m.sym)}</span></div>
       <span class="pf-request-route"><span class="pf-node-mark" aria-hidden="true">•</span> Request #${rid}<span class="pf-route-mark" aria-hidden="true"></span><span class="pf-decision-mark" aria-hidden="true">◇</span> Awaiting owner approval</span>
       <span class="why">Owner decision required · ${HOLD[Number(r.reason)]}</span>
@@ -1413,7 +1492,7 @@ async function toggleFreeze() {
 
 // ---------------------------------------------------------------- simulation
 // Loads docs/sim.js (an in-browser EVM running the real Allowance bytecode) and seeds a demo agent,
-// so judges and newcomers can try every feature without a wallet or test tokens.
+// so judges and newcomers can try the core native-POT lifecycle without a wallet or test tokens.
 function loadScript(src) {
   return new Promise((ok, fail) => { const el = document.createElement("script"); el.src = src; el.onload = ok; el.onerror = () => fail(new Error("Couldn't load the simulation.")); document.head.append(el); });
 }
@@ -1448,11 +1527,12 @@ async function seedDemo(sim) {
 }
 async function skipDay() {
   const btn = $("#skipDayBtn"); btn.disabled = true;
-  try { await S.eth.advance(86400); await refresh(); toast("One day later: the daily limit has reset."); }
+  try { await S.eth.advance(86400); await refresh(); toast("Advanced 24 hours. An elapsed fixed window rolls forward on the next successful payment or refuel."); }
   catch (e) { toast(friendly(e), true); } finally { btn.disabled = false; }
 }
 
 __POLICY_JS__
+__DEMO_GUIDE_JS__
 
 // Native reads stay outside S, the EVM signer and the transaction/deployment helpers.
 let nativePanel, nativeLoading;

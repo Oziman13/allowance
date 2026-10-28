@@ -44,13 +44,15 @@ async function renderControlField(entry, held, now) {
   if (S.sel !== id) return;
   root.setAttribute('aria-busy', 'true');
   const pending = held.filter(x => Number(x.r.status) === 1).length;
-  const expired = Number(a.rules.expiresAt) && now >= Number(a.rules.expiresAt);
+  const view = spendingFor(entry), expired = view.state === 'expired';
   root.dataset.state = a.frozen || expired ? 'blocked' : 'active';
   $('#fieldMode').textContent = S.sim ? 'BROWSER SIMULATION' : net().name;
   $('#fieldBalance').textContent = `${fmt(a.balance, m.dec)} ${m.sym}`;
   $('#fieldCap').textContent = `${fmt(a.rules.perPayment, m.dec)} ${m.sym}`;
-  $('#fieldLimit').textContent = `${fmt(a.rules.perPeriod, m.dec)} ${m.sym} / ${PERIOD_NAME[Number(a.rules.period)] || fmtDur(Number(a.rules.period))}`;
-  $('#fieldLeft').textContent = `${fmt(spendNow(left, a), m.dec)} ${m.sym}`;
+  $('#fieldLimit').textContent = `${fmt(a.rules.perPeriod, m.dec)} ${m.sym} / ${windowDuration(Number(a.rules.period))}`;
+  $('#fieldLeft').textContent = spendingText(view.capacity, m);
+  $('#fieldSingle').textContent = spendingText(view.single, m);
+  $('#fieldSpendingNote').textContent = `${view.state === 'active' ? '' : view.reason + ' '}Unused policy headroom: ${spendingText(view.headroom, m)} before budget/eligibility checks. Snapshot block ${entry.snapshotBlock}. Fixed windows are not rolling or calendar-day limits.`;
   $('#fieldAgent').textContent = a.agent;
   $('#fieldTrust').textContent = a.rules.trustedOnly ? 'Only trusted recipients may qualify for autonomous payment.' : 'Any recipient may qualify, subject to all other policy checks.';
   $('#fieldExpiry').textContent = Number(a.rules.expiresAt) ? `${expired ? 'Expired' : 'Expires'} ${new Date(Number(a.rules.expiresAt) * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC')}` : 'No expiry configured';
@@ -59,7 +61,7 @@ async function renderControlField(entry, held, now) {
   root.querySelector('[data-node="pending"]').textContent = `${pending} pending ${pending === 1 ? 'request' : 'requests'}`;
   root.querySelector('[data-node="blocked"]').textContent = a.frozen ? 'Frozen · spending blocked' : expired ? 'Expired · spending blocked' : 'Freeze / expiry guard';
   root.querySelector('[data-node="smallDecision"]').textContent = a.frozen ? '⊘ Frozen' : expired ? '⊘ Expired' : '◇ ' + pending + ' pending requests';
-  $('#fieldSummary').textContent = a.frozen ? 'Frozen. This agent cannot pay, refuel or create approval requests.' : expired ? 'Expired. This agent cannot pay or create approval requests until its access is extended.' : 'Active. A payment goes through on its own when it fits both caps, the recipient rule and the budget. Anything else waits for you.';
+  $('#fieldSummary').textContent = a.frozen ? 'Frozen. No new agent payments, refuels or requests. Owner actions remain available.' : expired ? 'Expired. No new agent payments, refuels or requests. Owner actions remain available.' : 'Eligible payments can settle within both caps, the recipient rule and the budget. Valid out-of-policy requests may wait; invalid or otherwise unexecutable calls can fail.';
   $('#fieldRecipients').replaceChildren();
   $('#fieldTrustNote').textContent = 'Verifying recipients against the contract…';
   root.querySelector('[data-node="trusted"]').textContent = 'Verifying recipients…';
@@ -73,7 +75,7 @@ async function renderControlField(entry, held, now) {
     if (S.sel !== id) return;
     for (const { recipient } of verified) { const li = document.createElement('li'); li.textContent = recipient; $('#fieldRecipients').append(li); }
     root.querySelector('[data-node="trusted"]').textContent = `${verified.length} trusted`;
-    $('#fieldTrustNote').textContent = verified.length ? 'Trusted recipients, each one confirmed by reading the contract.' : 'No trusted recipients yet.';
+    $('#fieldTrustNote').textContent = verified.length ? 'Trusted recipients, each one confirmed by reading the contract; available history may omit others.' : 'No trusted recipients verified from available history. This is not proof that the trusted set is empty.';
   } catch {
     if (S.sel !== id) return;
     root.querySelector('[data-node="trusted"]').textContent = 'Verification unavailable';
@@ -110,6 +112,7 @@ function showPaymentDecision(result) {
     proof.append(label, copy);
   }
   proof.classList.toggle('hidden', !proof.childNodes.length);
+  observeDemoOutcome(result);
 }
 
 // Full contract dry runs temporarily checkpoint the in-browser EVM. Queue RPC

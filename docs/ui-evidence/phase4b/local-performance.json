@@ -1,0 +1,45 @@
+{
+  "context": "Local Chromium lab; no live Pages or real-device performance claim",
+  "samples": [
+    {
+      "scope": "LOCAL cold browser context, cache disabled; no network throttling; automation overhead included",
+      "viewport": 1440,
+      "cpuThrottle": 1,
+      "domContentLoadedMs": 362.09999999962747,
+      "loadMs": 366,
+      "firstContentfulPaintMs": 352,
+      "lcpMs": 352,
+      "simulationReadyMs": 891.3999999985099
+    },
+    {
+      "scope": "LOCAL cold browser context, cache disabled; no network throttling; automation overhead included",
+      "viewport": 390,
+      "cpuThrottle": 1,
+      "domContentLoadedMs": 405.69999999925494,
+      "loadMs": 409,
+      "firstContentfulPaintMs": 372,
+      "lcpMs": 372,
+      "simulationReadyMs": 847.7000000011176
+    },
+    {
+      "scope": "LOCAL cold browser context, cache disabled; no network throttling; automation overhead included",
+      "viewport": 1440,
+      "cpuThrottle": 1,
+      "domContentLoadedMs": 347.30000000074506,
+      "loadMs": 354,
+      "firstContentfulPaintMs": 312,
+      "lcpMs": 312,
+      "simulationReadyMs": 915
+    },
+    {
+      "scope": "LOCAL cold browser context, cache disabled; no network throttling; automation overhead included",
+      "viewport": 390,
+      "cpuThrottle": 4,
+      "domContentLoadedMs": 719.4000000003725,
+      "loadMs": 731.5,
+      "firstContentfulPaintMs": 560,
+      "lcpMs": 560,
+      "simulationReadyMs": 2799.5999999996275
+    }
+  ]
+}

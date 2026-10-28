@@ -1,0 +1,294 @@
+LOCAL VALIDATION. No live Pages or public-chain success claim. Positive browser flows use real contract bytecode with local test accounts; native interfaces and negative RPC/event cases are mocked.
+
+Foundry
+Command: /workspace/.allowance-tools/node_modules/@foundry-rs/forge-linux-amd64/bin/forge test --use /workspace/.allowance-tools/solc-0.8.28 --fuzz-seed 0x4b -vv
+Exit: 0
+No files changed, compilation skipped
+
+Ran 19 tests for test/audit/Phase2A.t.sol:Phase2AAuditTest
+[PASS] test_I01_currentAgentCanCancelWhileFrozenAndExpired() (gas: 396571)
+[PASS] test_I01_staleRequestsRequireOwnerButSurviveFreezeExpiryRotationAndRules() (gas: 486729)
+[PASS] test_I02_gasRefuelCanBeSpentAtUntrustedRecipientOutsideContract() (gas: 456194)
+[PASS] test_I03_dishonestTrueReturnCanReportPaymentWithoutTransfer() (gas: 873383)
+[PASS] test_I03_recipientFeeMeansPaidAmountIsGrossNotNet() (gas: 937364)
+[PASS] test_I04_contractPreviewIsOnlyAHoldClassifier() (gas: 306827)
+[PASS] test_L01_lifetimeCounterOverflowBlocksPayAndApproveButOwnerCanWithdraw() (gas: 857924)
+[PASS] test_M01_negativeRebaseMakesClaimsInsolventAndFirstWithdrawerWins() (gas: 829075)
+[PASS] test_M01_senderSurchargeConsumesAnotherAccountsBacking() (gas: 1149175)
+[PASS] test_allOwnerEntryPointsRejectStranger() (gas: 390577)
+[PASS] test_callbacksBlockAllSixFundMovingEntryPointsAcrossAccounts() (gas: 946850)
+[PASS] test_exactExpiryBlocksInstantHeldAndRefuelButOwnerKeepsControl() (gas: 282443)
+[PASS] test_fixedWindowsPermitTwoLimitsNearBoundaryButNotWithinOneWindow() (gas: 559759)
+[PASS] test_incomingNoReturnWorksAndFalseMalformedRollBackOpenAndFund() (gas: 1394699)
+[PASS] test_nativeAccountingConservesValueAndThirdPartyFundingGrantsNoRights() (gas: 504821)
+[PASS] test_revokedAgentCannotPayRefuelOrCancelOldRequest_newAgentCanCancel() (gas: 419447)
+[PASS] test_tokenCallbackCannotReenterNativeAccountEvenWhenAuthorizedAgentOfBoth() (gas: 1190538)
+[PASS] test_tokenFalseMalformedAndBlacklistRevertAtomically_noDataWorks() (gas: 972497)
+[PASS] test_unsolicitedTokensAreUncreditedAndStandardAccountsStayIsolated() (gas: 1005699)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 11.23ms (6.53ms CPU time)
+
+Ran 10 tests for test/audit/TokenCompatibility.t.sol:TokenCompatibilityTest
+[PASS] test_blacklistRevertsPayApprovalAndWithdrawalWithoutAccountingLoss() (gas: 985623)
+[PASS] test_callbackTokenWithdrawalSucceedsWithoutReenteringOtherAsset() (gas: 1209305)
+[PASS] test_falseReturnsDoNotCreditDepositsOrDebitFailedWithdrawals() (gas: 1596676)
+[PASS] test_honestNoReturnOnBothDirectionsDepositFundPayWithdraw() (gas: 788590)
+[PASS] test_inboundRecipientFeeCreditsDeltaAndAllowsFullCreditedWithdrawal() (gas: 779910)
+[PASS] test_malformedReturnsDoNotCreditDepositsOrDebitFailedWithdrawals() (gas: 1596767)
+[PASS] test_outboundRecipientFeeKeepsBackingButReducesPaymentAndWithdrawalReceipt() (gas: 956662)
+[PASS] test_positiveRebaseInsideFundingCreditsOtherAccountsYieldToFunder() (gas: 983338)
+[PASS] test_positiveRebaseOutsideFundingLeavesUnallocatedSurplus() (gas: 972685)
+[PASS] test_standardTokenDepositFundPayWithdraw() (gas: 770515)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 3.90ms (3.28ms CPU time)
+
+Ran 27 tests for test/Allowance.t.sol:AllowanceTest
+[PASS] testFuzz_instantSpendingNeverExceedsPeriodLimit(uint256) (runs: 1000, μ: 1980732, ~: 1973642)
+[PASS] test_approveAndTrust_nextPaymentIsInstant() (gas: 516585)
+[PASS] test_approve_paysAndDoesNotUseThePeriodLimit() (gas: 482918)
+[PASS] test_approve_reentrancyBlocked() (gas: 726459)
+[PASS] test_erc20_account_paysAndHolds() (gas: 847640)
+[PASS] test_erc20_falseReturn_reverts() (gas: 786025)
+[PASS] test_erc20_feeOnTransfer_creditsWhatArrived() (gas: 728199)
+[PASS] test_erc20_rejectsNativeValueAndRefuel() (gas: 729159)
+[PASS] test_expiry_endsTheSession() (gas: 384576)
+[PASS] test_freeze_blocksEverythingTheAgentDoes() (gas: 394826)
+[PASS] test_fund_byAnyone() (gas: 347415)
+[PASS] test_onlyOwnerResolves_onlyAgentCancels() (gas: 437394)
+[PASS] test_open_native_depositsAndSeedsGas() (gas: 340217)
+[PASS] test_open_rejectsBadInput() (gas: 53987)
+[PASS] test_pay_insufficientBudget_reverts_butLargeRequestCanBeHeld() (gas: 497234)
+[PASS] test_pay_onlyAgent() (gas: 333961)
+[PASS] test_pay_overPerPayment_isHeld() (gas: 434798)
+[PASS] test_pay_overPeriod_isHeld_thenResetsNextPeriod() (gas: 554185)
+[PASS] test_pay_untrustedRecipient_isHeld() (gas: 479154)
+[PASS] test_pay_withinRules_settlesInstantly() (gas: 377875)
+[PASS] test_preview_matchesPay() (gas: 338910)
+[PASS] test_refuel_countsAgainstTheSameLimit() (gas: 450739)
+[PASS] test_refusingRecipient_revertsWholePayment() (gas: 407093)
+[PASS] test_resolvedRequestsAreFinal() (gas: 527742)
+[PASS] test_rotateAgent_oldKeyIsLockedOut() (gas: 407229)
+[PASS] test_untrust_removesInstantAccess() (gas: 412533)
+[PASS] test_withdraw_onlyOwner() (gas: 358997)
+Suite result: ok. 27 passed; 0 failed; 0 skipped; finished in 8.15s (8.15s CPU time)
+
+Ran 2 tests for test/invariant/AllowanceStateful.t.sol:AllowanceStatefulTest
+[PASS] invariant_referenceLedgerPermissionsAndBacking() (runs: 128, calls: 16384, reverts: 0)
+
+╭------------------+----------+-------+---------+----------╮
+| Contract         | Selector | Calls | Reverts | Discards |
++==========================================================+
+| AllowanceHandler | advance  | 1356  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | donate   | 1337  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | freeze   | 1406  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | fund     | 1389  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | open     | 1356  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | pay      | 1288  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | policy   | 1411  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | refuel   | 1337  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | resolve  | 1342  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | rotate   | 1371  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | trust    | 1413  | 0       | 0        |
+|------------------+----------+-------+---------+----------|
+| AllowanceHandler | withdraw | 1378  | 0       | 0        |
+╰------------------+----------+-------+---------+----------╯
+
+[PASS] test_handlerScriptExercisesSuccessesDenialsAndOldRequests() (gas: 3077492)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 63.33s (63.37s CPU time)
+
+Ran 4 test suites in 63.35s (71.50s CPU time): 58 tests passed, 0 failed, 0 skipped (58 total tests)
+
+MCP
+Command: ANVIL=/workspace/.allowance-tools/node_modules/@foundry-rs/anvil-linux-amd64/bin/anvil npm test --prefix mcp
+Exit: 0
+
+> allowance-mcp@0.1.0 test
+> node --test test/*.test.js
+
+✔ finds the agent's allowance and reports its rules (2219.811594ms)
+✔ preview tells the three outcomes apart (403.701648ms)
+✔ pays inside the rules, refuelling its own gas from the same budget (772.601524ms)
+✔ a payment outside the rules is held, then the owner approves it (570.563844ms)
+✔ the agent can withdraw its own request (619.795324ms)
+allowance-mcp: agent 0x28e83f9eb2A50a83f5432c167f95B6D66E6Ad04b, allowance #0 on Local (anvil)
+✔ full MCP round trip: a frozen allowance stops the assistant with a clear message (3842.282233ms)
+✔ audit: preview rejects contract-invalid addresses and amounts (1191.618532ms)
+✔ audit: frozen and expired capacity is zero; single payment differs from capacity (1206.456588ms)
+✔ audit: held requests may exceed budget; instant payments may not (978.296156ms)
+✔ audit: zero gas cannot bootstrap refuel and does not move budget (703.44671ms)
+✔ audit: invalid preview amount 0 (407.080525ms)
+✔ audit: invalid preview amount -1 (497.090303ms)
+✔ audit: invalid preview amount bad (388.992649ms)
+✔ audit: invalid preview amount 340282366920938463463.374607431768211456 (391.90132ms)
+✔ audit: frozen reports zero spending capacity (667.254721ms)
+✔ audit: expired reports zero spending capacity (510.834888ms)
+✔ audit: RPC timeout does not assert nothing was sent (0.476226ms)
+✔ audit: successful receipt without payment evidence is not paid (333.396135ms)
+✔ audit: refuel does not consume the budget reserved for an instant payment (757.038344ms)
+✔ audit: pending transaction never reports paid (436.012098ms)
+✔ audit: reverted transaction never reports paid (402.337231ms)
+✔ audit: timeout transaction never reports paid (506.051864ms)
+✔ audit: replacement transaction never reports paid (461.118949ms)
+✔ audit: refuel preserves period capacity and exhausted limits still allow requests (1849.549246ms)
+✔ audit: a preview is advisory when the owner freezes before payment (740.283875ms)
+✔ integration: Paid contract evidence (535.805008ms)
+✔ integration: Paid account evidence (313.313841ms)
+✔ integration: Paid recipient evidence (558.589595ms)
+✔ integration: Paid amount evidence (400.820957ms)
+✔ integration: Paid memo evidence (491.385035ms)
+✔ integration: Paid matching evidence (401.076989ms)
+✔ integration: PaymentHeld contract evidence (344.087805ms)
+✔ integration: PaymentHeld account evidence (305.59291ms)
+✔ integration: PaymentHeld recipient evidence (410.96002ms)
+✔ integration: PaymentHeld amount evidence (317.673502ms)
+✔ integration: PaymentHeld memo evidence (446.836233ms)
+✔ integration: PaymentHeld matching evidence (298.940166ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 29328.941806
+
+Native unit
+Command: npm test --prefix substrate
+Exit: 0
+
+> allowance-substrate@0.1.0 test
+> node browser/native.test.mjs
+
+✔ no permission on construction/discovery; unavailable wallet fails safely (3.830575ms)
+✔ user rejects account authorization (0.34643ms)
+✔ unsupported provider rejected; signing support is unnecessary and never accessed (46.673893ms)
+✔ multiple accounts require selection; account changes immediately invalidate, late RPC cannot restore (16.663768ms)
+✔ disconnect unsubscribes, clears identity and ignores late authorization/subscription (1.652185ms)
+✔ synchronous subscription beats stale initial account response (23.963555ms)
+✔ RPC deadline fails closed without zero balances even when backend ignores cancellation (38.653274ms)
+✔ only authorized AccountId32 identities accepted; SS58 reencoding preserves bytes (13.228865ms)
+✔ network genesis/runtime and versions must verify (0.59757ms)
+✔ mapping absent, conflicting and fallback-shaped cases remain distinct (0.30552ms)
+✔ runtime inspection uses finalized metadata/read API and checks exact reverse identity (44.775015ms)
+✔ wrong genesis, missing read API and reverse RPC failure never become unmapped (0.98416ms)
+✔ partial decorated version is supported; mismatched upgrade metadata fails closed (46.997881ms)
+✔ real pinned SDK initializes through read firewall with official generic metadata (not Portaldot evidence) (5107.263873ms)
+✔ ownership verifies actual stored owner, chain, deployed code and stable finalized snapshot (31.801381ms)
+✔ EVM read failures preserve confirmed mapping but never present empty ownership or budgets (5.662802ms)
+✔ positive RPC boundary rejects all submission/signing/mapping methods before fetch (2.428131ms)
+✔ null/undefined extension rejection is handled as authorization failure (0.230811ms)
+✔ null/undefined read rejection is handled as RPC unavailable (3.686566ms)
+✔ code-only reads also reject a changed finalized snapshot (0.16278ms)
+✔ HTTP 403, unavailable endpoint and malformed JSON-RPC never supply identity data (0.475431ms)
+✔ malformed runtime H160 and reverse Option fail without an ownership read (0.411637ms)
+✔ malformed EVM block/code/ABI data does not become empty ownership or a zero budget (42.226566ms)
+✔ disconnect, account selection and extension change cancel in-flight results (112.76658ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6965.731304
+
+Display unit
+Command: node script/spending-view.test.cjs
+Exit: 0
+✔ budget, total window capacity and one-payment ceiling are distinct (1.853371ms)
+✔ freeze stops immediately spendable amounts while retaining policy headroom and budget (0.31888ms)
+✔ expiry uses the supplied chain timestamp, including the exact boundary (0.164192ms)
+✔ exhausted fixed-window headroom permits zero even with budget (0.127067ms)
+✔ insufficient and empty budgets bound capacity independently of period headroom (0.1837ms)
+✔ single payment is bounded by all three amounts (1.323751ms)
+✔ an owner budget debit can lower available capacity without consuming period headroom (0.254154ms)
+✔ zero per-payment cap pauses positive autonomous spending (0.120588ms)
+✔ unknown chain time is unavailable, never a misleading zero or local-clock fallback (0.228957ms)
+✔ missing/malformed account reads remain unavailable (0.330547ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15.913601
+
+ui-smoke
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules node script/ui-smoke.cjs
+Exit: 0
+PASS wallet absent and wallet rejection states; keyboard skip link
+PASS real EVM: approval, trust, rejection, paid/held, freeze blocking, unfreeze and daily reset
+PASS real EVM: rule update, budget funding and withdrawal
+PASS hostile token metadata renders as text in account list, amount and activity
+PASS injected wallet connect/no-contract UI; no signing or transaction request
+PASS desktop/tablet/mobile layouts (1440, 768, 390, 320), expanded forms and reduced motion
+
+wallet-smoke
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules node script/wallet-smoke.cjs
+Exit: 0
+PASS desktop without a wallet: install link, QR to open on a phone, demo from the dialog
+PASS phone without a wallet: MetaMask, Trust, Coinbase, OKX links and copy-link
+PASS several wallets (EIP-6963): picker, only the chosen wallet is asked, choice remembered
+PASS reload reconnects the remembered wallet, no dialog
+PASS wrong network: Portaldot V3 Testnet added with chain 0x190f1ca9, POT, official RPC; no deploy offer
+PASS network already in the wallet: plain switch, nothing added
+PASS low budget: "can spend now" = min(period allowance, budget) = 2 POT, with the reason
+PASS no uncaught errors
+
+policy-field-smoke
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules UI_A11Y=1 node script/policy-field-smoke.cjs
+Exit: 0
+PASS axe WCAG A/AA: landing pending
+PASS axe WCAG A/AA: landing blocked
+PASS axe WCAG A/AA: landing allowed
+PASS landing selector: shared geometry, keyboard, example copy, responsive fallback
+PASS axe WCAG A/AA: active control field and preview
+PASS axe WCAG A/AA: mobile expanded control field
+PASS control field: verified balance/caps/allowance/trust/pending and narrow-screen details
+PASS axe WCAG A/AA: payment-autonomous
+PASS axe WCAG A/AA: payment-pending
+PASS axe WCAG A/AA: payment-owner-approved
+PASS payment lifecycle: preview/submission/receipt, autonomous, pending without reservation, distinct owner payment
+PASS axe WCAG A/AA: payment-blocked
+PASS frozen, chain expiry, and insufficient-balance failure; no false approval requests
+PASS selected-agent isolation: real account creation, policy values, no stale transaction outcome
+PASS unknown transport failure classification and zero uncaught browser errors
+
+checkin-smoke
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules node script/checkin-smoke.cjs
+Exit: 0
+PASS fresh browser: landing → policy explanation → simulation → rules/allowance → paid → held → approved → frozen/blocked → unfrozen
+PASS real contract semantics, desktop/tablet/mobile, keyboard focus, no missing assets or console errors, no external asset requests
+PASS independent fresh mobile session: repeatable seed; external traffic blocked without replacing assets or results
+
+native-wallet-smoke
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules node script/native-wallet-smoke.cjs
+Exit: 0
+PASS production lazy bundle: absent extension, no auto permission, Escape/focus restoration
+PASS production bundle: Error/null rejected permission and unsupported extension
+PASS production bundle: mocked HTTP 503/403, unavailable endpoint and malformed JSON stay unverified, no EVM deployment fallback or state mutation
+PASS mocked positive UI: selection/switch/disconnect, SS58 bytes, safe names, 1440/768/390/320, axe WCAG A/AA
+PASS mocked UI failure states: unmapped/conflicting/wrong network/missing API/RPC failure/owner mismatch
+PASS stale response after close discarded; simulation identity retained and native state cleared
+PASS MetaMask-style signer/provider/account retained; EVM mode entry clears native results without EVM submission
+PASS no signing/provider access, native/public-chain write requests, or uncaught errors
+
+Jury regression
+Command: NODE_PATH=/tmp/allowance-native-browser/node_modules UI_A11Y=1 UI_EVIDENCE_DIR=docs/ui-evidence/phase4b node script/jury-experience-smoke.cjs
+Exit: 0
+PASS accessibility: landing desktop
+PASS accessibility: simulation mobile
+PASS accessibility: frozen simulation desktop
+PASS exact guided lifecycle, matching request/focus, frozen owner exception, proof labels, four widths and 200% layout zoom
+PASS exhausted/budget-limited/expired/recipient-restricted states and clock/account/changed-head failures without false zeros
+METRICS {"context":"Local Chromium lab; no live Pages or real-device performance claim","samples":[{"scope":"LOCAL cold browser context, cache disabled; no network throttling; automation overhead included","viewport":1440,"cpuThrottle":1,"domContentLoadedMs":362.09999999962747,"loadMs":366,"firstContentfulPaintMs":352,"lcpMs":352,"simulationReadyMs":891.3999999985099},{"scope":"LOCAL cold browser context, cache disabled; no network throttling; automation overhead included","viewport":390,"cpuThrottle":1,"domContentLoadedMs":405.69999999925494,"loadMs":409,"firstContentfulPaintMs":372,"lcpMs":372,"simulationReadyMs":847.7000000011176},{"scope":"LOCAL cold browser context, cache disabled; no network throttling; automation overhead included","viewport":1440,"cpuThrottle":1,"domContentLoadedMs":347.30000000074506,"loadMs":354,"firstContentfulPaintMs":312,"lcpMs":312,"simulationReadyMs":915},{"scope":"LOCAL cold browser context, cache disabled; no network throttling; automation overhead included","viewport":390,"cpuThrottle":4,"domContentLoadedMs":719.4000000003725,"loadMs":731.5,"firstContentfulPaintMs":560,"lcpMs":560,"simulationReadyMs":2799.5999999996275}]}
+PASS no automatic transaction route, public RPC request, native SDK eager load or uncaught browser error

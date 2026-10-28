@@ -1,5 +1,5 @@
 /* Separate, read-only native identity surface. */
-#nativeBtn { font-size:11px; white-space:nowrap; }
+#nativeBtn { font-size:11px; white-space:normal; min-height:44px; text-align:left; }
 #nativeWalletDlg { width:min(860px,calc(100% - 32px)); max-width:860px; padding:0; border:1px solid #9585ff55; background:linear-gradient(145deg,#172139,#0b1221 70%); }
 .native-head { padding:28px 28px 22px; border-bottom:1px solid var(--line); background:radial-gradient(ellipse at top right,#9585ff17,transparent 65%); }
 .native-head .eyebrow { color:#bcb0ff; font-size:10px; margin-bottom:12px; }
@@ -32,9 +32,8 @@
 .native-limit p { margin:0; line-height:1.9; color:#bdc7da; }
 .native-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
 .native-actions .btn { min-height:44px; }
-@media(max-width:860px) { header { flex-wrap:wrap; } #nativeBtn { margin-left:auto; } }
+@media(max-width:860px) { header { flex-wrap:wrap; } }
 @media(max-width:560px) {
- #nativeBtn { order:4; margin-left:0; width:100%; }
  #nativeWalletDlg { width:calc(100% - 20px); max-height:calc(100dvh - 20px); }
  .native-head,.native-body { padding:20px; } .native-head h2 { font-size:24px; }
  .native-grid,#nativeAllowances { grid-template-columns:1fr; }

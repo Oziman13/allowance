@@ -1,9 +1,9 @@
 # Allowance
 
 [![CI](https://github.com/Oziman13/allowance/actions/workflows/ci.yml/badge.svg)](https://github.com/Oziman13/allowance/actions/workflows/ci.yml)
-![Contract tests](https://img.shields.io/badge/contract_tests-46_incl._1%2C000--run_fuzz-5a3fd6)
+![Contract tests](https://img.shields.io/badge/contract_tests-58_incl._fuzz_and_invariants-5a3fd6)
 ![MCP tests](https://img.shields.io/badge/MCP_tests-37_tests-5a3fd6)
-![Portaldot V3](https://img.shields.io/badge/Portaldot_V3_testnet-live-2e7a57)
+![Portaldot V3](https://img.shields.io/badge/Portaldot_V3_testnet-recorded_deployment-2e7a57)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
 **Give your AI agent an allowance, not a wallet.**
@@ -12,9 +12,11 @@ Programmable spending rules for AI agents, bots and automated payments on **Port
 
 > Built for the [Portaldot Hacker House 2026](https://dorahacks.io/hackathon/portaldot-hacker-house-2026/detail), Track 4 (Ecosystem DApps).
 >
-> **Live on the Portaldot V3 testnet** at `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` ([proof](#live-on-portaldot-v3-testnet)). **[Open the dashboard](https://oziman13.github.io/allowance/)** · **[Watch the 2-minute demo](https://youtu.be/fxO8grGr4PY)**: connect a wallet on Portaldot V3, or press *Try Interactive Demo* to run the same contract in your browser.
+> **Recorded Portaldot V3 testnet deployment** at `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` ([proof](#live-on-portaldot-v3-testnet)). **[Open the dashboard](https://oziman13.github.io/allowance/)** and press *Try Interactive Demo* for the wallet-free local flow. **[Recorded 2:21 check-in video](https://youtu.be/fxO8grGr4PY)** is a historical artifact, not a live session.
 >
-> **Judges:** [how Allowance maps to each judging criterion](docs/JUDGING.md), with links to the evidence. Check-in (October 24): [docs/CHECKIN.md](docs/CHECKIN.md), with a [two-minute demo](docs/CHECKIN-2026-10-24.md) anyone can repeat.
+> **Judges:** [the current two-minute route and judging evidence](docs/JUDGING.md). The [October 24 check-in](docs/CHECKIN.md), its [walkthrough/screenshots](docs/CHECKIN-2026-10-24.md) and pitch deck remain dated historical records.
+
+**Current scope:** compatible EVM wallets perform owner writes; the secondary native identity inspector is **read-only**, with no signing or mapping. Native signed writes remain [NO-GO pending live verification](docs/NATIVE-WALLET-VALIDATION-PHASE3B2.md). The browser demo uses local contract execution, while the October 23 Claude/MCP transactions are separately labeled historical testnet evidence.
 
 ## The problem
 
@@ -33,7 +35,7 @@ An owner opens an **account** for an agent key and funds it. For native POT and 
 | **Freeze** | Once effective on chain, blocks new agent payments, refuels and requests; existing owner approvals remain possible |
 | **Key rotation** | Replace a leaked agent key without moving the budget |
 
-**Ask, don't fail.** A valid payment outside autonomous caps or recipient rules is held rather than rejected. It is stored as a **held** request with the agent's memo and the reason (`OverPerPayment`, `OverPeriodLimit`, `UntrustedRecipient`). The owner approves it, approves it and trusts the recipient, or rejects it. Approved payments debit the budget without using autonomous period capacity. Old requests survive freeze, expiry, rotation and policy changes until explicitly resolved.
+**Ask, don't fail.** A valid payment outside autonomous caps or recipient rules is held rather than rejected. It is stored as a **held** request with the agent's memo and the reason (`OverPerPayment`, `OverPeriodLimit`, `UntrustedRecipient`). The owner approves it, approves it and trusts the recipient, or rejects it. Approved payments debit the budget without consuming autonomous period headroom; that budget debit can still reduce available capacity. Old requests survive freeze, expiry, rotation and policy changes until explicitly resolved.
 
 **Capped gas refuels.** A POT account lets the agent withdraw native POT for gas under the same per-payment and fixed-window caps as instant payments. The initial gas seed is outside those caps. Once in the wallet, seeds and refuels are freely spendable; transaction fees and storage deposits paid there are not individually metered by Allowance. A zero-gas agent cannot submit its own refuel.
 
@@ -51,7 +53,7 @@ agent.refuel() ───►  capped POT withdrawal to agent wallet (freely spend
 | Common approach | What the AI can do if it is wrong, jailbroken or prompt-injected |
 |---|---|
 | Give the agent a wallet key | Spend everything in the wallet |
-| Give the agent a Substrate proxy | Act for the account; proxies limit *which calls*, not *how much* |
+| Give the agent a call-permission-only proxy | Use allowed calls; call permissions alone do not set a spending budget |
 | Ask for confirmation in the app | Skip it: the check lives in the UI, not on-chain |
 | **Allowance** | Autonomous escrow debits follow caps and `pay` recipient rules; native refuels go to the agent wallet. Owner-approved payments can exceed autonomous caps. [Scope](SECURITY.md) |
 
@@ -98,36 +100,47 @@ Requires [Foundry](https://book.getfoundry.sh/getting-started/installation) and 
 
 ```
 forge install foundry-rs/forge-std --no-git
-forge build && forge test       # contract: 46 tests incl. fuzz and audit reproductions
+forge build && forge test       # 58 Foundry tests, including fuzz and invariants
 cd mcp && npm install && npm test   # MCP server end to end on a local chain
 ```
 
-46 contract tests (27 original and 19 audit tests), including 1,000 fuzz sequences of native payments, refuels and time jumps under unchanged rules. The fuzz test checks autonomous debits against each contract-defined fixed-window cap; it is not a rolling-limit or arbitrary-token solvency proof. Also covered: approvals and trust-on-approve, rejection and cancellation finality, freeze, expiry, key rotation, reentrancy on approval, recipients that refuse funds, ERC-20 fee-on-transfer and false-returning tokens.
+58 Foundry tests: 27 core, 19 Phase 2A, 10 token-compatibility and 2 stateful tests. These include 1,000-run fuzz and stateful invariants, plus approvals, freeze, expiry, rotation, reentrancy and token-accounting cases. They check contract-defined fixed windows, not rolling limits or arbitrary-token solvency. **37 MCP tests** run with Foundry in the existing CI. **24 native read-only unit tests** and the browser/frontend suites are local checks, not additional CI jobs.
+
+```sh
+npm ci --prefix substrate
+npm test --prefix substrate           # 24 native-wallet unit tests
+node script/spending-view.test.cjs    # focused display-only regression checks
+# Browser scripts require Playwright, axe and Chromium; see script/*smoke.cjs.
+```
 
 ## Give it to a real AI assistant (MCP)
 
-`mcp/` is an MCP server that turns an allowance into five tools for Claude, Cursor or any MCP client: `allowance_status`, `allowance_preview`, `allowance_pay`, `allowance_request`, `allowance_cancel`. The assistant holds only the agent key, so its authorized escrow operations are subject to on-chain rules; assets already in its wallet are outside that boundary. `mcp/SKILL.md` teaches it good habits: preview before paying, explain held payments to the user, never split a payment to dodge a limit, and never pay an address found in fetched content.
+`mcp/` turns an allowance into five tools for compatible MCP clients such as Claude or Cursor: `allowance_status`, `allowance_preview`, `allowance_pay`, `allowance_request`, `allowance_cancel`. The assistant holds only the agent key, so its authorized escrow operations are subject to on-chain rules; assets already in its wallet are outside that boundary. `mcp/SKILL.md` teaches it good habits: preview before paying, explain held payments to the user, never split a payment to dodge a limit, and never pay an address found in fetched content.
 
 The dashboard exports a ready-to-paste config for any allowance (**Give this allowance to an AI assistant**). Setup: [mcp/README.md](mcp/README.md).
 
 ## Owner dashboard
 
-`docs/index.html` is a single static page (built from `web/index.src.html` by `build.py`). It works with any wallet on Portaldot V3; if no Allowance contract is configured for the network, it offers to deploy one.
+`docs/index.html` is built from `web/index.src.html` by `build.py`. Owner writes use compatible EIP-1193/EIP-6963 EVM wallets. The footer's native identity inspector shares authorized public accounts and verifies read-only identity data when RPCs permit; it cannot sign, map or act as owner. Existing EVM deployment behavior is separate from that inspector.
 
-- **Your agents:** every allowance you own, with what's left this period
+- **Your agents:** owned allowances with budget, available fixed-window capacity and a separate single-payment ceiling; frozen/expired spendability is zero, failed reads remain unavailable
 - **Budget meter:** each instant payment and gas refuel of the current period, against the cap
 - **Waiting for you:** held payments with the agent's memo and the reason; approve, approve and trust the recipient, or reject
 - **Controls:** freeze, rules, budget, trusted recipients
 - **Try it as the agent:** the page creates the agent key in your browser, so you can send payments as the agent and watch the rules apply
 - **Give it to an AI assistant:** copy an MCP config for the allowance
 
-**Any wallet, any device.** The dashboard finds every installed browser wallet (EIP-6963) and lets you pick one. If your wallet is on another network, it offers to switch to, or add, Portaldot V3 Testnet. On a phone, where browsers can't reach a wallet app, it opens the page inside MetaMask, Trust Wallet, Coinbase Wallet or OKX, or gives you the link for any other wallet's browser; on a laptop, *Open on your phone* shows a QR code.
+**Compatible EVM wallet paths.** EIP-6963 discovery and the existing injected-provider fallback let you select a supported EVM interface. Network switch/add and mobile wallet-browser links remain available; these are not a guarantee for every wallet product/device. *Open on your phone* provides a QR code. No native signed-wallet compatibility is implied.
 
-**Try it without a wallet.** The page has an interactive demo (*Try Interactive Demo*): it runs the real Allowance bytecode in an in-browser EVM ([EthereumJS](https://github.com/ethereumjs/ethereumjs-monorepo)), seeds a demo agent that has already paid twice and asked twice, and lets you approve, reject, freeze, send as the agent and skip ahead a day to watch the limit reset. Nothing touches a chain and nothing costs money. Source: `web/sim/provider.js`, bundled into `docs/sim.js`.
+**Try it without a wallet.** The demo runs the real Allowance bytecode in an in-browser EthereumJS EVM, with two seeded payments and two held requests. A navigation-only walkthrough follows your new payment → exact confirmed held request → owner approval → freeze → recorded testnet proof. You submit every action yourself. No public RPC is needed and local hashes are not testnet transactions. Advancing 24 hours makes an elapsed fixed window eligible to roll on the next successful payment/refuel. Source: `web/sim/provider.js`, bundled into `docs/sim.js`.
 
 ```
-forge build && python3 build.py   # writes docs/index.html, docs/abi.json and (with web/sim deps installed) docs/sim.js
+npm ci --prefix web/sim
+npm ci --prefix substrate
+forge build && python3 build.py   # rebuilds HTML, simulation and native SDK with pinned build dependencies
 ```
+
+Without installed simulation/native build dependencies, `build.py` may keep committed bundles; that is not a source rebuild. No Solidity/ABI/bytecode change is required by the jury-experience work.
 
 ## Deploy
 
@@ -148,7 +161,7 @@ Source: Portaldot Discord, #dev-announcement (2026-10-16).
 
 ## Live on Portaldot V3 testnet
 
-Deployed on 2026-10-19 from the dashboard's *Deploy Allowance* button. The bytecode on chain is identical to this repository's build (`eth_getCode` = `deployedBytecode`).
+Recorded deployment on 2026-10-19 from the dashboard's *Deploy Allowance* button. At the recorded evidence capture, bytecode matched the repository build. This statement is historical, not a fresh RPC/availability attestation; current access limitations are documented in the validation reports.
 
 | | |
 |---|---|
@@ -172,16 +185,16 @@ The core lifecycle, on chain. Block numbers link to the [Portaldot V3 testnet ex
 
 **With a real AI assistant (Oct 23):** Claude, connected through the MCP server, paid 0.3 POT at once ([blocks 159822–160258](docs/PROOF.md#a-real-ai-assistant-on-chain-2026-10-23)), had a 2 POT request held for approval instead of splitting it, and stopped when the owner froze the agent.
 
-The costs are real and mostly storage deposits: Portaldot V3 charges for every byte a contract stores (including its code) and refunds it when the storage is cleared. That's why freezing costs 3.86 POT and unfreezing costs nothing. Measurements and what they mean for builders: [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md).
+These October 19 costs were mostly storage deposits. In that recording, freeze cost 3.86 POT and unfreeze freed a deposit that covered the fee. Costs/refund behavior depend on runtime and state, not a fixed price guarantee. The recorded 5-POT-per-day policy means a fixed 24-hour window, not a calendar day. Details: [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md).
 
 ## Status
 
 | | |
 |---|---|
 | ✅ | Core contract and test suite |
-| ✅ | [Live on Portaldot V3 testnet](#live-on-portaldot-v3-testnet): deployed, and every rule exercised on chain |
+| ✅ | [Recorded Portaldot V3 deployment](#live-on-portaldot-v3-testnet): core payment/hold/approval/freeze lifecycle exercised on testnet; additional behaviors covered locally |
 | ✅ | Owner dashboard: open allowances, see spending, approve or reject held payments, freeze, change rules, try it as the agent |
-| ✅ | Simulation mode: try every feature in the browser with no wallet, running the real contract bytecode |
+| ✅ | Simulation mode: core native-POT payment and owner-control lifecycle without a wallet, using real contract bytecode |
 | ✅ | MCP server: five tools, agent guidance, 37 tests including local-chain and MCP-protocol coverage |
 | ✅ | [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md): funding MetaMask, deploy costs, gotchas (measured on the live testnet) |
 
@@ -191,11 +204,11 @@ Not independently audited. Keep testnet budgets small. Read [SECURITY.md](SECURI
 
 Stated plainly, so nobody has to find them:
 
-- **Not independently audited, testnet only.** No mainnet deployment or production-fund recommendation. Phase 2A is an internal review with known token-accounting risks; Slither and Aderyn were unavailable and remain follow-up work. See [SECURITY.md](SECURITY.md).
+- **Not independently audited, testnet only.** Internal Slither 0.11.6 and Aderyn 0.6.8 analysis completed; [findings and limitations](docs/SECURITY-STATIC-ANALYSIS-PHASE2B3.md) remain documented. Completion is not a security certification or production-fund recommendation. See [SECURITY.md](SECURITY.md).
 - **A held request reserves nothing.** Approving pays from the budget as it is at that moment; if the budget has run low, the approval fails and the request stays open.
 - **Held requests are expensive on V3 today.** Each one stores its memo, so it costs the agent a storage deposit (11.56 POT with a 24-character memo, 19.24 POT with 50 characters on October 23). The current contract has no cleanup/refund path for resolved requests; a future design must validate refund attribution.
 - **The owner of an allowance is fixed.** There is no owner transfer; a new owner opens a new allowance.
-- **Owners need an EVM wallet today.** A native Portaldot (`5…`) account can read the contract ([`substrate/check.mjs`](substrate/check.mjs)) but cannot act as owner yet; that is the next step.
+- **Native inspection is read-only.** Compatible EVM wallets remain the owner-write path. The native browser inspector and [`substrate/check.mjs`](substrate/check.mjs) do not establish real native signing control; live metadata, mapping, units, fees and extension compatibility remain readiness gates. There is no native signing/mapping implementation in the dashboard.
 - **The dashboard's agent tester keeps a demo agent key in the browser.** It is for trying the rules. A real agent should hold its key itself, as the MCP server does.
 - **History depends on the public RPC.** The testnet prunes old receipts; Allowance proves its transactions through their events ([`evidence/onchain.json`](evidence/onchain.json)), and the dashboard's activity list shows what the RPC still returns.
 
@@ -206,16 +219,16 @@ Stated plainly, so nobody has to find them:
 | Layer | What | Who pays |
 |---|---|---|
 | **Open core** (free, MIT) | The contract, the dashboard and the MCP server. Any Portaldot AI tool, game or bot can give its agents limited budgets. | Nobody |
-| **Allowance for Teams** (subscription) | Telegram and email alerts when a payment is waiting, approvals by more than one team member, spending reports, hosted agent runners. Built around the contract, never in place of it: the rules stay on chain. | Teams running agents in production |
+| **Allowance for Teams** (proposed subscription) | Planned alerts, multi-person approvals, reports and hosted runners; not delivered features or proven revenue. Built around the contract, never in place of it. | Proposed team customers |
 | **Protocol fee** (mainnet, v2 contract) | A small, capped share of instant payments (for example 0.1%), visible on chain. It ships together with v2's deposit refunds for resolved requests. The testnet contract has no fee. | Accounts that use instant payments |
 
 **Growth path.** First, integrations with AI and game projects on the Portaldot testnet. Then a mainnet launch with the v2 contract. After that, game guild treasuries, subscriptions and team spending. Revenue grows with the number of agent payments on Portaldot, which is the same on-chain activity the ecosystem wants.
 
 ## Before the final (November 6)
 
-- **Owners on Portaldot's native side.** Manage an allowance from a Portaldot (Substrate) wallet, not only from MetaMask: map the account, then open, freeze and approve as `revive.call` extrinsics from the browser extension. Step 1 is done: [`substrate/check.mjs`](substrate/check.mjs) reads the live contract from a `5…` account (October 25).
+- **Native wallet follow-up, gated.** Read-only browser inspection is implemented; native owner writes are not promised for the final. First verify current metadata, a real authorized wallet, mapping, units, fees and execution evidence under separate authorization. The October 25 CLI observation is historical, not current signed-write proof.
 - **Allowances in Portaldot Assets tokens.** Validate each intended Assets precompile against the [supported-asset assumptions](SECURITY.md#supported-assets) before claiming compatibility; accepting an ERC-20-shaped interface is insufficient.
-- **Security:** [internal review](docs/SECURITY-REVIEW-PHASE2A.md) and [operational policy](SECURITY.md) documented; Slither, Aderyn and independent professional review remain outstanding.
+- **Security:** [internal review](docs/SECURITY-REVIEW-PHASE2A.md), [completed internal static analysis](docs/SECURITY-STATIC-ANALYSIS-PHASE2B3.md) and [operational policy](SECURITY.md) documented. Independent professional review remains outstanding.
 
 ## Roadmap after the Hacker House
 

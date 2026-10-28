@@ -125,6 +125,35 @@
 }
 
 .pf-preview-label { font: 10px/1.6 var(--font-mono); color: var(--ink-2); margin: 0 0 -8px; letter-spacing: .06em; }
+.pf-readings .pf-single { grid-column:1/-1; border-left:0; border-top:1px solid var(--line); }
+.pf-single dd { color:var(--paid); }
+.pf-control[data-state="blocked"] .pf-single dd { color:var(--frozen); }
+.demo-guide,.sim-proof { background:var(--surface); border:1px solid var(--line); border-radius:16px; margin:20px 0; padding:20px 24px; }
+.demo-guide .eyebrow,.sim-proof .eyebrow { font-size:10px; color:var(--cyan); margin:0 0 10px; }
+.demo-guide h2,.sim-proof h2 { font-size:18px; font-weight:500; margin:0 0 16px; }
+.demo-steps { display:flex; flex-wrap:wrap; gap:8px; list-style:none; padding:0; margin:0; }
+.demo-steps li { min-width:0; }
+.demo-steps a,.demo-steps button { display:flex; align-items:center; min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#0c1424; color:var(--ink); font:500 11px/1.6 var(--font-ui); text-decoration:none; text-align:left; }
+.demo-steps .done>a,.demo-steps .done>button { border-color:#51d9b555; color:var(--paid); }
+.demo-steps button:disabled { color:var(--ink-2); cursor:default; }
+#demoGuideStatus { font-size:12px; color:var(--ink-2); line-height:1.9; margin:14px 0 0; }
+.sim-proof summary { padding:0; font-weight:500; font-size:13px; min-height:44px; display:list-item; align-content:center; }
+.sim-proof-body { padding:20px 0 0; }
+.sim-proof-body ol { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 28px; padding-left:20px; }
+.sim-proof-body li,.sim-proof-body p { font-size:12px; line-height:1.9; color:var(--ink-2); overflow-wrap:anywhere; }
+.sim-proof-body b { color:var(--ink); }
+.proof-links { display:flex; gap:8px 20px; flex-wrap:wrap; }
+.proof-links a,.review-held { font-size:12px; display:inline-flex; align-items:center; min-height:44px; }
+.review-held { margin-top:12px; color:var(--held); }
+.technical-links { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+#agentBox,.req,#freezeRow,#simProofTitle { scroll-margin-top:24px; }
+#agentBox:focus,.req:focus,#simProofTitle:focus { outline:2px solid var(--cyan); outline-offset:4px; }
+@media(max-width:560px) {
+ .demo-guide,.sim-proof { padding:18px; }
+ .demo-steps { display:grid; grid-template-columns:1fr; }
+ .demo-steps a,.demo-steps button { width:100%; }
+ .sim-proof-body ol { grid-template-columns:1fr; }
+}
 
 /* Check-in polish: keep mobile agent selection compact without shrinking touch targets. */
 @media(max-width:560px) {
