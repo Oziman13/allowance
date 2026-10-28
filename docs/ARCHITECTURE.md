@@ -27,14 +27,20 @@ flowchart LR
     C -- instant payment or approved payment --> R
     C -- events: Paid, PaymentHeld, ... --> D
     D -. "Try Interactive Demo" .-> S
+    N[Native extension accounts] -. "public accounts only" .-> I[Read-only identity inspector]
+    I -. "genesis / metadata / address / reverse mapping" .-> V[Configured Substrate RPC]
+    I -. "code / stored owner reads" .-> C
 ```
 
 - **Allowance contract** (`src/Allowance.sol`): holds every account's budget and enforces the rules. The single source of truth. [Live on the Portaldot V3 testnet](../README.md#live-on-portaldot-v3-testnet).
-- **Owner dashboard** (`web/index.src.html` → `docs/index.html`, [live](https://oziman13.github.io/allowance/)): one static page with no backend. It reads everything from the chain (account state and events), and every action is a transaction the owner signs in their own wallet. It opens accounts, shows spending, approves or rejects held payments, freezes agents, changes rules, and lets you try the agent side.
-- **MCP server** (`mcp/`): exposes an account to any AI assistant as five tools (`allowance_status`, `allowance_preview`, `allowance_pay`, `allowance_request`, `allowance_cancel`). It holds only the agent key, so a prompt-injected assistant is still bound by the contract. It refuels the agent's gas from the same budget when needed.
+- **Owner dashboard** (`web/index.src.html` → `docs/index.html`, [published URL](https://oziman13.github.io/allowance/)): static app with account/event reads and owner-signed writes through compatible EVM wallets. The agent tester uses its separate browser-held agent key; simulation transactions are local. Navigation, previews and native inspection are not owner-signed transactions. Public RPC reads are observations, not independent proofs.
+- **MCP server** (`mcp/`): exposes five tools to compatible clients (`allowance_status`, `allowance_preview`, `allowance_pay`, `allowance_request`, `allowance_cancel`). Contract rules bound authorized escrow operations; a compromised agent's wallet funds and owner exceptions are outside that boundary. Native gas refuel withdrawals share autonomous caps, but seeds/fees/deposits differ and a zero-gas agent cannot submit its own refuel.
 - **Simulation** (`web/sim/provider.js` → `docs/sim.js`): an in-browser chain that runs the real contract bytecode in EthereumJS and exposes it as a wallet provider, so the unchanged dashboard works without a wallet or test tokens. Loaded only when someone presses *Try Interactive Demo*.
+- **Native identity inspector** (`substrate/browser/` → lazy `docs/native-wallet.js`): public AccountId32 discovery, chain/mapping inspection and stored-owner reads. It is read-only, never accesses/invokes a signer, never maps an account and never enters EVM owner state. Address similarity is not proof of signing control. [Live validation gates](NATIVE-WALLET-VALIDATION-PHASE3B2.md) remain unverified; native signed writes are NO-GO.
+- **Spending display** (`web/spending-view.js`): separates recorded budget, budget-backed window capacity and the eligible single-payment ceiling. Financial reads and chain time must share an unchanged latest head; a failed/changed snapshot is unavailable, not zero. Freeze/expiry/zero per-payment cap stop current autonomous capacity. Unused policy headroom is explained separately; the preview checks the selected recipient and execution at a later snapshot.
+- **Simulation guidance** (`web/demo-guide.js`): observes existing confirmed results and navigates to the exact held request ID, existing approval/freeze controls and dated Claude proof. It never submits a payment/approval, retries or changes authorization. The proof entry remains available when the landing section is hidden.
 
-Nothing here is a trusted server. The dashboard and the MCP server are conveniences; the rules live in the contract.
+There is no dedicated custodial backend. The contract enforces escrow rules; owner key security, wallet-signed calldata, frontend integrity and RPC trust still matter. Internal reviews/static analysis are not independent audits.
 
 ## Payment flow
 
@@ -67,7 +73,7 @@ sequenceDiagram
 | `balance` | budget held by the contract |
 | `rules` | `perPayment`, `perPeriod`, `period`, `expiresAt`, `trustedOnly` |
 | `spentInPeriod`, `periodStart` | instant spending in the current fixed window |
-| `frozen` | kill switch |
+| `frozen` | stops new agent pay/refuel/request operations; owner withdrawals and existing approvals remain available |
 
 One agent key may hold several accounts (for example a POT account for gas and payments and a stablecoin account for subscriptions). Each account has one asset, but accounts using the same ERC-20 share actual token backing. The ledger assumes predictable balances and transfer debits; see the [supported-asset policy](../SECURITY.md#supported-assets).
 
@@ -89,8 +95,10 @@ Contract `preview` classifies a hold reason; it does not check full executabilit
 
 V3 charges a storage deposit when contract storage goes from empty to non-empty, and refunds it when the storage is cleared. Allowance is shaped around that:
 
-- **Instant payments update existing storage only**, so they cost an agent about 0.03 POT (measured on chain).
-- **Opening an account and holding a request create storage**, so they cost more (42 POT and 15 POT on the testnet today). Clearing resolved requests to get the deposit back is the first item on the roadmap.
-- **The build is tuned for size** (`via_ir`, `optimizer_runs = 1`), because the code itself is stored on chain: 9.8 KB, a 779 POT deposit.
+- **Recorded October 19/23 instant payments** updated existing storage and cost about 0.03 POT; actual costs depend on runtime/state.
+- **Recorded account creation and held requests** cost about 42 POT and 11–19 POT respectively, depending on the memo. These are historical testnet measurements, not current fee quotes. The contract has no resolved-request cleanup/refund path.
+- **The existing build is tuned for size** (`via_ir`, `optimizer_runs = 1`): the historical 9.8 KB deployment cost about 779 POT. No code-generation setting was changed by the jury-experience work.
 
 Measurements: [Getting started with Solidity on Portaldot V3](SOLIDITY-ON-PORTALDOT-V3.md).
+
+Current validation scope: **58 Foundry / 37 MCP tests** in existing CI; **24 native unit tests**, spending-display tests and browser suites run locally. Native and browser checks are not additional CI jobs. [Internal static analysis](SECURITY-STATIC-ANALYSIS-PHASE2B3.md) is complete with documented findings/limits; the deployment remains not independently audited.

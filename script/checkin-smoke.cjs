@@ -55,7 +55,7 @@ async function capture(page, name, selector) {
     assert.equal(await page.locator('#fieldBalance').innerText(), '19 POT');
     assert.equal(await page.locator('#fieldCap').innerText(), '1 POT');
     assert.equal(await page.locator('#fieldLeft').innerText(), '4 POT');
-    assert.equal(await page.locator('#fieldLimit').innerText(), '5 POT / day');
+    assert.equal(await page.locator('#fieldLimit').innerText(), '5 POT / 24 hours');
     assert.match(await page.locator('#fieldPending').textContent(), /2 waiting for your approval/);
     assert.equal(await page.locator('#inbox .req').count(), 2);
     assert.match(await page.locator('#netName').innerText(), /Simulation/);

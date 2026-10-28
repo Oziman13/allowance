@@ -1,12 +1,31 @@
 # Allowance against the Hacker House criteria
 
-The Hacker House judges on objective evidence: GitHub repositories, commit timelines, testnet transaction records, contract addresses, transaction hashes and live demo performance. This page maps each criterion to the evidence for it, so every claim can be checked in a minute. It also says plainly what is still missing.
+This page maps the Hacker House criteria to source, tests, dated transaction records and the delivered demo. It distinguishes local behavior, historical project records, roadmap items and unverified live conditions; current access may prevent an independent chain/video check.
 
-**October 24 check-in:** [CHECKIN.md](CHECKIN.md), with a [two-minute demo and screenshots](CHECKIN-2026-10-24.md).
+**Current scope, 28 October 2026:** 58 Foundry tests, 37 MCP tests and 24 native read-only unit tests. Existing CI runs Foundry/MCP; native and frontend/browser checks are local validation, not extra CI jobs. See [Phase 4B changes and verification](FINAL-EXPERIENCE-IMPLEMENTATION-PHASE4B.md).
+
+**Historical October 24 artifacts:** [CHECKIN.md](CHECKIN.md), its [walkthrough/screenshots](CHECKIN-2026-10-24.md), the pitch deck and the recorded **2:21** video retain their original dates and measurements. They are not current live-site or native signed-write proof.
 
 **Security scope:** This testnet deployment is not independently audited or recommended for production funds. See the [security policy](../SECURITY.md) and [Phase 2A internal review](SECURITY-REVIEW-PHASE2A.md).
 
 **Quick links:** [Live dashboard](https://oziman13.github.io/allowance/) (press *Try Interactive Demo* if you don't have test POT) · [Contract on Portaldot V3 testnet](../README.md#live-on-portaldot-v3-testnet) · [All transactions](PROOF.md) · [Architecture](ARCHITECTURE.md) · [CI runs](https://github.com/Oziman13/allowance/actions)
+
+## Two-minute jury route
+
+This is a guided **local browser simulation**, independent of public RPCs. Navigation does not submit an action: the visitor chooses each payment, approval and freeze. Start with **Try Interactive Demo**; use the seeded Research agent and its trusted recipient.
+
+| Step | Action and expected result |
+|---|---|
+| Inspect | 19 POT recorded budget; 4 POT available fixed-window capacity; **1 POT maximum single autonomous payment** to an eligible recipient. Four POT is aggregate capacity, not one payment. |
+| Pay | Send **0.1 POT**: a confirmed local payment, budget **18.9 POT**, capacity **3.9 POT**. |
+| Hold | Change the amount to **2.5 POT** and send. It is held, **not paid**, with unchanged budget/capacity. Use **Review request #N** to select your newly confirmed request, not a seeded card with the same amount. |
+| Approve | The owner approves that exact request: budget **16.4 POT**, autonomous capacity still **3.9 POT** in this example. Approval still requires budget and does not consume autonomous period headroom; a smaller budget could reduce available capacity. |
+| Freeze | Use **Freeze agent**: current autonomous capacity and single-payment ceiling are **0**, and new agent payment/refuel/request operations stop. Owner withdrawals and pre-existing approvals remain possible. |
+| Compare proof | Open **Recorded Claude testnet proof · 23 October 2026**, still reachable during simulation. Recorded agent 0.3 POT payment → held 2 POT request → owner approval → freeze. These are historical events, not this browser's local hashes or a live Claude session. |
+
+Windows are fixed contract periods, not rolling or calendar days. Native gas refuels share autonomous caps; initial seeds, wallet spending and actual fees/deposits have separate boundaries. Invalid/frozen/expired calls can fail instead of becoming held requests. Recipient restrictions and execution still require a current contract preview.
+
+The historical [October 23 record](PROOF.md#a-real-ai-assistant-on-chain-2026-10-23) and [event export](../evidence/onchain.json) identify the contract, account, recipient, amount and hashes. The recorded recipient was the documented owner address; API/compute service delivery was not independently verified. The reported MCP refusal after freeze produced **no new transaction**. Native inspection is an optional **read-only** technical follow-up; native signed owner operations remain [NO-GO pending live verification](NATIVE-WALLET-VALIDATION-PHASE3B2.md).
 
 ---
 
@@ -16,13 +35,13 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 
 | What the judges look for | Evidence |
 |---|---|
-| Deployed on Portaldot testnet | Contract `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` on Portaldot V3 testnet (chain 420420777), deployed in block 102688. The code returned by `eth_getCode` is byte-for-byte this repository's build. |
-| Verifiable on-chain interactions | [15 transactions](PROOF.md): the deployment; on October 19 an account opened, two instant payments, a payment held for being over the cap, its approval, a freeze and an unfreeze; on October 23 the same flow driven by a real AI assistant (Claude, through the MCP server). Each one can be checked against the public RPC through the events it emitted ([how](PROOF.md)), or with `python3 script/check_submission.py`. |
+| Deployed on Portaldot testnet | Recorded contract `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f`, chain 420420777, deployment block 102688. Bytecode matched the repository build at evidence capture; this is not a fresh live-availability attestation. |
+| Verifiable on-chain interactions | [15 recorded transactions](PROOF.md): deployment plus 14 event-bearing transactions from October 19/23. The latter include Claude/MCP-attributed agent steps, owner interventions and a separate dashboard request. The checked-in export is dated; current RPC/explorer access may be unavailable. Verification instructions and full hashes remain available in the repository. |
 | Core functions complete | Per-payment cap, per-period cap (any period of 1 hour or more), trusted recipients, expiry, freeze, key rotation, held requests with approve / approve-and-trust / reject / cancel, gas refuels from the same budget, native POT and ERC-20 budgets. [Contract](../src/Allowance.sol), [function table](../README.md#contract). |
-| Code completeness and quality | 46 contract tests, including 19 audit reproductions and a 1,000-run native-account fuzz test of combined autonomous debits per fixed window under unchanged rules. They also cover reentrancy, fee-on-transfer and false-returning tokens, and recipients that refuse funds. 37 MCP tests include local-chain, simulated-receipt and real MCP-protocol coverage. Both suites [run in CI on every push](https://github.com/Oziman13/allowance/actions). |
+| Code completeness and quality | **58 Foundry tests:** 27 core, 19 Phase 2A, 10 token-compatibility and 2 stateful tests, including 1,000-run fuzz and invariants. **37 MCP tests** cover local-chain, simulated receipts and protocol behavior. These two suites run in CI. **24 native read-only unit tests**, display regressions and browser checks are local validation. Internal [static analysis](SECURITY-STATIC-ANALYSIS-PHASE2B3.md) includes documented findings and limitations; it is not an independent audit. |
 | System architecture | [ARCHITECTURE.md](ARCHITECTURE.md): component and sequence diagrams, account model, security properties. |
 | Actual delivery | Three working parts, all public: the contract, the [owner dashboard](https://oziman13.github.io/allowance/) (GitHub Pages) and the [MCP server](../mcp/) for AI assistants. |
-| Sustained development activity | 35 commits on 8 days (October 16–23), each one a reviewable step: contract and tests → dashboard → MCP server and CI → size-tuned build and guide → simulation mode → testnet deployment and proof → MCP fixes from a live Claude session → dashboard redesign. History: [commits](https://github.com/Oziman13/allowance/commits/main). |
+| Sustained development activity | Historical October 23 snapshot: 35 commits on 8 days (October 16–23). Work continued through security analysis, native read-only validation and jury-experience corrections. See the [current commit history](https://github.com/Oziman13/allowance/commits/main); the dated count is not a live total or certification of qualifying contest commits. |
 
 ## Innovation (30%)
 
@@ -30,12 +49,12 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 
 | What the judges look for | Evidence |
 |---|---|
-| Real value beyond existing solutions | Today, giving an AI agent money means giving it a wallet key, a proxy, or a confirmation screen in an app. A wallet key can spend everything. A proxy limits *which* calls, not *how much*. A confirmation screen is a UI check, not an on-chain rule, so a compromised agent can skip it. Allowance puts the limits on chain, bounding authorized autonomous escrow debits for native POT and compatible tokens; owner approvals and funds in the agent wallet have separate boundaries. [Comparison table](../README.md#why-a-wallet-a-proxy-or-an-approval-screen-isnt-enough). |
+| Real value beyond existing solutions | A wallet key can spend its wallet funds; call permissions alone do not create a spending budget, and an app confirmation screen is not contract enforcement. Allowance bounds authorized autonomous escrow debits for native POT and compatible tokens, with separate owner-approval and agent-wallet boundaries. This is a technical comparison, not a claim that no other product offers spending limits. [Comparison table](../README.md#why-a-wallet-a-proxy-or-an-approval-screen-isnt-enough). |
 | Application scenario | "Ask, don't fail": a payment outside the rules is held with the agent's memo and the reason, and the owner decides. The agent stays useful without being trusted with everything. |
 | Product model | One contract serves any number of owners and agents. Owners get a dashboard; agents get five MCP tools any assistant can use (Claude, Cursor, …). |
 | Use of Portaldot V3 EVM compatibility | Plain Solidity compiled with Foundry runs on V3's contract runtime (pallet-revive) unchanged. We measured what that costs and how to make it fit, and published the method ([guide](SOLIDITY-ON-PORTALDOT-V3.md)). |
-| Designed for Portaldot specifically | Gas on Portaldot is POT, so native refuel withdrawals share autonomous payment caps. Initial seeds are outside those caps, and fees/storage costs paid from the wallet are not individually metered by Allowance. Storage writes cost a deposit on V3, so instant payments only update existing storage: 0.03 POT each, measured on chain. |
-| Trying it is easy | The dashboard's simulation mode runs the real contract bytecode in an in-browser EVM, with a demo agent already spending, so anyone can try every rule in seconds without a wallet or test tokens. |
+| Designed for Portaldot specifically | Native POT refuel withdrawals share autonomous caps; seeds and wallet fees/deposits have separate boundaries. Recorded October 19/23 instant payments cost about 0.03 POT by updating existing storage. These are historical testnet measurements, not fee guarantees. |
+| Trying it is easy | The wallet-free browser EVM runs the real bytecode for the core native-POT lifecycle. A navigation-only guide follows your own confirmed payment/request, owner approval and freeze; recorded testnet proof stays accessible. This does not expose every contract feature or constitute a live Claude session. |
 
 ## Ecosystem Contribution (20%)
 
@@ -58,7 +77,7 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 | Real market need | AI agents are starting to pay for APIs, data and compute on their own. Every team that deploys one faces the same question, "how much can it spend without asking me?", and today's answer is either too much trust or no autonomy. |
 | Target users | Teams running AI agents or bots on Portaldot; game studios and guilds; DAOs and teams that want members to spend within limits. |
 | Ability to continue | One developer delivering steadily: a deployed contract, a dashboard, an MCP server, a guide, CI and a simulation mode in the first six days, all public. |
-| Business model and growth path | **Open protocol, paid team layer, no token** ([details](../README.md#business-model)). The core is free and open source, so it can become shared infrastructure. Teams pay a subscription for alerts, approvals by more than one member, reports and hosted agent runners. On mainnet, a v2 contract adds a small, capped protocol fee on instant payments. Revenue grows with agent payment volume on Portaldot, which is the on-chain activity the ecosystem rewards. |
+| Business model and growth path | **Open core, proposed paid team layer, no token** ([details](../README.md#business-model)). Subscriptions, multi-person approvals, hosted runners and a capped mainnet v2 fee are roadmap proposals, not delivered features or proven revenue. The current testnet contract has no protocol fee. |
 
 ---
 
@@ -66,10 +85,10 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 
 | Item | Plan |
 |---|---|
-| Use of V3's Substrate side (WASM / multi-chain) | Today Allowance uses V3's EVM side. Next: let an owner fund and manage an allowance from a Portaldot (Substrate) wallet, not only from MetaMask. |
-| Demo video (≤ 3 minutes) | Done: [2:21 narrated demo](https://youtu.be/fxO8grGr4PY). A new recording for the final will add the Portaldot-account owner actions. |
-| Pitch deck | Done: [Allowance-pitch-deck.pdf](Allowance-pitch-deck.pdf), 11 pages. |
-| MCP server published on npm | Before the final submission. |
+| Native signed owner operations | The deployed application uses the EVM owner-write path. Native browser inspection is implemented **read-only**, with no signing, mapping or WASM/multi-chain execution claim. Live/runtime/real-wallet gates remain unverified; writes require separate authorization. |
+| Demo video (≤ 3 minutes) | Historical [2:21 narrated check-in demo](https://youtu.be/fxO8grGr4PY), not a current live session. A final recording should show delivered EVM/simulation behavior and clearly labeled read-only native inspection; native owner writes are not promised. |
+| Pitch deck | Historical [October 24 deck](Allowance-pitch-deck.pdf), 11 pages. Its older counts/plans remain dated; use this page for current scope. |
+| MCP server published on npm | Not verified as published; remains a separate release task. |
 | Block explorer links | Done: every transaction in [PROOF.md](PROOF.md) links to its block on the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/). |
 
 ## Code compliance
@@ -77,7 +96,7 @@ The Hacker House judges on objective evidence: GitHub repositories, commit timel
 | Rule | Status |
 |---|---|
 | Repository public during the event | ✅ |
-| At least 3 valid commits during the Hacker House | ✅ 35 commits on 8 days (October 16–23); see [history](https://github.com/Oziman13/allowance/commits/main) |
+| At least 3 valid commits during the Hacker House | Historical October 23 snapshot: 35 commits on 8 days (October 16–23); see [history](https://github.com/Oziman13/allowance/commits/main). Current qualifying-commit assessment is separate from this dated count. |
 | Code primarily produced during the Hacker House (Oct 14 – Nov 6) | ✅ First commit Oct 16. The idea builds on an earlier proof of concept on another chain; **no code from it is reused** ([disclosure](../README.md#prior-work-disclosure)). |
 | Core modules not committed all at once in the last 24 hours | ✅ Core modules were committed on Oct 16–19; the final days are for polish, video and deck. |
 | Third-party code properly licensed and disclosed | ✅ [Dependencies](../README.md#prior-work-disclosure): Foundry/forge-std, ethers, EthereumJS (MPL-2.0, bundled unmodified), MCP SDK, zod, and locally hosted Sora, Inter and JetBrains Mono (OFL). |

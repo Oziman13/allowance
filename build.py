@@ -20,6 +20,8 @@ fonts = "\n".join(
 html = (html.replace("__POLICY_CSS__", (root / "web/policy-field.css").read_text())
             .replace("__NATIVE_CSS__", (root / "web/native-wallet.css").read_text())
             .replace("__POLICY_JS__", (root / "web/policy-field.js").read_text())
+            .replace("__SPENDING_JS__", (root / "web/spending-view.js").read_text())
+            .replace("__DEMO_GUIDE_JS__", (root / "web/demo-guide.js").read_text())
             .replace("__SITE_QR__", (root / "web/site-qr.svg").read_text())  # script/make_qr.py
             .replace("__FONTS__", fonts)
             .replace("__ABI__", json.dumps(art["abi"]))

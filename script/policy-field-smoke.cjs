@@ -111,7 +111,14 @@ async function capture(page, name, selector) {
     assert.equal(await page.locator('#decisionEndpoint').innerText(), 'Request recorded');
     await capture(page, 'payment-pending', '#agentBox');
     await audit(page, 'payment-pending');
-    const rid = await page.evaluate(() => paymentResult.requestId), leftBeforeApproval = await page.locator('#fieldLeft').innerText();
+    // Refresh now clears current amounts while the authoritative snapshot is loading.
+    // Capture the request/capacity atomically; never compare an approval to "Reading…".
+    const beforeApproval = await page.waitForFunction(() => {
+      const left = document.querySelector('#fieldLeft').textContent;
+      return document.querySelector('#controlField').getAttribute('aria-busy') === 'false' && /POT$/.test(left)
+        ? { rid: paymentResult.requestId, leftBeforeApproval: left } : false;
+    });
+    const { rid, leftBeforeApproval } = await beforeApproval.jsonValue();
     await page.locator(`#inbox [data-request-id="${rid}"] [data-a=approve]`).click();
     await page.waitForFunction(() => document.querySelector('#decisionTitle').textContent === 'Paid after owner approval');
     await page.waitForFunction(() => document.querySelector('#controlField').getAttribute('aria-busy') === 'false' && document.querySelectorAll('#inbox .req').length === 2);

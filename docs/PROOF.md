@@ -2,16 +2,20 @@
 
 Contract `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f`, chain ID 420420777, RPC `https://test-evm-rpc-v3.portaldot.dev`.
 
+**Historical project evidence, separate from browser simulation.** The [stored event export](../evidence/onchain.json) was captured on October 26, 2026 at 21:07:47 UTC+03, read block 206637: **21 events in 14 event-bearing transactions**, plus the deployment (15 transactions total). This is not a fresh live/RPC or cryptographic attestation. See the [current jury route](JUDGING.md#two-minute-jury-route) and [verification limitations](FINAL-EXPERIENCE-IMPLEMENTATION-PHASE4B.md).
+
 **Explorer:** each block number below opens the block in the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (blocks, events and the owner's Substrate account: [5CcD…jq3v](https://scanner-testnet-v3.portaldot.dev/#/accounts/5CcDLjHrfoBeL4NX6ZGQzhBbzCrsS7qwFazkzFcF83pWjq3v)). The explorer indexes the Substrate side, so search by block number, not by 0x address.
 
-Check them yourself. The public testnet node prunes old blocks, so `eth_getTransactionReceipt` returns `null` for transactions older than a day or two. Contract events stay available, and a transaction only emits events if it succeeded:
+At the recorded checks, the public node pruned older receipts while relevant logs remained available. Current retention/access is not guaranteed. A missing receipt or log is not proof of success or failure. This bounded read-only query covers the recorded range:
 
 ```
 curl -s -X POST https://test-evm-rpc-v3.portaldot.dev -H 'content-type: application/json' \
- -d '{"jsonrpc":"2.0","id":1,"method":"eth_getLogs","params":[{"address":"0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f","fromBlock":"0x19120","toBlock":"latest"}]}'
+ -d '{"jsonrpc":"2.0","id":1,"method":"eth_getLogs","params":[{"address":"0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f","fromBlock":"0x19120","toBlock":"0x27202"}]}'
 ```
 
-Every `transactionHash` in that output is one of the rows below. The deployment itself is proven by the code at the address: `eth_getCode` returns exactly this repository's build. `python3 script/check_submission.py` runs both checks.
+Match a payment's exact contract, account ID, recipient, amount and Paid event; an arbitrary event is insufficient. PaymentHeld is a request, not a payment. At capture, deployed bytecode matched the repository build. `python3 script/check_submission.py` can attempt fresh read-only checks when the configured RPC is accessible; a blocked request does not refresh stored evidence.
+
+## October 19 dashboard run (historical)
 
 | Block | What happened | Signed by | Cost |
 |---|---|---|---|
@@ -39,7 +43,7 @@ Full transaction hashes, in the same order:
 
 ## A real AI assistant on chain (2026-10-23)
 
-Claude (Claude Desktop) connected through the Allowance MCP server, holding only the agent key, ran the full flow against this contract:
+The project records a Claude Desktop session through MCP, holding only the agent key, alongside owner interventions and a separate dashboard request. Events do not identify an AI client; session attribution comes from the project record and [historical 2:21 check-in recording](https://youtu.be/fxO8grGr4PY), not independent model-authorship verification:
 
 | Block | What happened | Signed by | Cost |
 |---|---|---|---|
@@ -52,6 +56,8 @@ Claude (Claude Desktop) connected through the Allowance MCP server, holding only
 | [160258](https://scanner-testnet-v3.portaldot.dev/#/blocks/160258) | Owner unfreezes the agent | owner | 0 POT |
 
 When the account was frozen, Claude's payment never reached the chain: the MCP server's dry run returned `AccountFrozen` and Claude stopped. When asked to pay "market data again" in a new conversation without an address, it asked for the recipient instead of guessing one.
+
+That refusal is reported session behavior and produced **no new transaction**; FrozenSet proves the recorded freeze, not a subsequent refusal event. The recipient was the documented owner address below. Memos describe example API/compute purposes, not independently verified purchase or delivery by a service vendor. Browser simulation receipts and native fixture screenshots are separate evidence and do not reproduce these live transactions.
 
 ```
 159822  0xc26b7d632cc5d334dfc46c5c8cb8d31aac22cf69036cd7661bd9b08c0bf0899b
