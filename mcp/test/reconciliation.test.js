@@ -498,3 +498,62 @@ test("reconciliation repair: candidate survives context failure before replaceme
   assert.equal(after.replacement.candidateHash, candidateHash);
   assert.equal(f.attempts.length, 1);
 });
+
+test("reconciliation repair: real Anvil reorg and cancellation invalidate an in-flight Paid observation", async () => {
+  const f = await fixture();
+  const snapshot = await provider.send("evm_snapshot", []);
+  const out = await f.adapter().pay(f.input);
+  await f.adapter().confirm(...ref(out), one);
+  const old = ethers.Transaction.from(f.raw[0]);
+  const originalReceipt = await provider.getTransactionReceipt(out.transactionHash);
+  const blockNumberHex = ethers.toQuantity(originalReceipt.blockNumber);
+  let held = false, release;
+  f.transform = async (v, r) => {
+    // Delay an already-fetched canonical block response; the observer must
+    // check newer journal evidence before returning this stale success.
+    if (!held && v.method === "eth_getBlockByNumber" && v.params[0] === blockNumberHex
+        && r.result?.hash === originalReceipt.blockHash) {
+      held = true;
+      await new Promise(resolve => { release = resolve; });
+    }
+  };
+  const pending = observe(f, out);
+  let cancellationHash;
+  try {
+    await until(() => held && typeof release === "function");
+    assert.equal(await provider.send("evm_revert", [snapshot]), true);
+    const raw = await f.agent.signTransaction({ type: 2, chainId: 31337n,
+      nonce: old.nonce, to: f.agent.address, value: 0n, data: "0x",
+      gasLimit: 21000n, maxFeePerGas: old.maxFeePerGas * 3n,
+      maxPriorityFeePerGas: old.maxPriorityFeePerGas * 3n });
+    cancellationHash = ethers.keccak256(raw);
+    await provider.send("eth_sendRawTransaction", [raw]);
+    const cancelled = await provider.getTransactionReceipt(cancellationHash);
+    assert.equal(cancelled.status, 1);
+    const session = f.store.acquire(f.wallet);
+    try {
+      const current = f.store.inspect(f.wallet).operations[0].children[0];
+      session.transition(out.operationId, out.childId, {
+        state: "RECOVERY_REQUIRED", transactionHash: out.transactionHash,
+        outcome: current.outcome, receipt: current.receipt,
+        reasonCode: "REPLACEMENT_OBSERVED", evidence: {
+          ...current.evidence, replacement: {
+            originalHash: out.transactionHash, candidateHash: cancellationHash,
+            classification: "CANCELLATION", verified: true,
+            receipt: { transactionHash: cancellationHash,
+              blockHash: cancelled.blockHash.toLowerCase(),
+              blockNumber: String(cancelled.blockNumber), status: 1 }
+          }
+        }
+      });
+    } finally { session.release(); }
+  } finally { release?.(); }
+  const result = await pending;
+  assert.equal(result.observation, "RECOVERY_REQUIRED");
+  assert.equal(result.recordedState, "RECOVERY_REQUIRED");
+  assert.equal(result.replacement.candidateHash, cancellationHash);
+  assert.equal(result.replacement.classification, "CANCELLATION");
+  assert.equal(await provider.getTransactionReceipt(out.transactionHash), null);
+  assert.equal(await provider.getBalance(f.recipient), 0n);
+  assert.equal(f.attempts.length, 1);
+});
