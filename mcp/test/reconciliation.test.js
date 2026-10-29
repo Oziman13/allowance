@@ -393,3 +393,29 @@ test("reconciliation: evidence replay stays validated, corrupt/unsafe paths reje
   fs.truncateSync(f.journal, fs.statSync(f.journal).size - 10); const before = fs.readFileSync(f.journal);
   await rejection(observe(f, out)); assert.deepEqual(fs.readFileSync(f.journal), before); assert.equal(f.attempts.length, 1);
 });
+
+
+test("reconciliation repair: candidate survives RPC lookup failure and keyless restart", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  const candidateHash = "0x" + "b".repeat(64);
+  f.transform = (v, response) => {
+    if (v.method === "eth_getTransactionByHash" && v.params[0] === candidateHash) {
+      delete response.result;
+      response.error = { code: -32000, message: "injected candidate lookup failure" };
+    }
+  };
+  const result = await f.adapter().confirm(...ref(out), { ...one, replacementHash: candidateHash });
+  assert.equal(result.observation, "UNKNOWN");
+  const saved = f.store.inspect(f.wallet).operations[0].children[0];
+  assert.equal(saved.state, "RECOVERY_REQUIRED");
+  assert.equal(saved.evidence.replacement.candidateHash, candidateHash);
+  assert.equal(saved.evidence.replacement.classification, "UNVERIFIED");
+  assert.equal(saved.transactionHash, out.transactionHash);
+  const journalBefore = fs.readFileSync(f.journal);
+  f.transform = null;
+  const restarted = await observe(f, out);
+  assert.equal(restarted.replacement.candidateHash, candidateHash);
+  assert.deepEqual(fs.readFileSync(f.journal), journalBefore);
+  assert.equal(f.attempts.length, 1);
+  await rejection(f.adapter().pay(f.input), "UNRESOLVED_OPERATION");
+});
