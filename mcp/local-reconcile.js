@@ -217,7 +217,21 @@ export function createLocalReconciler(options) {
     }
     const finishedAt = new Date().toISOString();
     let recorded = c;
-    try { recorded = stable(); } catch { result = { observation: "RECOVERY_REQUIRED", reason: "JOURNAL_CHANGED" }; }
+    try {
+      recorded = stable();
+      // A valid RPC observation must not overrule a later journal revision.
+      // Immutable identity equality alone is insufficient: another authorized
+      // writer can record a reorg, cancellation or replacement while we await RPC.
+      if (canonical(recorded) !== canonical(c)) {
+        result = { observation: "RECOVERY_REQUIRED", reason: "JOURNAL_CHANGED" };
+        head = null;
+        replacement = recorded.evidence?.replacement ?? replacement;
+      }
+    } catch {
+      // No reliable fresh snapshot exists. Never emit a stale positive result.
+      result = { observation: "RECOVERY_REQUIRED", reason: "JOURNAL_CHANGED" };
+      head = null;
+    }
     if (["CONFIRMED", "REVERTED"].includes(recorded.state) && ["CONFIRMED", "REVERTED"].includes(result.observation)
         && (recorded.state !== result.observation || recorded.outcome !== result.outcome || canonical(recorded.receipt) !== canonical(result.receipt))) {
       result = { observation: "RECOVERY_REQUIRED", reason: "HISTORICAL_CONTRADICTION", conflictingObservation: result };
