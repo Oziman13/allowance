@@ -105,7 +105,7 @@ export function createLocalReconciler(options) {
     const stable = () => {
       const now = select(operationId, childId);
       requireThat(canonical(now.o.intent) === canonical(o.intent) && canonical(now.c.spec) === canonical(c.spec) && now.c.transactionHash === c.transactionHash, "JOURNAL_CHANGED");
-      return now.c;
+      return now;
     };
     async function receiptEvidence(env, receipt, expectedHash, checkEvents) {
       requireThat(receipt && receipt.transactionHash === expectedHash && env.included && receipt.blockHash === env.blockHash
@@ -225,11 +225,12 @@ export function createLocalReconciler(options) {
     const finishedAt = new Date().toISOString();
     let recorded = c;
     try {
-      recorded = stable();
+      const newest = stable();
+      recorded = newest.c;
       // A valid RPC observation must not overrule a later journal revision.
       // Immutable identity equality alone is insufficient: another authorized
       // writer can record a reorg, cancellation or replacement while we await RPC.
-      if (canonical(recorded) !== canonical(c)) {
+      if (canonical(newest.o) !== canonical(o)) {
         result = { observation: "RECOVERY_REQUIRED", reason: "JOURNAL_CHANGED" };
         head = null;
         replacement = recorded.evidence?.replacement ?? replacement;
