@@ -419,3 +419,30 @@ test("reconciliation repair: candidate survives RPC lookup failure and keyless r
   assert.equal(f.attempts.length, 1);
   await rejection(f.adapter().pay(f.input), "UNRESOLVED_OPERATION");
 });
+
+test("reconciliation repair: newer recovery evidence defeats in-flight stale success", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  await f.adapter().confirm(...ref(out), one);
+  let injected = false;
+  f.transform = (request, response) => {
+    if (!injected && request.method === "eth_getBlockByNumber" && request.params[0] === "latest" && response.result) {
+      injected = true;
+      const session = f.store.acquire(f.wallet);
+      try {
+        const current = f.store.inspect(f.wallet).operations[0].children[0];
+        session.transition(out.operationId, out.childId, {
+          state: "RECOVERY_REQUIRED", transactionHash: out.transactionHash,
+          outcome: current.outcome, receipt: current.receipt,
+          reasonCode: "MANUAL_REVIEW", evidence: current.evidence
+        });
+      } finally { session.release(); }
+    }
+  };
+  const result = await observe(f, out);
+  assert.equal(injected, true);
+  assert.equal(result.observation, "RECOVERY_REQUIRED");
+  assert.equal(result.recordedState, "RECOVERY_REQUIRED");
+  assert.notEqual(result.observation, "CONFIRMED");
+  assert.equal(f.store.inspect(f.wallet).operations[0].children[0].state, "RECOVERY_REQUIRED");
+  assert.equal(f.attempts.length, 1);
+});
