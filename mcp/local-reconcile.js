@@ -239,6 +239,15 @@ export function createLocalReconciler(options) {
       result = { observation: "RECOVERY_REQUIRED", reason: "JOURNAL_CHANGED" };
       head = null;
     }
+    // Recovery evidence present *before* observation also requires explicit
+    // disposition; a freshly fetched receipt must not silently clear a
+    // recorded reorg, cancellation or manual-review requirement.
+    if (recorded.state === "RECOVERY_REQUIRED" && ["CONFIRMED", "REVERTED"].includes(result.observation)) {
+      result = { observation: "RECOVERY_REQUIRED", reason: "RECOVERY_REQUIRES_DISPOSITION",
+        conflictingObservation: result };
+      replacement = recorded.evidence?.replacement ?? replacement;
+      head = null;
+    }
     if (["CONFIRMED", "REVERTED"].includes(recorded.state) && ["CONFIRMED", "REVERTED"].includes(result.observation)
         && (recorded.state !== result.observation || recorded.outcome !== result.outcome || canonical(recorded.receipt) !== canonical(result.receipt))) {
       result = { observation: "RECOVERY_REQUIRED", reason: "HISTORICAL_CONTRADICTION", conflictingObservation: result };
