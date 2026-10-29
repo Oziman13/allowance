@@ -46,9 +46,13 @@ export async function confirmLocalOperation(options, operationId, childId, contr
         };
         if (current.state === "SUBMITTING" || current.state === "SUBMITTED")
           move("UNKNOWN", { reasonCode: "MANUAL_REVIEW" });
-        const evidence = { policy: "ANVIL_CANONICAL_V1", observedAt: new Date().toISOString(),
-          head: null, event: null, replacement: { originalHash: child.transactionHash,
-            candidateHash, classification: "UNVERIFIED", verified: false, receipt: null } };
+        // Preserve prior recovery evidence byte-for-byte, enriching only the
+        // missing candidate. The journal validator forbids arbitrary same-state
+        // changes and replays the same append-only identity rule on restart.
+        const evidence = { ...(current.evidence ?? { policy: "ANVIL_CANONICAL_V1",
+            observedAt: new Date().toISOString(), head: null, event: null }),
+          replacement: { originalHash: child.transactionHash, candidateHash,
+            classification: "UNVERIFIED", verified: false, receipt: null } };
         move("RECOVERY_REQUIRED", { outcome: current.outcome, receipt: current.receipt,
           reasonCode: "REPLACEMENT_OBSERVED", evidence });
       }
