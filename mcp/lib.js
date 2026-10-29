@@ -90,16 +90,29 @@ export async function createClient(o) {
   }
 
   let meta;
+  async function initMeta(asset) {
+    if (meta) return;
+    if (asset === ethers.ZeroAddress) meta = { symbol: net.symbol, decimals: 18, native: true };
+    else {
+      const t = new ethers.Contract(asset, ERC20, provider);
+      let decimals;
+      try {
+        // Validate the full ABI word: ethers' uint8 decoder masks noncanonical high bits.
+        const raw = await provider.call({ to: asset, data: t.interface.encodeFunctionData("decimals") });
+        if (!ethers.isHexString(raw, 32) || BigInt(raw) > 80n) throw new Error("Unsupported decimals");
+        // The pinned ethers formatUnits/parseUnits implementation supports 0 through 80.
+        decimals = Number(BigInt(raw));
+      } catch {
+        throw new Error(`Token decimals are unavailable, invalid or unsupported for ${asset}. Verify metadata before spending.`);
+      }
+      // Cache only verified units. TOKEN is a display placeholder, not verified token identity.
+      meta = { symbol: await t.symbol().catch(() => "TOKEN"), decimals, native: false };
+    }
+  }
   async function account() {
     const [a, left] = await al.getAccount(id);
     if (a.agent.toLowerCase() !== agent.address.toLowerCase()) throw new Error(ERRORS.NotAgent);
-    if (!meta) {
-      if (a.asset === ethers.ZeroAddress) meta = { symbol: net.symbol, decimals: 18, native: true };
-      else {
-        const t = new ethers.Contract(a.asset, ERC20, provider);
-        meta = { symbol: await t.symbol().catch(() => "TOKEN"), decimals: Number(await t.decimals().catch(() => 18)), native: false };
-      }
-    }
+    await initMeta(a.asset);
     return { a, left };
   }
   const fmt = (v) => `${ethers.formatUnits(v, meta.decimals).replace(/\.0$/, "")} ${meta.symbol}`;
@@ -196,13 +209,23 @@ export async function createClient(o) {
     return out;
   }
 
-  async function request(requestId) {
+  async function scopedRequest(requestId) {
     const r = await al.getRequest(requestId);
-    if (Number(r.accountId) !== id) throw new Error("That request belongs to another allowance.");
+    if (r.accountId !== BigInt(id)) throw new Error("That request belongs to another allowance.");
+    return r;
+  }
+
+  async function request(requestId) {
+    const r = await scopedRequest(requestId);
+    if (!meta) {
+      const [a] = await al.getAccount(id);
+      await initMeta(a.asset);
+    }
     return { request_id: Number(requestId), status: STATUS[Number(r.status)], amount: fmt(r.amount), to: r.to, memo: r.memo, held_because: HOLD[Number(r.reason)] };
   }
 
   async function cancel(requestId) {
+    await scopedRequest(requestId);
     const tx = await send("cancel", requestId);
     await confirmed(tx);
     return { request_id: Number(requestId), status: "cancelled", tx: link(tx.hash) };
