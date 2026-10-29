@@ -83,7 +83,14 @@ export function createLocalReconciler(options) {
       && Number.isInteger(maxPolls) && maxPolls >= 1 && maxPolls <= 100 && (control.signal === undefined || control.signal instanceof AbortSignal), "INVALID_CONTROL");
     if (candidateHash !== null) { hash(candidateHash); requireThat(candidateHash !== c.transactionHash, "INVALID_REPLACEMENT"); }
     const start = performance.now(), startedAt = new Date().toISOString(), deadline = start + timeoutMs, aborter = new AbortController();
-    let reason = null, polls = 0, observedAt = null, lastObservation = null, head = null, result, replacement = null;
+    // Carry caller-supplied or durable candidate identity even if an earlier
+    // context/transaction RPC fails before candidate() is reached. Never
+    // promote this identity beyond UNVERIFIED without complete RPC evidence.
+    const unresolvedCandidate = candidateHash === null ? null : {
+      originalHash: c.transactionHash, candidateHash, classification: "UNVERIFIED", verified: false, receipt: null
+    };
+    let reason = null, polls = 0, observedAt = null, lastObservation = null, head = null, result,
+      replacement = c.evidence?.replacement ? structuredClone(c.evidence.replacement) : unresolvedCandidate;
     const stop = code => { reason ??= code; aborter.abort(); }, external = control.signal;
     const cancel = () => stop("CANCELLED"); external?.addEventListener("abort", cancel, { once: true }); if (external?.aborted) cancel();
     const timer = setTimeout(() => stop("TIMEOUT"), timeoutMs);
