@@ -183,3 +183,27 @@ No Solidity, ABI, production MCP handler, frontend/generated site, CI, dependenc
 - Journal/runtime version coordination is required for evidence-bearing frames. State corruption or missing identities cannot be reconstructed from caller intent and declared safe.
 - Qualify blocking storage/replay latency separately if a hard wall-clock return guarantee is required. The current logical deadline bounds RPC/poll work under a responsive local runtime, not stalled kernel calls or hardware durability.
 - V3 remains NO-GO: public transport behavior, chain retention/historical-state availability, native gas/storage deposits, runtime/code identity and EVM/Substrate finality mapping require separately authorized target-runtime evidence. One Anvil receipt and event do not prove Portaldot finality or production readiness.
+
+
+## Independent review addendum — PR #20 C2-R1/C2-R2 remediation (29 October 2026)
+
+This section tracks the separately reviewed **draft PR #21**, based on draft PR #20:
+https://github.com/Oziman13/allowance/pull/21
+Original blocker reproduction:
+https://github.com/Oziman13/allowance/pull/20#issuecomment-6499911707
+
+**C2-R2 (stale PAID):** The prior observer checked only immutable child identity. The replacement implementation re-reads the authorized parent operation after asynchronous RPC work, rejects an in-flight success if any parent/child/recovery evidence has changed, carries forward newly recorded candidate identity, and refuses to promote an already `RECOVERY_REQUIRED` child merely because an RPC produces another positive receipt. A confirmed receipt remains an observation, not V3 finality or operator authorization to clear recovery.
+
+**C2-R1 (lost candidate identity):** For an explicit candidate supplied to the **journal-owned confirmation coordinator**, the candidate hash is validated and recorded as `UNVERIFIED` under exclusive wallet ownership **before** error-prone network observation. For an already-recovery-blocked child with no candidate, a narrowly constrained same-state journal update can append only the previously unknown candidate, preserving historical receipt/outcome and prior evidence. Live writes and replay use the same transition validation. The keyless reader remains byte-for-byte read-only and can report a supplied candidate without making it durable; only the journal-owning coordinator may promise persistence after successful fsync.
+
+New deterministic Anvil regression cases cover candidate lookup error, context failure before lookup, fresh-process read, already-recovery-blocked child enrichment and replay, rejection of a conflicting second candidate, newer recovery evidence while a success response is in flight, real `evm_snapshot` / `evm_revert` with a locally signed same-nonce cancellation and zero recipient balance, pre-existing recovery holds, and parent disposition changes. Each preserves the original transaction hash and checks there is no additional payment broadcast from the reconciler.
+
+**Important boundaries and residual uncertainty:**
+- A supplied replacement hash is NOT proof of a broadcast, same-sender ownership, equivalence, finality or even an existing transaction. Until independently verified, its classification is `UNVERIFIED` and payments remain blocked.
+- An operator-provided hash is durable only **after** the journal has successfully recorded the candidate. Interruption before the candidate's fsynced frame can still require the operator to re-supply it. The multi-frame SUBMITTING/SUBMITTED-to-recovery transition is intentionally not a transactional group.
+- There is no autonomous reconciliation-to-payment retry, no crash-lock takeover, no silent parent settlement, no replacement-chain tracking across multiple candidates, and no automatic conversion of recovered evidence to a new payment.
+- A successfully read one-confirmation Anvil receipt is not independently qualified Portaldot V3 finality.
+- An immutable hash/history is not protection against an attacker who can roll back the **whole valid journal store**; previous storage/rollback limitations persist.
+- Existing filesystem synchronous operations do not obey asynchronous deadlines.
+
+**Delivery gate:** This addendum does not itself certify success. Check the latest branch head's GitHub Actions Foundry and MCP jobs and the new tests before any PR #21 merge into PR #20. Re-review the integrated PR #20 diff and run CI before considering main. The public/production MCP broadcaster stays disconnected and NO-GO until the later crash recovery, compound-parent disposition and live V3 qualification phases.
