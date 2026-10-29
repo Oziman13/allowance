@@ -582,3 +582,23 @@ test("reconciliation repair: pre-existing recovery hold cannot be promoted by a 
   assert.deepEqual(fs.readFileSync(f.journal), before);
   assert.equal(f.attempts.length, 1);
 });
+
+test("reconciliation repair: changed parent disposition invalidates in-flight child observation", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  await f.adapter().confirm(...ref(out), one);
+  let changed = false;
+  f.transform = (v, r) => {
+    if (!changed && v.method === "eth_getBlockByNumber" && v.params[0] === "latest" && r.result) {
+      changed = true;
+      const session = f.store.acquire(f.wallet);
+      try { session.closeOperation(out.operationId, "RESOLVED"); }
+      finally { session.release(); }
+    }
+  };
+  const observation = await observe(f, out);
+  assert.equal(changed, true);
+  assert.equal(observation.observation, "RECOVERY_REQUIRED");
+  assert.equal(observation.reason, "JOURNAL_CHANGED");
+  assert.equal(f.store.inspect(f.wallet).operations[0].status, "CLOSED");
+  assert.equal(f.attempts.length, 1);
+});
