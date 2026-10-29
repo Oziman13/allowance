@@ -446,3 +446,55 @@ test("reconciliation repair: newer recovery evidence defeats in-flight stale suc
   assert.equal(f.store.inspect(f.wallet).operations[0].children[0].state, "RECOVERY_REQUIRED");
   assert.equal(f.attempts.length, 1);
 });
+
+test("reconciliation repair: enrich an already recovery-blocked child without erasing evidence", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  f.transform = (v, r) => {
+    if (v.method === "eth_getTransactionReceipt" && r.result && r.result.logs.length)
+      r.result.logs[0].address = f.recipient;
+  };
+  const first = await f.adapter().confirm(...ref(out), one);
+  assert.equal(first.journalState, "RECOVERY_REQUIRED");
+  const before = f.store.inspect(f.wallet).operations[0].children[0];
+  assert.equal(before.evidence.replacement, null);
+  f.transform = null;
+  const candidateHash = "0x" + "c".repeat(64);
+  const second = await f.adapter().confirm(...ref(out), { ...one, replacementHash: candidateHash });
+  assert.equal(second.observation, "RECOVERY_REQUIRED");
+  const saved = f.store.inspect(f.wallet).operations[0].children[0];
+  assert.equal(saved.state, "RECOVERY_REQUIRED");
+  assert.equal(saved.evidence.replacement.candidateHash, candidateHash);
+  assert.equal(saved.evidence.replacement.classification, "UNVERIFIED");
+  assert.equal(saved.evidence.observedAt, before.evidence.observedAt);
+  assert.deepEqual(saved.evidence.head, before.evidence.head);
+  assert.deepEqual(saved.evidence.event, before.evidence.event);
+  const restarted = openReader(f.state).inspect(f.wallet).operations[0].children[0];
+  assert.equal(restarted.evidence.replacement.candidateHash, candidateHash);
+  const unchanged = fs.readFileSync(f.journal);
+  const session = f.store.acquire(f.wallet);
+  try {
+    const bad = structuredClone(saved.evidence);
+    bad.replacement.candidateHash = "0x" + "d".repeat(64);
+    assert.throws(() => session.transition(...ref(out), { state: "RECOVERY_REQUIRED",
+      transactionHash: out.transactionHash, outcome: saved.outcome, receipt: saved.receipt,
+      reasonCode: "REPLACEMENT_OBSERVED", evidence: bad }), e => e.code === "INVALID_TRANSITION");
+    assert.deepEqual(fs.readFileSync(f.journal), unchanged);
+  } finally { session.release(); }
+  assert.equal(f.attempts.length, 1);
+});
+
+test("reconciliation repair: candidate survives context failure before replacement lookup", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  const candidateHash = "0x" + "e".repeat(64);
+  f.mode = "chain";
+  const result = await f.adapter().confirm(...ref(out), { ...one, replacementHash: candidateHash });
+  assert.equal(result.observation, "RECOVERY_REQUIRED");
+  assert.equal(result.replacement.candidateHash, candidateHash);
+  assert.equal(result.replacement.classification, "UNVERIFIED");
+  const saved = openReader(f.state).inspect(f.wallet).operations[0].children[0];
+  assert.equal(saved.evidence.replacement.candidateHash, candidateHash);
+  f.mode = null;
+  const after = await observe(f, out);
+  assert.equal(after.replacement.candidateHash, candidateHash);
+  assert.equal(f.attempts.length, 1);
+});
