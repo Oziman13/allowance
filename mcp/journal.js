@@ -106,13 +106,21 @@ export function initializeStore({ stateDir, io = fs }) {
 export function openStore({ stateDir, storeId, io = fs }) {
   try { id(storeId); return new Store(stateDir, storeId, io); } catch (e) { throw ioError(e); }
 }
+// Same identity, permissions and chronological replay checks, without writes,
+// fsync, lock acquisition or any exposed mutation capability.
+export function openReader({ stateDir, storeId, io = fs }) {
+  try {
+    id(storeId); const store = new Store(stateDir, storeId, io, true);
+    return Object.freeze({ inspect: descriptor => store.inspect(descriptor) });
+  } catch (e) { throw ioError(e); }
+}
 class Store {
   #f; #root; #id; #inode;
-  constructor(root, storeId, io) {
+  constructor(root, storeId, io, readOnly = false) {
     this.#f = new Files(io); this.#root = root; this.#id = storeId;
     this.#inode = this.#f.dir(root); this.#check();
     // Re-establish durable naming before opening this explicitly provisioned store.
-    this.#f.syncDir(root); this.#f.syncDir(path.dirname(root));
+    if (!readOnly) { this.#f.syncDir(root); this.#f.syncDir(path.dirname(root)); }
   }
   #check() {
     if (!sameInode(this.#inode, this.#f.dir(this.#root))) fail("IDENTITY_MISMATCH");
