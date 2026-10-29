@@ -247,6 +247,12 @@ class Store {
       };
       const find = (s, operationId) => { id(operationId); const v = s.operations.get(operationId); if (!v) fail("UNKNOWN_OPERATION"); return structuredClone(v); };
       return Object.freeze({
+        // Synchronous capability check for a final send boundary; never a lease
+        // against uncooperating writers, and never permission to repair history.
+        assertOwnership: () => {
+          try { guard(); }
+          catch (e) { poisoned = true; throw ioError(e); }
+        },
         admit: spec => write(s => {
           keys(spec, ["intent", "child"]); intent(spec.intent); childSpec(spec.child, spec.intent, descriptor.binding.wallet);
           return { operationId: uuid(), intent: structuredClone(spec.intent), status: "OPEN", closure: null, children: [newChild(spec.child)] };
