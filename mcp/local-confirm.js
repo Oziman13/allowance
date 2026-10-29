@@ -21,6 +21,38 @@ export async function confirmLocalOperation(options, operationId, childId, contr
   try {
     store = openStore({ ...state, io });
     session = store.acquire(wallet);
+    // A caller-supplied candidate is evidence of a possible replacement, NOT
+    // proof it exists. Reserve its identity durably before any fallible RPC
+    // lookup; otherwise an error/timeout would erase the only known hash.
+    if (control.replacementHash !== undefined && control.replacementHash !== null) {
+      const candidateHash = control.replacementHash;
+      if (typeof candidateHash !== "string" || !/^0x[0-9a-f]{64}$/.test(candidateHash)
+          || candidateHash === child.transactionHash || child.transactionHash === null)
+        throw new ConfirmationError("INVALID_REPLACEMENT", { transactionHash: child.transactionHash });
+      let current = store.inspect(wallet).operations.find(o => o.operationId === operationId)?.children.find(c => c.childId === childId);
+      if (!current || current.transactionHash !== child.transactionHash || canonical(current.spec) !== canonical(child.spec))
+        throw new ConfirmationError("JOURNAL_CHANGED", { transactionHash: child.transactionHash });
+      const existing = current.evidence?.replacement?.candidateHash ?? null;
+      if (existing && existing !== candidateHash)
+        throw new ConfirmationError("MULTIPLE_REPLACEMENTS_UNSUPPORTED", { transactionHash: child.transactionHash });
+      if (!existing) {
+        if (["PREPARED", "NOT_SUBMITTED"].includes(current.state))
+          throw new ConfirmationError("INVALID_TRANSITION", { transactionHash: child.transactionHash });
+        const move = (state, fields = {}) => {
+          session.transition(operationId, childId, { state, transactionHash: child.transactionHash,
+            outcome: null, receipt: null, reasonCode: null, ...fields });
+          current = store.inspect(wallet).operations.find(o => o.operationId === operationId).children.find(c => c.childId === childId);
+          persisted = true;
+        };
+        if (current.state === "SUBMITTING" || current.state === "SUBMITTED")
+          move("UNKNOWN", { reasonCode: "MANUAL_REVIEW" });
+        const evidence = { policy: "ANVIL_CANONICAL_V1", observedAt: new Date().toISOString(),
+          head: null, event: null, replacement: { originalHash: child.transactionHash,
+            candidateHash, classification: "UNVERIFIED", verified: false, receipt: null } };
+        move("RECOVERY_REQUIRED", { outcome: current.outcome, receipt: current.receipt,
+          reasonCode: "REPLACEMENT_OBSERVED", evidence });
+      }
+    }
     const remaining = Math.floor(timeoutMs - (performance.now() - start));
     if (remaining < 10) throw new ConfirmationError("TIMEOUT", { transactionHash: child.transactionHash });
     phase = "observe";
