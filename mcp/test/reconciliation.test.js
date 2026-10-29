@@ -602,3 +602,46 @@ test("reconciliation repair: changed parent disposition invalidates in-flight ch
   assert.equal(f.store.inspect(f.wallet).operations[0].status, "CLOSED");
   assert.equal(f.attempts.length, 1);
 });
+
+test("reconciliation repair: real accepted replacement survives injected candidate lookup failure and new process", async () => {
+  const f = await fixture();
+  await provider.send("evm_setAutomine", [false]);
+  let out, candidateHash;
+  try {
+    out = await f.adapter().pay(f.input);
+    const old = ethers.Transaction.from(f.raw[0]);
+    const raw = await f.agent.signTransaction({ type: 2, chainId: 31337n,
+      nonce: old.nonce, to: ADDRESS, value: 0n, data: old.data,
+      gasLimit: old.gasLimit, maxFeePerGas: old.maxFeePerGas * 3n,
+      maxPriorityFeePerGas: old.maxPriorityFeePerGas * 3n });
+    candidateHash = ethers.keccak256(raw);
+    await provider.send("eth_sendRawTransaction", [raw]);
+    await provider.send("evm_mine", []);
+  } finally { await provider.send("evm_setAutomine", [true]); }
+  const accepted = await provider.getTransactionReceipt(candidateHash);
+  assert.equal(accepted.status, 1);
+  assert.equal(await provider.getTransactionReceipt(out.transactionHash), null);
+  f.transform = (v, response) => {
+    if (v.method === "eth_getTransactionByHash" && v.params[0] === candidateHash) {
+      delete response.result;
+      response.error = { code: -32000, message: "injected lookup error after accepted replacement" };
+    }
+  };
+  const failedLookup = await f.adapter().confirm(...ref(out), { ...one, replacementHash: candidateHash });
+  assert.equal(failedLookup.observation, "UNKNOWN");
+  assert.equal(failedLookup.replacement.candidateHash, candidateHash);
+  assert.equal(failedLookup.replacement.classification, "UNVERIFIED");
+  const saved = openReader(f.state).inspect(f.wallet).operations[0].children[0];
+  assert.equal(saved.transactionHash, out.transactionHash);
+  assert.equal(saved.state, "RECOVERY_REQUIRED");
+  assert.equal(saved.evidence.replacement.candidateHash, candidateHash);
+  assert.equal(saved.evidence.replacement.verified, false);
+  f.transform = null;
+  const bytes = fs.readFileSync(f.journal);
+  const restarted = await keylessWorker(f, out);
+  assert.equal(restarted.signs, 0);
+  assert.equal(restarted.result.replacement.candidateHash, candidateHash);
+  assert.deepEqual(fs.readFileSync(f.journal), bytes);
+  assert.equal(f.attempts.length, 1);
+  await paid(f, candidateHash);
+});
