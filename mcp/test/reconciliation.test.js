@@ -13,6 +13,7 @@ import { createLocalReconciler } from "../local-reconcile.js";
 import { confirmLocalOperation } from "../local-confirm.js";
 import { canonical } from "../journal-schema.js";
 import { createLocalBroadcastAdapter } from "../local-broadcast.js";
+import { createLocalOperatorPacket } from "../local-operator.js";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const base = path.join(ROOT, "work/reconciliation"); fs.mkdirSync(base, { recursive: true, mode: 0o700 });
@@ -644,4 +645,38 @@ test("reconciliation repair: real accepted replacement survives injected candida
   assert.deepEqual(fs.readFileSync(f.journal), bytes);
   assert.equal(f.attempts.length, 1);
   await paid(f, candidateHash);
+});
+
+test("operator packet: keyless read-only snapshot never authorizes recovery or touches chain", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  await f.adapter().confirm(...ref(out), one);
+  const bytes = fs.readFileSync(f.journal), rpcCalls = f.methods.length, sends = f.attempts.length;
+  const packet = createLocalOperatorPacket({ mode: "anvil-journal", state: f.state, wallet: f.wallet });
+  const first = packet.inspect(), second = packet.inspect();
+  assert.deepEqual(first, second);
+  assert.equal(first.packetVersion, 1);
+  assert.equal(first.authority, "READ_ONLY_NO_RECOVERY");
+  assert.equal(first.nextAction, "HUMAN_REVIEW_ONLY");
+  assert.equal(first.ownerOpenRecorded, false);
+  assert.equal(first.lockObserved, "ABSENT");
+  assert(first.riskFlags.includes("UNRESOLVED_PARENT"));
+  assert(first.riskFlags.includes("HISTORICAL_CONFIRMATION_NOT_FINALITY"));
+  assert.equal(first.operations[0].children[0].transactionHash, out.transactionHash);
+  assert.equal(first.operations[0].children[0].state, "CONFIRMED");
+  assert.match(first.fingerprint, /^sha256:[0-9a-f]{64}$/);
+  const rendered = JSON.stringify(first);
+  assert.equal(rendered.includes(f.key), false);
+  assert.equal(rendered.includes(f.state.stateDir), false);
+  assert.deepEqual(fs.readFileSync(f.journal), bytes);
+  assert.equal(f.methods.length, rpcCalls);
+  assert.equal(f.attempts.length, sends);
+  const owner = f.store.acquire(f.wallet);
+  try {
+    const open = packet.inspect();
+    assert.equal(open.ownerOpenRecorded, true);
+    assert.equal(open.lockObserved, "PRESENT");
+    assert(open.riskFlags.includes("JOURNAL_OWNER_OPEN"));
+    assert(open.riskFlags.includes("OWNER_LOCK_PRESENT"));
+  } finally { owner.release(); }
+  assert.equal(packet.inspect().lockObserved, "ABSENT");
 });
