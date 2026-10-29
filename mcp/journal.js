@@ -165,8 +165,7 @@ class Store {
         keys(v, ["kind", "schemaVersion", "sequence", "previousDigest", "ownerToken", "operation"]);
         if (!ownerOpen || v.ownerToken !== ownerToken) fail("OWNERSHIP_UNCERTAIN");
         const old = operations.get(v.operation.operationId);
-        if (!old && [...operations.values()].some(o => o.status === "OPEN")) fail("UNRESOLVED_OPERATION");
-        validateChange(old, v.operation, descriptor.binding.wallet); operations.set(v.operation.operationId, v.operation);
+        validateChange(old, v.operation, descriptor.binding.wallet, operations); operations.set(v.operation.operationId, v.operation);
       } else fail("CORRUPT_STATE");
       previous = JSON.parse(lines[i]).digest;
     }
@@ -238,7 +237,7 @@ class Store {
       const write = fn => {
         try {
           const s = guard(), next = fn(s);
-          const old = s.operations.get(next.operationId); validateChange(old, next, descriptor.binding.wallet);
+          const old = s.operations.get(next.operationId); validateChange(old, next, descriptor.binding.wallet, s.operations);
           this.#append(paths, descriptor, s, { kind: "OP", ownerToken: token, operation: structuredClone(next) }); guard();
           return structuredClone(next);
         } catch (e) {
@@ -250,21 +249,14 @@ class Store {
       return Object.freeze({
         admit: spec => write(s => {
           keys(spec, ["intent", "child"]); intent(spec.intent); childSpec(spec.child, spec.intent, descriptor.binding.wallet);
-          if ([...s.operations.values()].some(o => o.status === "OPEN")) fail("UNRESOLVED_OPERATION");
-          if ([...s.operations.values()].flatMap(o => o.children).some(c => c.transactionHash !== null && BigInt(spec.child.transaction.nonce) <= BigInt(c.spec.transaction.nonce))) fail("NONCE_CONFLICT");
           return { operationId: uuid(), intent: structuredClone(spec.intent), status: "OPEN", closure: null, children: [newChild(spec.child)] };
         }),
         addChild: (operationId, spec) => write(s => {
           const o = find(s, operationId);
-          if ([...s.operations.values()].some(x => x.operationId !== operationId && x.status === "OPEN")) fail("UNRESOLVED_OPERATION");
           childSpec(spec, o.intent, descriptor.binding.wallet); o.children.push(newChild(spec)); return o;
         }),
         transition: (operationId, childId, patch) => write(s => {
           const o = find(s, operationId); id(childId); const index = o.children.findIndex(c => c.childId === childId); if (index < 0) fail("UNKNOWN_CHILD");
-          // Re-check the mutation gate at the future broadcast boundary, including
-          // contradictions discovered after this operation was first prepared.
-          if (patch?.state === "SUBMITTING" && ([...s.operations.values()].some(x => x.operationId !== operationId && x.status === "OPEN")
-              || o.children.slice(0, index).some(c => c.state !== "CONFIRMED"))) fail("UNRESOLVED_OPERATION");
           o.children[index] = updateChild(o.children[index], patch); o.status = "OPEN"; o.closure = null; return o;
         }),
         closeOperation: (operationId, closure = "RESOLVED") => write(s => { const o = find(s, operationId); o.status = "CLOSED"; o.closure = closure; return o; }),

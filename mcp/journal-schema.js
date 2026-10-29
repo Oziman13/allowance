@@ -106,8 +106,7 @@ export function updateChild(current, patch) {
   if (current.transactionHash !== null && current.transactionHash !== patch.transactionHash) fail("IDENTITY_MISMATCH");
   return { childId: current.childId, spec: current.spec, ...patch };
 }
-// Replay validates every change, not only the final snapshot.
-export function validateChange(old, next, wallet) {
+function validateOperationChange(old, next, wallet) {
   operation(next, wallet);
   if (!old) {
     if (next.status !== "OPEN" || next.children.length !== 1 || next.children[0].state !== "PREPARED") fail("INVALID_TRANSITION");
@@ -131,4 +130,39 @@ export function validateChange(old, next, wallet) {
   if (old.status === "CLOSED" && b.state !== "RECOVERY_REQUIRED") fail("INVALID_TRANSITION");
   if (a.childId !== b.childId || canonical(a.spec) !== canonical(b.spec)
       || !TRANSITIONS[a.state].includes(b.state) || (a.transactionHash !== null && a.transactionHash !== b.transactionHash)) fail("INVALID_TRANSITION");
+}
+
+// The complete wallet context is mandatory: a parent-local nonce comparison
+// cannot protect older parents reopened after another allowance has progressed.
+export function validateChange(old, next, wallet, operations) {
+  validateOperationChange(old, next, wallet);
+  if (!(operations instanceof Map) || operations.get(next.operationId) !== old) fail("INVALID_SCHEMA");
+  // Eligibility is a transition rule, not a blanket ban on multiple OPEN
+  // parents: recording contradictory evidence and reconciling it must remain possible.
+  const addsChild = old && next.children.length > old.children.length;
+  const submitting = next.children.findIndex((c, i) => c.state === "SUBMITTING" && old?.children[i]?.state !== "SUBMITTING");
+  if ((!old || addsChild || submitting >= 0)
+      && [...operations.values()].some(o => o.operationId !== next.operationId && o.status === "OPEN")) fail("UNRESOLVED_OPERATION");
+  if (submitting >= 0 && old.children.slice(0, submitting).some(c => c.state !== "CONFIRMED")) fail("UNRESOLVED_OPERATION");
+  const reserved = new Set();
+  for (const o of [...operations.values()].filter(o => o.operationId !== next.operationId).concat(next)) {
+    for (const c of o.children) {
+      // Only the explicit, terminal PREPARED -> NOT_SUBMITTED proof releases a
+      // reservation. Closing a parent or losing a receipt does not release it.
+      if (c.state === "NOT_SUBMITTED") continue;
+      const nonce = c.spec.transaction.nonce;
+      if (reserved.has(nonce)) fail("NONCE_CONFLICT");
+      reserved.add(nonce);
+    }
+  }
+  for (const c of next.children) {
+    const previous = old?.children.find(p => p.childId === c.childId);
+    if (previous && !(previous.state === "PREPARED" && c.state === "SUBMITTING")) continue;
+    // Preserve the existing conservative ordering at both reservation and send
+    // admission. The child's own immutable hash/nonce is not a new transaction.
+    for (const o of operations.values()) for (const other of o.children) {
+      if (o.operationId === next.operationId && other.childId === c.childId) continue;
+      if (other.transactionHash !== null && BigInt(c.spec.transaction.nonce) <= BigInt(other.spec.transaction.nonce)) fail("NONCE_CONFLICT");
+    }
+  }
 }
