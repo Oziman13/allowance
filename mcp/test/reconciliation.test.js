@@ -559,3 +559,26 @@ test("reconciliation repair: real Anvil reorg and cancellation invalidate an in-
   assert.equal(await provider.getBalance(f.recipient), 0n);
   assert.equal(f.attempts.length, 1);
 });
+
+test("reconciliation repair: pre-existing recovery hold cannot be promoted by a fresh Paid receipt", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  await f.adapter().confirm(...ref(out), one);
+  const session = f.store.acquire(f.wallet);
+  try {
+    const current = f.store.inspect(f.wallet).operations[0].children[0];
+    session.transition(out.operationId, out.childId, {
+      state: "RECOVERY_REQUIRED", transactionHash: out.transactionHash,
+      outcome: current.outcome, receipt: current.receipt,
+      reasonCode: "MANUAL_REVIEW", evidence: current.evidence
+    });
+  } finally { session.release(); }
+  // The original payment is still canonical on this local chain, but a newer
+  // recorded recovery requirement cannot be cleared by an ordinary keyless read.
+  const before = fs.readFileSync(f.journal), observation = await observe(f, out);
+  assert.equal(observation.observation, "RECOVERY_REQUIRED");
+  assert.equal(observation.recordedState, "RECOVERY_REQUIRED");
+  assert.equal(observation.reason, "RECOVERY_REQUIRES_DISPOSITION");
+  assert.equal(observation.conflictingObservation?.observation, "CONFIRMED");
+  assert.deepEqual(fs.readFileSync(f.journal), before);
+  assert.equal(f.attempts.length, 1);
+});
