@@ -470,8 +470,10 @@ test("reconciliation repair: enrich an already recovery-blocked child without er
   assert.deepEqual(saved.evidence.event, before.evidence.event);
   const restarted = openReader(f.state).inspect(f.wallet).operations[0].children[0];
   assert.equal(restarted.evidence.replacement.candidateHash, candidateHash);
-  const unchanged = fs.readFileSync(f.journal);
   const session = f.store.acquire(f.wallet);
+  // Acquiring ownership itself appends an authorized OWNER record. Snapshot
+  // *after* acquisition to assert the rejected transition changes no bytes.
+  const unchanged = fs.readFileSync(f.journal);
   try {
     const bad = structuredClone(saved.evidence);
     bad.replacement.candidateHash = "0x" + "d".repeat(64);
