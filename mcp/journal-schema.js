@@ -65,8 +65,43 @@ export const TRANSITIONS = Object.freeze({
   CONFIRMED: ["RECOVERY_REQUIRED"], REVERTED: ["RECOVERY_REQUIRED"], NOT_SUBMITTED: [],
 });
 export const settled = (c) => ["CONFIRMED", "REVERTED", "NOT_SUBMITTED"].includes(c.state);
+function observationEvidence(v, c) {
+  keys(v, ["policy", "observedAt", "head", "event", "replacement"]);
+  if (v.policy !== "ANVIL_CANONICAL_V1" || typeof v.observedAt !== "string" || v.observedAt.length !== 24
+      || !Number.isFinite(Date.parse(v.observedAt)) || new Date(v.observedAt).toISOString() !== v.observedAt) fail("INVALID_RECEIPT");
+  if (v.head !== null) { keys(v.head, ["hash", "number"]); hash(v.head.hash); integer(v.head.number); }
+  if (v.event !== null) {
+    keys(v.event, ["name", "logIndex", "requestId", "reason", "commitment"]);
+    integer(v.event.logIndex); hash(v.event.commitment);
+    if (!["Paid", "PaymentHeld", "Refueled", "RequestResolved"].includes(v.event.name)) fail("INVALID_RECEIPT");
+    if (["PaymentHeld", "RequestResolved"].includes(v.event.name)) integer(v.event.requestId);
+    else if (v.event.requestId !== null) fail("INVALID_RECEIPT");
+    if (v.event.name === "PaymentHeld") { if (![1, 2, 3].includes(v.event.reason)) fail("INVALID_RECEIPT"); }
+    else if (v.event.reason !== null) fail("INVALID_RECEIPT");
+    if (v.event.name === "RequestResolved" && v.event.requestId !== c.spec.requestId) fail("INVALID_RECEIPT");
+  }
+  if (v.replacement !== null) {
+    keys(v.replacement, ["originalHash", "candidateHash", "classification", "verified", "receipt"]);
+    hash(v.replacement.originalHash); hash(v.replacement.candidateHash);
+    if (v.replacement.originalHash !== c.transactionHash || v.replacement.candidateHash === c.transactionHash
+        || !["EQUIVALENT_CALL", "DIFFERENT_CALL", "CANCELLATION", "UNVERIFIED"].includes(v.replacement.classification)
+        || typeof v.replacement.verified !== "boolean" || c.state !== "RECOVERY_REQUIRED") fail("INVALID_RECEIPT");
+    if (v.replacement.receipt !== null) {
+      const r = v.replacement.receipt; keys(r, ["transactionHash", "blockHash", "blockNumber", "status"]);
+      hash(r.transactionHash); hash(r.blockHash); integer(r.blockNumber);
+      if (r.transactionHash !== v.replacement.candidateHash || ![0, 1].includes(r.status)) fail("INVALID_RECEIPT");
+    }
+    if (v.replacement.verified !== (v.replacement.receipt !== null) || v.replacement.classification === "UNVERIFIED" && v.replacement.verified) fail("INVALID_RECEIPT");
+  }
+  if (["CONFIRMED", "REVERTED"].includes(c.state)) {
+    if (v.head === null || BigInt(v.head.number) < BigInt(c.receipt.blockNumber) || v.replacement !== null
+        || v.head.number === c.receipt.blockNumber && v.head.hash !== c.receipt.blockHash) fail("INVALID_RECEIPT");
+    const name = { PAID: "Paid", HELD: "PaymentHeld", REFUELED: "Refueled", CANCELLED: "RequestResolved" }[c.outcome];
+    if (c.state === "CONFIRMED" ? v.event?.name !== name : v.event !== null) fail("INVALID_RECEIPT");
+  } else if (c.state !== "RECOVERY_REQUIRED") fail("INVALID_RECEIPT");
+}
 export function child(v, parent, wallet) {
-  keys(v, ["childId", "spec", "state", "transactionHash", "outcome", "receipt", "reasonCode"]);
+  keys(v, ["childId", "spec", "state", "transactionHash", "outcome", "receipt", "reasonCode", ...(Object.hasOwn(v ?? {}, "evidence") ? ["evidence"] : [])]);
   id(v.childId); childSpec(v.spec, parent, wallet);
   if (!Object.hasOwn(TRANSITIONS, v.state)) fail("INVALID_STATE");
   if (["PREPARED", "NOT_SUBMITTED"].includes(v.state)) {
@@ -86,6 +121,7 @@ export function child(v, parent, wallet) {
   } else if (v.state !== "RECOVERY_REQUIRED" && (v.receipt !== null || v.outcome !== null)) fail("INVALID_RECEIPT");
   if (v.state === "RECOVERY_REQUIRED" && v.outcome !== null
       && (v.receipt?.status !== 1 || !({ pay: ["PAID", "HELD"], refuel: ["REFUELED"], cancel: ["CANCELLED"] })[v.spec.kind].includes(v.outcome))) fail("INVALID_RECEIPT");
+  if (Object.hasOwn(v, "evidence")) observationEvidence(v.evidence, v);
 }
 export function operation(v, wallet) {
   keys(v, ["operationId", "intent", "status", "closure", "children"]); id(v.operationId); intent(v.intent);
@@ -101,10 +137,10 @@ export function newChild(spec) {
   return { childId: uuid(), spec: structuredClone(spec), state: "PREPARED", transactionHash: null, outcome: null, receipt: null, reasonCode: null };
 }
 export function updateChild(current, patch) {
-  keys(patch, ["state", "transactionHash", "outcome", "receipt", "reasonCode"]);
+  keys(patch, ["state", "transactionHash", "outcome", "receipt", "reasonCode", ...(Object.hasOwn(patch ?? {}, "evidence") ? ["evidence"] : [])]);
   if (!TRANSITIONS[current.state]?.includes(patch.state)) fail("INVALID_TRANSITION");
   if (current.transactionHash !== null && current.transactionHash !== patch.transactionHash) fail("IDENTITY_MISMATCH");
-  return { childId: current.childId, spec: current.spec, ...patch };
+  return { childId: current.childId, spec: current.spec, ...(current.evidence ? { evidence: current.evidence } : {}), ...patch };
 }
 function validateOperationChange(old, next, wallet) {
   operation(next, wallet);

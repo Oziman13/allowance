@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { openStore, JournalError } from "./journal.js";
 import { keys, address, hash, integer, binding, intent as validateIntent } from "./journal-schema.js";
 import { localRpc, loopbackUrl, LocalRpcError } from "./local-rpc.js";
+import { confirmLocalOperation } from "./local-confirm.js";
 
 const ABI = JSON.parse(fs.readFileSync(new URL("./abi.json", import.meta.url), "utf8"));
 const iface = new ethers.Interface(ABI), TIP = 1_000_000_000n;
@@ -34,6 +35,8 @@ export function createLocalBroadcastAdapter(options) {
   } catch (e) { throw new LocalBroadcastError(safeCode(e)); }
   // Retain only the immutable context needed below, not the caller's mutable config.
   const contract = options.contract, accountId = options.accountId, codeHash = options.expectedCodeHash;
+  const confirmationContext = { mode: options.mode, rpcUrl: options.rpcUrl, contract, accountId, expectedCodeHash: codeHash,
+    state: structuredClone(options.state), wallet: structuredClone(descriptor), ...(options.io ? { io: options.io } : {}) };
   async function pay(input, control = {}) {
     let intent, memo, timeoutMs, external;
     try {
@@ -132,5 +135,6 @@ export function createLocalBroadcastAdapter(options) {
       transactionHash, broadcastAttempted: attempted, journalState, persistenceFailed });
     return Object.freeze(result);
   }
-  return Object.freeze({ pay, refuel: async () => fail("UNSUPPORTED_ACTION"), cancel: async () => fail("UNSUPPORTED_ACTION"), inspect: () => store.inspect(descriptor) });
+  return Object.freeze({ pay, confirm: (operationId, childId, control) => confirmLocalOperation(confirmationContext, operationId, childId, control),
+    refuel: async () => fail("UNSUPPORTED_ACTION"), cancel: async () => fail("UNSUPPORTED_ACTION"), inspect: () => store.inspect(descriptor) });
 }
