@@ -136,9 +136,27 @@ export function operation(v, wallet) {
 export function newChild(spec) {
   return { childId: uuid(), spec: structuredClone(spec), state: "PREPARED", transactionHash: null, outcome: null, receipt: null, reasonCode: null };
 }
+// Only a previously unknown candidate hash may be attached to an already
+// recovery-blocked child. This is evidence enrichment, NOT a new payment,
+// nonce release, transaction replacement or change of financial outcome.
+function candidateEnrichment(old, next) {
+  if (old.state !== "RECOVERY_REQUIRED" || next.state !== "RECOVERY_REQUIRED"
+      || old.evidence?.replacement != null || next.evidence?.replacement?.classification !== "UNVERIFIED"
+      || next.evidence.replacement.verified !== false || next.evidence.replacement.receipt !== null
+      || next.reasonCode !== "REPLACEMENT_OBSERVED"
+      || old.transactionHash !== next.transactionHash
+      || canonical(old.spec) !== canonical(next.spec)
+      || canonical(old.receipt) !== canonical(next.receipt)
+      || canonical(old.outcome) !== canonical(next.outcome)) return false;
+  if (old.evidence) {
+    return canonical({ ...old.evidence, replacement: null }) === canonical({ ...next.evidence, replacement: null });
+  }
+  return next.evidence.head === null && next.evidence.event === null;
+}
 export function updateChild(current, patch) {
   keys(patch, ["state", "transactionHash", "outcome", "receipt", "reasonCode", ...(Object.hasOwn(patch ?? {}, "evidence") ? ["evidence"] : [])]);
-  if (!TRANSITIONS[current.state]?.includes(patch.state)) fail("INVALID_TRANSITION");
+  if (!TRANSITIONS[current.state]?.includes(patch.state)
+      && !candidateEnrichment(current, { ...current, ...patch })) fail("INVALID_TRANSITION");
   if (current.transactionHash !== null && current.transactionHash !== patch.transactionHash) fail("IDENTITY_MISMATCH");
   return { childId: current.childId, spec: current.spec, ...(current.evidence ? { evidence: current.evidence } : {}), ...patch };
 }
@@ -165,7 +183,8 @@ function validateOperationChange(old, next, wallet) {
   const i = changed[0], a = old.children[i], b = next.children[i];
   if (old.status === "CLOSED" && b.state !== "RECOVERY_REQUIRED") fail("INVALID_TRANSITION");
   if (a.childId !== b.childId || canonical(a.spec) !== canonical(b.spec)
-      || !TRANSITIONS[a.state].includes(b.state) || (a.transactionHash !== null && a.transactionHash !== b.transactionHash)) fail("INVALID_TRANSITION");
+      || (!TRANSITIONS[a.state].includes(b.state) && !candidateEnrichment(a, b))
+      || (a.transactionHash !== null && a.transactionHash !== b.transactionHash)) fail("INVALID_TRANSITION");
 }
 
 // The complete wallet context is mandatory: a parent-local nonce comparison

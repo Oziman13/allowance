@@ -83,7 +83,14 @@ export function createLocalReconciler(options) {
       && Number.isInteger(maxPolls) && maxPolls >= 1 && maxPolls <= 100 && (control.signal === undefined || control.signal instanceof AbortSignal), "INVALID_CONTROL");
     if (candidateHash !== null) { hash(candidateHash); requireThat(candidateHash !== c.transactionHash, "INVALID_REPLACEMENT"); }
     const start = performance.now(), startedAt = new Date().toISOString(), deadline = start + timeoutMs, aborter = new AbortController();
-    let reason = null, polls = 0, observedAt = null, lastObservation = null, head = null, result, replacement = null;
+    // Carry caller-supplied or durable candidate identity even if an earlier
+    // context/transaction RPC fails before candidate() is reached. Never
+    // promote this identity beyond UNVERIFIED without complete RPC evidence.
+    const unresolvedCandidate = candidateHash === null ? null : {
+      originalHash: c.transactionHash, candidateHash, classification: "UNVERIFIED", verified: false, receipt: null
+    };
+    let reason = null, polls = 0, observedAt = null, lastObservation = null, head = null, result,
+      replacement = c.evidence?.replacement ? structuredClone(c.evidence.replacement) : unresolvedCandidate;
     const stop = code => { reason ??= code; aborter.abort(); }, external = control.signal;
     const cancel = () => stop("CANCELLED"); external?.addEventListener("abort", cancel, { once: true }); if (external?.aborted) cancel();
     const timer = setTimeout(() => stop("TIMEOUT"), timeoutMs);
@@ -98,7 +105,7 @@ export function createLocalReconciler(options) {
     const stable = () => {
       const now = select(operationId, childId);
       requireThat(canonical(now.o.intent) === canonical(o.intent) && canonical(now.c.spec) === canonical(c.spec) && now.c.transactionHash === c.transactionHash, "JOURNAL_CHANGED");
-      return now.c;
+      return now;
     };
     async function receiptEvidence(env, receipt, expectedHash, checkEvents) {
       requireThat(receipt && receipt.transactionHash === expectedHash && env.included && receipt.blockHash === env.blockHash
@@ -217,7 +224,31 @@ export function createLocalReconciler(options) {
     }
     const finishedAt = new Date().toISOString();
     let recorded = c;
-    try { recorded = stable(); } catch { result = { observation: "RECOVERY_REQUIRED", reason: "JOURNAL_CHANGED" }; }
+    try {
+      const newest = stable();
+      recorded = newest.c;
+      // A valid RPC observation must not overrule a later journal revision.
+      // Immutable identity equality alone is insufficient: another authorized
+      // writer can record a reorg, cancellation or replacement while we await RPC.
+      if (canonical(newest.o) !== canonical(o)) {
+        result = { observation: "RECOVERY_REQUIRED", reason: "JOURNAL_CHANGED" };
+        head = null;
+        replacement = recorded.evidence?.replacement ?? replacement;
+      }
+    } catch {
+      // No reliable fresh snapshot exists. Never emit a stale positive result.
+      result = { observation: "RECOVERY_REQUIRED", reason: "JOURNAL_CHANGED" };
+      head = null;
+    }
+    // Recovery evidence present *before* observation also requires explicit
+    // disposition; a freshly fetched receipt must not silently clear a
+    // recorded reorg, cancellation or manual-review requirement.
+    if (recorded.state === "RECOVERY_REQUIRED" && ["CONFIRMED", "REVERTED"].includes(result.observation)) {
+      result = { observation: "RECOVERY_REQUIRED", reason: "RECOVERY_REQUIRES_DISPOSITION",
+        conflictingObservation: result };
+      replacement = recorded.evidence?.replacement ?? replacement;
+      head = null;
+    }
     if (["CONFIRMED", "REVERTED"].includes(recorded.state) && ["CONFIRMED", "REVERTED"].includes(result.observation)
         && (recorded.state !== result.observation || recorded.outcome !== result.outcome || canonical(recorded.receipt) !== canonical(result.receipt))) {
       result = { observation: "RECOVERY_REQUIRED", reason: "HISTORICAL_CONTRADICTION", conflictingObservation: result };

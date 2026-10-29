@@ -393,3 +393,212 @@ test("reconciliation: evidence replay stays validated, corrupt/unsafe paths reje
   fs.truncateSync(f.journal, fs.statSync(f.journal).size - 10); const before = fs.readFileSync(f.journal);
   await rejection(observe(f, out)); assert.deepEqual(fs.readFileSync(f.journal), before); assert.equal(f.attempts.length, 1);
 });
+
+
+test("reconciliation repair: candidate survives RPC lookup failure and keyless restart", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  const candidateHash = "0x" + "b".repeat(64);
+  f.transform = (v, response) => {
+    if (v.method === "eth_getTransactionByHash" && v.params[0] === candidateHash) {
+      delete response.result;
+      response.error = { code: -32000, message: "injected candidate lookup failure" };
+    }
+  };
+  const result = await f.adapter().confirm(...ref(out), { ...one, replacementHash: candidateHash });
+  assert.equal(result.observation, "UNKNOWN");
+  const saved = f.store.inspect(f.wallet).operations[0].children[0];
+  assert.equal(saved.state, "RECOVERY_REQUIRED");
+  assert.equal(saved.evidence.replacement.candidateHash, candidateHash);
+  assert.equal(saved.evidence.replacement.classification, "UNVERIFIED");
+  assert.equal(saved.transactionHash, out.transactionHash);
+  const journalBefore = fs.readFileSync(f.journal);
+  f.transform = null;
+  const restarted = await observe(f, out);
+  assert.equal(restarted.replacement.candidateHash, candidateHash);
+  assert.deepEqual(fs.readFileSync(f.journal), journalBefore);
+  assert.equal(f.attempts.length, 1);
+  await rejection(f.adapter().pay(f.input), "UNRESOLVED_OPERATION");
+});
+
+test("reconciliation repair: newer recovery evidence defeats in-flight stale success", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  await f.adapter().confirm(...ref(out), one);
+  let injected = false;
+  f.transform = (request, response) => {
+    if (!injected && request.method === "eth_getBlockByNumber" && request.params[0] === "latest" && response.result) {
+      injected = true;
+      const session = f.store.acquire(f.wallet);
+      try {
+        const current = f.store.inspect(f.wallet).operations[0].children[0];
+        session.transition(out.operationId, out.childId, {
+          state: "RECOVERY_REQUIRED", transactionHash: out.transactionHash,
+          outcome: current.outcome, receipt: current.receipt,
+          reasonCode: "MANUAL_REVIEW", evidence: current.evidence
+        });
+      } finally { session.release(); }
+    }
+  };
+  const result = await observe(f, out);
+  assert.equal(injected, true);
+  assert.equal(result.observation, "RECOVERY_REQUIRED");
+  assert.equal(result.recordedState, "RECOVERY_REQUIRED");
+  assert.notEqual(result.observation, "CONFIRMED");
+  assert.equal(f.store.inspect(f.wallet).operations[0].children[0].state, "RECOVERY_REQUIRED");
+  assert.equal(f.attempts.length, 1);
+});
+
+test("reconciliation repair: enrich an already recovery-blocked child without erasing evidence", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  f.transform = (v, r) => {
+    if (v.method === "eth_getTransactionReceipt" && r.result && r.result.logs.length)
+      r.result.logs[0].address = f.recipient;
+  };
+  const first = await f.adapter().confirm(...ref(out), one);
+  assert.equal(first.journalState, "RECOVERY_REQUIRED");
+  const before = f.store.inspect(f.wallet).operations[0].children[0];
+  assert.equal(before.evidence.replacement, null);
+  f.transform = null;
+  const candidateHash = "0x" + "c".repeat(64);
+  const second = await f.adapter().confirm(...ref(out), { ...one, replacementHash: candidateHash });
+  assert.equal(second.observation, "RECOVERY_REQUIRED");
+  const saved = f.store.inspect(f.wallet).operations[0].children[0];
+  assert.equal(saved.state, "RECOVERY_REQUIRED");
+  assert.equal(saved.evidence.replacement.candidateHash, candidateHash);
+  assert.equal(saved.evidence.replacement.classification, "UNVERIFIED");
+  assert.equal(saved.evidence.observedAt, before.evidence.observedAt);
+  assert.deepEqual(saved.evidence.head, before.evidence.head);
+  assert.deepEqual(saved.evidence.event, before.evidence.event);
+  const restarted = openReader(f.state).inspect(f.wallet).operations[0].children[0];
+  assert.equal(restarted.evidence.replacement.candidateHash, candidateHash);
+  const session = f.store.acquire(f.wallet);
+  // Acquiring ownership itself appends an authorized OWNER record. Snapshot
+  // *after* acquisition to assert the rejected transition changes no bytes.
+  const unchanged = fs.readFileSync(f.journal);
+  try {
+    const bad = structuredClone(saved.evidence);
+    bad.replacement.candidateHash = "0x" + "d".repeat(64);
+    assert.throws(() => session.transition(...ref(out), { state: "RECOVERY_REQUIRED",
+      transactionHash: out.transactionHash, outcome: saved.outcome, receipt: saved.receipt,
+      reasonCode: "REPLACEMENT_OBSERVED", evidence: bad }), e => e.code === "INVALID_TRANSITION");
+    assert.deepEqual(fs.readFileSync(f.journal), unchanged);
+  } finally { session.release(); }
+  assert.equal(f.attempts.length, 1);
+});
+
+test("reconciliation repair: candidate survives context failure before replacement lookup", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  const candidateHash = "0x" + "e".repeat(64);
+  f.mode = "chain";
+  const result = await f.adapter().confirm(...ref(out), { ...one, replacementHash: candidateHash });
+  assert.equal(result.observation, "RECOVERY_REQUIRED");
+  assert.equal(result.replacement.candidateHash, candidateHash);
+  assert.equal(result.replacement.classification, "UNVERIFIED");
+  const saved = openReader(f.state).inspect(f.wallet).operations[0].children[0];
+  assert.equal(saved.evidence.replacement.candidateHash, candidateHash);
+  f.mode = null;
+  const after = await observe(f, out);
+  assert.equal(after.replacement.candidateHash, candidateHash);
+  assert.equal(f.attempts.length, 1);
+});
+
+test("reconciliation repair: real Anvil reorg and cancellation invalidate an in-flight Paid observation", async () => {
+  const f = await fixture();
+  const snapshot = await provider.send("evm_snapshot", []);
+  const out = await f.adapter().pay(f.input);
+  await f.adapter().confirm(...ref(out), one);
+  const old = ethers.Transaction.from(f.raw[0]);
+  const originalReceipt = await provider.getTransactionReceipt(out.transactionHash);
+  const blockNumberHex = ethers.toQuantity(originalReceipt.blockNumber);
+  let held = false, release;
+  f.transform = async (v, r) => {
+    // Delay an already-fetched canonical block response; the observer must
+    // check newer journal evidence before returning this stale success.
+    if (!held && v.method === "eth_getBlockByNumber" && v.params[0] === blockNumberHex
+        && r.result?.hash === originalReceipt.blockHash) {
+      held = true;
+      await new Promise(resolve => { release = resolve; });
+    }
+  };
+  const pending = observe(f, out);
+  let cancellationHash;
+  try {
+    await until(() => held && typeof release === "function");
+    assert.equal(await provider.send("evm_revert", [snapshot]), true);
+    const raw = await f.agent.signTransaction({ type: 2, chainId: 31337n,
+      nonce: old.nonce, to: f.agent.address, value: 0n, data: "0x",
+      gasLimit: 21000n, maxFeePerGas: old.maxFeePerGas * 3n,
+      maxPriorityFeePerGas: old.maxPriorityFeePerGas * 3n });
+    cancellationHash = ethers.keccak256(raw);
+    await provider.send("eth_sendRawTransaction", [raw]);
+    const cancelled = await provider.getTransactionReceipt(cancellationHash);
+    assert.equal(cancelled.status, 1);
+    const session = f.store.acquire(f.wallet);
+    try {
+      const current = f.store.inspect(f.wallet).operations[0].children[0];
+      session.transition(out.operationId, out.childId, {
+        state: "RECOVERY_REQUIRED", transactionHash: out.transactionHash,
+        outcome: current.outcome, receipt: current.receipt,
+        reasonCode: "REPLACEMENT_OBSERVED", evidence: {
+          ...current.evidence, replacement: {
+            originalHash: out.transactionHash, candidateHash: cancellationHash,
+            classification: "CANCELLATION", verified: true,
+            receipt: { transactionHash: cancellationHash,
+              blockHash: cancelled.blockHash.toLowerCase(),
+              blockNumber: String(cancelled.blockNumber), status: 1 }
+          }
+        }
+      });
+    } finally { session.release(); }
+  } finally { release?.(); }
+  const result = await pending;
+  assert.equal(result.observation, "RECOVERY_REQUIRED");
+  assert.equal(result.recordedState, "RECOVERY_REQUIRED");
+  assert.equal(result.replacement.candidateHash, cancellationHash);
+  assert.equal(result.replacement.classification, "CANCELLATION");
+  assert.equal(await provider.getTransactionReceipt(out.transactionHash), null);
+  assert.equal(await provider.getBalance(f.recipient), 0n);
+  assert.equal(f.attempts.length, 1);
+});
+
+test("reconciliation repair: pre-existing recovery hold cannot be promoted by a fresh Paid receipt", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  await f.adapter().confirm(...ref(out), one);
+  const session = f.store.acquire(f.wallet);
+  try {
+    const current = f.store.inspect(f.wallet).operations[0].children[0];
+    session.transition(out.operationId, out.childId, {
+      state: "RECOVERY_REQUIRED", transactionHash: out.transactionHash,
+      outcome: current.outcome, receipt: current.receipt,
+      reasonCode: "MANUAL_REVIEW", evidence: current.evidence
+    });
+  } finally { session.release(); }
+  // The original payment is still canonical on this local chain, but a newer
+  // recorded recovery requirement cannot be cleared by an ordinary keyless read.
+  const before = fs.readFileSync(f.journal), observation = await observe(f, out);
+  assert.equal(observation.observation, "RECOVERY_REQUIRED");
+  assert.equal(observation.recordedState, "RECOVERY_REQUIRED");
+  assert.equal(observation.reason, "RECOVERY_REQUIRES_DISPOSITION");
+  assert.equal(observation.conflictingObservation?.observation, "CONFIRMED");
+  assert.deepEqual(fs.readFileSync(f.journal), before);
+  assert.equal(f.attempts.length, 1);
+});
+
+test("reconciliation repair: changed parent disposition invalidates in-flight child observation", async () => {
+  const f = await fixture(), out = await f.adapter().pay(f.input);
+  await f.adapter().confirm(...ref(out), one);
+  let changed = false;
+  f.transform = (v, r) => {
+    if (!changed && v.method === "eth_getBlockByNumber" && v.params[0] === "latest" && r.result) {
+      changed = true;
+      const session = f.store.acquire(f.wallet);
+      try { session.closeOperation(out.operationId, "RESOLVED"); }
+      finally { session.release(); }
+    }
+  };
+  const observation = await observe(f, out);
+  assert.equal(changed, true);
+  assert.equal(observation.observation, "RECOVERY_REQUIRED");
+  assert.equal(observation.reason, "JOURNAL_CHANGED");
+  assert.equal(f.store.inspect(f.wallet).operations[0].status, "CLOSED");
+  assert.equal(f.attempts.length, 1);
+});
