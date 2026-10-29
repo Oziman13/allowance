@@ -137,6 +137,13 @@ function validateOperationChange(old, next, wallet) {
 export function validateChange(old, next, wallet, operations) {
   validateOperationChange(old, next, wallet);
   if (!(operations instanceof Map) || operations.get(next.operationId) !== old) fail("INVALID_SCHEMA");
+  // Eligibility is a transition rule, not a blanket ban on multiple OPEN
+  // parents: recording contradictory evidence and reconciling it must remain possible.
+  const addsChild = old && next.children.length > old.children.length;
+  const submitting = next.children.findIndex((c, i) => c.state === "SUBMITTING" && old?.children[i]?.state !== "SUBMITTING");
+  if ((!old || addsChild || submitting >= 0)
+      && [...operations.values()].some(o => o.operationId !== next.operationId && o.status === "OPEN")) fail("UNRESOLVED_OPERATION");
+  if (submitting >= 0 && old.children.slice(0, submitting).some(c => c.state !== "CONFIRMED")) fail("UNRESOLVED_OPERATION");
   const reserved = new Set();
   for (const o of [...operations.values()].filter(o => o.operationId !== next.operationId).concat(next)) {
     for (const c of o.children) {

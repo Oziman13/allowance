@@ -146,7 +146,11 @@ test("nonce repair: shared boundary validation rejects conflicting SUBMITTING wh
     Object.assign(next.children[1], patch("SUBMITTING", H(6)));
     const history = new Map([[prepared.operationId, prepared], [other.operationId, other]]);
     let signs = 0, broadcasts = 0;
-    assert.throws(() => { validateChange(prepared, next, binding.wallet, history); signs++; broadcasts++; }, code("NONCE_CONFLICT"));
+    // Shared admission now reports unresolved-parent eligibility first when
+    // both that rule and nonce uniqueness are violated. Closed-history cases
+    // still specifically exercise NONCE_CONFLICT; none can reach signing.
+    const expected = other.status === "OPEN" ? "UNRESOLVED_OPERATION" : "NONCE_CONFLICT";
+    assert.throws(() => { validateChange(prepared, next, binding.wallet, history); signs++; broadcasts++; }, code(expected));
     assert.equal(signs, 0); assert.equal(broadcasts, 0);
   }
   const next = structuredClone(prepared); Object.assign(next.children[1], patch("SUBMITTING", H(6)));
