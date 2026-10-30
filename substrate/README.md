@@ -2,6 +2,8 @@
 
 Portaldot V3 is one chain with two faces. Substrate accounts (`5…`, the Portaldot wallet) and the EVM side (`0x…`, MetaMask) share the same state: the EVM side is the runtime's `revive` pallet. Allowance runs on the EVM side today. This folder is the path for owners who keep their POT in a native Portaldot account.
 
+> **Status (October 30, 2026): read-only.** Step 1 is done. Signed native writes (`revive.mapAccount()` and `revive.call` from a `5…` account) are **not implemented and are NO-GO** until live metadata, mapping, units, fees and wallet-extension compatibility are verified on testnet ([validation report](../docs/NATIVE-WALLET-VALIDATION-PHASE3B2.md)). Owner writes today go through an EVM wallet. The "Next" steps below are the plan, not shipped features.
+
 ## Step 1 (October 25): read the contract from a Substrate account
 
 `check.mjs` connects to the Portaldot V3 testnet node, finds the `0x` address the contract sees for a given `5…` account, checks whether that address is mapped, and dry-runs Allowance's read functions from that account. It never signs or sends anything.
@@ -31,7 +33,7 @@ What this shows:
 - **The contract is reachable from Substrate.** `reviveApi.call` runs Allowance's functions with a `5…` account as the caller.
 - **Every Substrate account has a fixed `0x` address on the EVM side** (`reviveApi.address`). For the twin of a MetaMask address (the address followed by twelve `0xEE` bytes) it is that MetaMask address. For an ordinary Portaldot account it is derived from the account, and the account must call `revive.mapAccount()` once before it acts on the EVM side.
 
-## Next
+## Next (planned, not done)
 
 1. **Map** a Portaldot wallet account with `revive.mapAccount()`, signed in the browser through the Portaldot / polkadot.js extension.
 2. **Act as owner from that account:** open an allowance, freeze, approve a held payment, sent as `revive.call` extrinsics and recorded in [PROOF.md](../docs/PROOF.md).
