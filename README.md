@@ -96,7 +96,7 @@ Design notes:
 
 ## Tests
 
-Requires [Foundry](https://book.getfoundry.sh/getting-started/installation) and Node 20+. CI runs both suites on every push.
+Requires [Foundry](https://book.getfoundry.sh/getting-started/installation) and Node 20+. CI runs both suites on every push. Step-by-step instructions for macOS, Linux and Windows are in [docs/TESTING.md](docs/TESTING.md).
 
 ```
 forge install foundry-rs/forge-std --no-git
