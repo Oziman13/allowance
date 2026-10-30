@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Oziman13/allowance/actions/workflows/ci.yml/badge.svg)](https://github.com/Oziman13/allowance/actions/workflows/ci.yml)
 ![Contract tests](https://img.shields.io/badge/contract_tests-58_incl._fuzz_and_invariants-5a3fd6)
-![MCP tests](https://img.shields.io/badge/MCP_tests-37_tests-5a3fd6)
+![MCP tests](https://img.shields.io/badge/MCP_tests-118_tests-5a3fd6)
 ![Portaldot V3](https://img.shields.io/badge/Portaldot_V3_testnet-recorded_deployment-2e7a57)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
@@ -104,7 +104,7 @@ forge build && forge test       # 58 Foundry tests, including fuzz and invariant
 cd mcp && npm install && npm test   # MCP server end to end on a local chain
 ```
 
-58 Foundry tests: 27 core, 19 Phase 2A, 10 token-compatibility and 2 stateful tests. These include 1,000-run fuzz and stateful invariants, plus approvals, freeze, expiry, rotation, reentrancy and token-accounting cases. They check contract-defined fixed windows, not rolling limits or arbitrary-token solvency. **37 MCP tests** run with Foundry in the existing CI. **24 native read-only unit tests** and the browser/frontend suites are local checks, not additional CI jobs.
+58 Foundry tests: 27 core, 19 Phase 2A, 10 token-compatibility and 2 stateful tests. These include 1,000-run fuzz and stateful invariants, plus approvals, freeze, expiry, rotation, reentrancy and token-accounting cases. They check contract-defined fixed windows, not rolling limits or arbitrary-token solvency. **118 MCP tests** run with Foundry in the existing CI. **24 native read-only unit tests** and the browser/frontend suites are local checks, not additional CI jobs.
 
 ```sh
 npm ci --prefix substrate
@@ -195,7 +195,7 @@ These October 19 costs were mostly storage deposits. In that recording, freeze c
 | ✅ | [Recorded Portaldot V3 deployment](#live-on-portaldot-v3-testnet): core payment/hold/approval/freeze lifecycle exercised on testnet; additional behaviors covered locally |
 | ✅ | Owner dashboard: open allowances, see spending, approve or reject held payments, freeze, change rules, try it as the agent |
 | ✅ | Simulation mode: core native-POT payment and owner-control lifecycle without a wallet, using real contract bytecode |
-| ✅ | MCP server: five tools, agent guidance, 37 tests including local-chain and MCP-protocol coverage |
+| ✅ | MCP server: five tools, agent guidance, 118 tests including local-chain and MCP-protocol coverage |
 | ✅ | [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md): funding MetaMask, deploy costs, gotchas (measured on the live testnet) |
 
 Not independently audited. Keep testnet budgets small. Read [SECURITY.md](SECURITY.md) and the [Phase 2A internal review](docs/SECURITY-REVIEW-PHASE2A.md). What Allowance does not do yet is listed under [Limitations](#limitations).

@@ -1,6 +1,6 @@
 # Running the tests from a clean clone
 
-Allowance has three test suites. Total expected results: **58 Foundry tests, 37 MCP tests, 24 native-wallet unit tests.**
+Allowance has three test suites. Total expected results: **58 Foundry tests, 118 MCP tests, 24 native-wallet unit tests.**
 
 | Suite | Command | Needs |
 |---|---|---|

@@ -101,4 +101,4 @@ V3 charges a storage deposit when contract storage goes from empty to non-empty,
 
 Measurements: [Getting started with Solidity on Portaldot V3](SOLIDITY-ON-PORTALDOT-V3.md).
 
-Current validation scope: **58 Foundry / 37 MCP tests** in existing CI; **24 native unit tests**, spending-display tests and browser suites run locally. Native and browser checks are not additional CI jobs. [Internal static analysis](SECURITY-STATIC-ANALYSIS-PHASE2B3.md) is complete with documented findings/limits; the deployment remains not independently audited.
+Current validation scope: **58 Foundry / 118 MCP tests** in existing CI; **24 native unit tests**, spending-display tests and browser suites run locally. Native and browser checks are not additional CI jobs. [Internal static analysis](SECURITY-STATIC-ANALYSIS-PHASE2B3.md) is complete with documented findings/limits; the deployment remains not independently audited.
