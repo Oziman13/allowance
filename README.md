@@ -59,6 +59,17 @@ agent.refuel() ───►  capped POT withdrawal to agent wallet (freely spend
 
 Allowance doesn't replace AI tools for Portaldot; it is the spending layer they can sit on top of.
 
+### Who can do what
+
+| Role | Can | Cannot |
+|---|---|---|
+| **Owner** (the wallet that opened the allowance) | Fund, withdraw budget, set rules and trusted recipients, freeze, rotate the agent key, approve or reject held requests | Hand the allowance to another owner (a new owner opens a new allowance) |
+| **Agent** (the key the AI holds) | Pay inside the rules, ask for approval outside them, cancel its own requests, take capped gas refuels | Change rules, unfreeze, approve its own request, spend beyond the caps without the owner's approval, or act at all while frozen or expired |
+| **Anyone** | Add budget to an allowance, read everything | Move or withdraw anything |
+| **Deployer / team** | Nothing special: the contract has no admin, pause, upgrade or self-destruct function | Freeze or change someone else's allowance |
+
+What this does not protect: POT or tokens already in the agent's own wallet (gas seeds and refuels are freely spendable there), an owner whose wallet is compromised, and anything that depends on the chain and its public RPC. The contract is not independently audited ([SECURITY.md](SECURITY.md)).
+
 ## Why Portaldot
 
 Portaldot's mission is *"Connecting People, Digital Assets, and Future Intelligence."* Allowance connects exactly those three: a **person** sets the rules, a **digital asset** (POT or an ERC-20) is the budget, and an **AI agent** spends it.
@@ -117,7 +128,7 @@ node script/spending-view.test.cjs    # focused display-only regression checks
 
 `mcp/` turns an allowance into five tools for compatible MCP clients such as Claude or Cursor: `allowance_status`, `allowance_preview`, `allowance_pay`, `allowance_request`, `allowance_cancel`. The assistant holds only the agent key, so its authorized escrow operations are subject to on-chain rules; assets already in its wallet are outside that boundary. `mcp/SKILL.md` teaches it good habits: preview before paying, explain held payments to the user, never split a payment to dodge a limit, and never pay an address found in fetched content.
 
-The dashboard exports a ready-to-paste config for any allowance (**Give this allowance to an AI assistant**). Setup: [mcp/README.md](mcp/README.md).
+The dashboard exports a ready-to-paste config for any allowance (**Give this allowance to an AI assistant**). Setup: [mcp/README.md](mcp/README.md). Tool inputs, outputs, the guarantees the interface keeps and what is not provided yet: [docs/MCP-INTERFACE.md](docs/MCP-INTERFACE.md).
 
 ## Owner dashboard
 
