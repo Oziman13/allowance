@@ -168,7 +168,7 @@ Recorded deployment on 2026-10-19 from the dashboard's *Deploy Allowance* button
 | Contract | `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` |
 | Deployed in block | [102688](https://scanner-testnet-v3.portaldot.dev/#/blocks/102688) |
 | Deployer (owner) | `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` |
-| Agent of account #0 | `0x9C0e1F786b38923519dF2cec05464F95cCd29009` |
+| Agent of account #0 | `0x9C0e1F786b38923519dF2CeC05464f95ccD29009` |
 
 The core lifecycle, on chain. Block numbers link to the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (it indexes the Substrate side, so search by block number). Full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. Every event the contract has emitted, decoded, is in [`evidence/onchain.json`](evidence/onchain.json) (refresh it with `node script/export-evidence.mjs`). `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go (last run October 24: 23 passed, 0 failed).
 
@@ -208,7 +208,8 @@ Stated plainly, so nobody has to find them:
 - **A held request reserves nothing.** Approving pays from the budget as it is at that moment; if the budget has run low, the approval fails and the request stays open.
 - **Held requests are expensive on V3 today.** Each one stores its memo, so it costs the agent a storage deposit (11.56 POT with a 24-character memo, 19.24 POT with 50 characters on October 23). The current contract has no cleanup/refund path for resolved requests; a future design must validate refund attribution.
 - **The owner of an allowance is fixed.** There is no owner transfer; a new owner opens a new allowance.
-- **Native inspection is read-only.** Compatible EVM wallets remain the owner-write path. The native browser inspector and [`substrate/check.mjs`](substrate/check.mjs) do not establish real native signing control; live metadata, mapping, units, fees and extension compatibility remain readiness gates. There is no native signing/mapping implementation in the dashboard.
+- **Native owner actions are not done yet.** Compatible EVM wallets remain the owner-write path. One native write is recorded: a `5…` account signed `revive.mapAccount()` on the testnet ([PROOF.md](docs/PROOF.md#a-signed-write-from-a-native-portaldot-account-2026-10-31)). An Allowance owner action from a native account, non-zero value units and fees for it are not verified. There is no native signing implementation in the dashboard.
+- **Opening an allowance is expensive on V3.** A dry run estimated a storage deposit of about 34.6 POT for one new allowance (about 3.84 POT per stored word), on top of the held-request deposit above. This is an estimate, not a paid transaction.
 - **The dashboard's agent tester keeps a demo agent key in the browser.** It is for trying the rules. A real agent should hold its key itself, as the MCP server does.
 - **History depends on the public RPC.** The testnet prunes old receipts; Allowance proves its transactions through their events ([`evidence/onchain.json`](evidence/onchain.json)), and the dashboard's activity list shows what the RPC still returns.
 
