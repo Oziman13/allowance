@@ -2,7 +2,7 @@
 
 Portaldot V3 is one chain with two faces. Substrate accounts (`5…`, the Portaldot wallet) and the EVM side (`0x…`, MetaMask) share the same state: the EVM side is the runtime's `revive` pallet. Allowance runs on the EVM side today. This folder is the path for owners who keep their POT in a native Portaldot account.
 
-> **Status (October 30, 2026): read-only.** Step 1 is done. Signed native writes (`revive.mapAccount()` and `revive.call` from a `5…` account) are **not implemented and are NO-GO** until live metadata, mapping, units, fees and wallet-extension compatibility are verified on testnet ([validation report](../docs/NATIVE-WALLET-VALIDATION-PHASE3B2.md)). Owner writes today go through an EVM wallet. The "Next" steps below are the plan, not shipped features.
+> **Status (October 31, 2026): read-only in the project, one manual native write recorded.** Step 1 is done. On October 31 a `5…` account signed `revive.mapAccount()` by hand in the Portaldot node console and it succeeded at block 255537, with no deposit held and a fee of about 0.0109 POT ([record](../docs/PROOF.md#a-signed-write-from-a-native-portaldot-account-2026-10-31)). Signed native writes from this project's own code (`revive.mapAccount()` and `revive.call`) remain **not implemented and NO-GO** until units, fees and wallet-extension compatibility are verified for owner actions ([validation report](../docs/NATIVE-WALLET-VALIDATION-PHASE3B2.md)). Owner writes today go through an EVM wallet. The "Next" steps below are the plan, not shipped features.
 
 ## Step 1 (October 25): read the contract from a Substrate account
 
@@ -35,6 +35,6 @@ What this shows:
 
 ## Next (planned, not done)
 
-1. **Map** a Portaldot wallet account with `revive.mapAccount()`, signed in the browser through the Portaldot / polkadot.js extension.
-2. **Act as owner from that account:** open an allowance, freeze, approve a held payment, sent as `revive.call` extrinsics and recorded in [PROOF.md](../docs/PROOF.md).
+1. **Map** a Portaldot wallet account with `revive.mapAccount()`, signed in the browser through the Portaldot / polkadot.js extension. *Done by hand on October 31 (block 255537); the Portaldot team says automatic mapping is also enabled.*
+2. **Act as owner from that account:** open an allowance, freeze, approve a held payment, sent as `revive.call` extrinsics and recorded in [PROOF.md](../docs/PROOF.md). *A dry run of `openAccount` estimated a storage deposit of about 34.6 POT, so the account needs roughly 35 POT before this step.*
 3. **In the dashboard:** a "Portaldot wallet" option next to MetaMask for these owner actions.
