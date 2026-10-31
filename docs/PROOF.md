@@ -69,6 +69,27 @@ That refusal is reported session behavior and produced **no new transaction**; F
 160258  0xf3845cc8686585566c4c1dca1c98f8a708131fc5eac89d9eab573b8b133219f8
 ```
 
-Owner: `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` · Agent: `0x9C0e1F786b38923519dF2cec05464F95cCd29009`
+Owner: `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` · Agent: `0x9C0e1F786b38923519dF2CeC05464f95ccD29009`
 
 Events emitted, per transaction: 102805: Funded, RulesUpdated, TrustUpdated, AccountOpened, Refueled; 102861: Paid; 102867: Paid; 102873: PaymentHeld; 102880: Paid, RequestResolved; 102887: FrozenSet; 102900: FrozenSet.
+
+## A signed write from a native Portaldot account (2026-10-31)
+
+One transaction signed from an ordinary Substrate (`5…`) account, recorded as evidence that a native wallet can act on the V3 testnet. It is **not** an Allowance owner action yet.
+
+| Block | What happened | Signed by | Cost |
+|---|---|---|---|
+| [255537](https://scanner-testnet-v3.portaldot.dev/#/blocks/255537) | `revive.mapAccount()`: the account registers its EVM-side address | `5DyzK2FvF9mYvJGLzz3GaTuv2KqC56zyAQvrBL7RV36Ff2pA` (Portaldot node console, polkadot{.js} extension) | 0.0109 POT fee, no deposit held |
+
+```
+255537  0x7ffec539400918583a1243aa1a9c2532fd9c885dd4af04c35cf27c3d66779700
+```
+
+What was checked afterwards, read-only from the node:
+
+- `revive.originalAccount(0x7acb562d90e299471d077a1b0de28520327cdff6)` returns the `5DyzK2…` account, and [`substrate/check.mjs`](../substrate/check.mjs) reports `Mapped yes` for it.
+- The extrinsic's fee was 1,090,545,990,394 base units (14 decimals, 0.0109 POT). The account's balance fell from 10.0000 to 9.9890 POT, which the fee explains, and its reserved balance afterwards is 0, so no mapping deposit was held on this testnet. The Portaldot team states that automatic mapping is enabled; this record does not test that claim, it only shows an explicit `mapAccount` succeeding.
+
+What this does not show: an owner action on the Allowance contract from this account, non-zero value units between the 18-decimal EVM side and the 14-decimal native side, or finality beyond block inclusion.
+
+A dry-run of `openAccount` from a funded native account (zero value, one-word name) estimated a **storage deposit of about 34.6 POT** (about 3.84 POT per stored word). This is an estimate from `reviveApi.call`, not a paid transaction.
