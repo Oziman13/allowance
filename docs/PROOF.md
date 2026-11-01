@@ -73,23 +73,26 @@ Owner: `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` · Agent: `0x9C0e1F786b38923
 
 Events emitted, per transaction: 102805: Funded, RulesUpdated, TrustUpdated, AccountOpened, Refueled; 102861: Paid; 102867: Paid; 102873: PaymentHeld; 102880: Paid, RequestResolved; 102887: FrozenSet; 102900: FrozenSet.
 
-## A signed write from a native Portaldot account (2026-10-31)
+## Signed writes from a native Portaldot account (2026-10-31 and 2026-11-02)
 
-One transaction signed from an ordinary Substrate (`5…`) account, recorded as evidence that a native wallet can act on the V3 testnet. It is **not** an Allowance owner action yet.
+Two transactions signed from an ordinary Substrate (`5…`) account, `5DyzK2FvF9mYvJGLzz3GaTuv2KqC56zyAQvrBL7RV36Ff2pA`, by hand in the Portaldot node console with the polkadot{.js} extension. The second one is an Allowance owner action: the first time this contract was used from a native account.
 
-| Block | What happened | Signed by | Cost |
-|---|---|---|---|
-| [255537](https://scanner-testnet-v3.portaldot.dev/#/blocks/255537) | `revive.mapAccount()`: the account registers its EVM-side address | `5DyzK2FvF9mYvJGLzz3GaTuv2KqC56zyAQvrBL7RV36Ff2pA` (Portaldot node console, polkadot{.js} extension) | 0.0109 POT fee, no deposit held |
+| Block | What happened | Cost |
+|---|---|---|
+| [255537](https://scanner-testnet-v3.portaldot.dev/#/blocks/255537) | `revive.mapAccount()`: the account registers its EVM-side address | 0.0109 POT fee, no deposit held |
+| [282485](https://scanner-testnet-v3.portaldot.dev/#/blocks/282485) | `revive.call` to the Allowance contract: `openAccount` with **zero value** (agent `0x9C0e1F786b38923519dF2CeC05464f95ccD29009`, native POT, name "Native", 0.1 POT per payment, 0.5 POT per day, no trusted recipients) | 0.0601 POT fee + **34.5735 POT storage deposit held** |
 
 ```
 255537  0x7ffec539400918583a1243aa1a9c2532fd9c885dd4af04c35cf27c3d66779700
+282485  0x8cda394d9c7c006f79362cd8d26b03d09dc63f8fda1205ea620f9e85f7a5867c
 ```
 
 What was checked afterwards, read-only from the node:
 
-- `revive.originalAccount(0x7acb562d90e299471d077a1b0de28520327cdff6)` returns the `5DyzK2…` account, and [`substrate/check.mjs`](../substrate/check.mjs) reports `Mapped yes` for it.
-- The extrinsic's fee was 1,090,545,990,394 base units (14 decimals, 0.0109 POT). The account's balance fell from 10.0000 to 9.9890 POT, which the fee explains, and its reserved balance afterwards is 0, so no mapping deposit was held on this testnet. The Portaldot team states that automatic mapping is enabled; this record does not test that claim, it only shows an explicit `mapAccount` succeeding.
+- `revive.originalAccount(0x7acb562d90e299471d077a1b0de28520327cdff6)` returns the `5DyzK2…` account, and [`substrate/check.mjs`](../substrate/check.mjs) reported `Mapped yes` for it.
+- The `mapAccount` fee was 1,090,545,990,394 base units (14 decimals, 0.0109 POT). The balance fell from 10.0000 to 9.9890 POT, which the fee explains, and the reserved balance afterwards was 0, so no mapping deposit was held on this testnet. The Portaldot team states that automatic mapping is enabled; this record does not test that claim.
+- Block 282485 events: `system.ExtrinsicSuccess`, two `revive.ContractEmitted` events from the Allowance contract (the account opening and its rules), `balances.TransferAndHold` with reason `StorageDepositReserve` of 3,457,350,000,000,000 base units (34.5735 POT), and a fee of 6,011,736,295,965 base units (0.0601 POT). At the check the finalized head (282494) was past this block.
+- Read back from the contract with `reviveApi.call`: `accountCount` is 2 and the `0x7acb…` address owns allowance #1: agent `0x9C0e…D29009`, native POT, name "Native", per-payment 0.1 POT, per-period 0.5 POT, period 86400 seconds, budget 0, not frozen.
+- The call was prepared in the console from a dry run (weight limit 4,000,000,000 refTime and 300,000 proofSize, storage deposit limit 37 POT) and the console's encoded call hash matched the locally computed one: `0xc563bfc362c9b06ef3807085079b6954ba9a85e676d532482f589151c05acb46`.
 
-What this does not show: an owner action on the Allowance contract from this account, non-zero value units between the 18-decimal EVM side and the 14-decimal native side, or finality beyond block inclusion.
-
-A dry-run of `openAccount` from a funded native account (zero value, one-word name) estimated a **storage deposit of about 34.6 POT** (about 3.84 POT per stored word). This is an estimate from `reviveApi.call`, not a paid transaction.
+What this does not show: non-zero value units between the 18-decimal EVM side and the 14-decimal native side (the owner action used zero value and zero budget), any other owner action (funding, freezing, approving) from a native account, or whether the 34.5735 POT deposit is refundable. The deposit was measured at about 3.84 POT per stored word; it is held, not spent, and no cleanup path was tested.
