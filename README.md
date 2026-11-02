@@ -181,7 +181,7 @@ Recorded deployment on 2026-10-19 from the dashboard's *Deploy Allowance* button
 | Deployer (owner) | `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` |
 | Agent of account #0 | `0x9C0e1F786b38923519dF2CeC05464f95ccD29009` |
 
-The core lifecycle, on chain. Block numbers link to the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (it indexes the Substrate side, so search by block number). Full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. Every event the contract has emitted, decoded, is in [`evidence/onchain.json`](evidence/onchain.json) (refresh it with `node script/export-evidence.mjs`). `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go (last run October 24: 23 passed, 0 failed).
+The core lifecycle, on chain. Block numbers link to the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (it indexes the Substrate side, so search by block number). Full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. For the newest evidence, a native Portaldot account owning an allowance that an AI agent then pays from, see [Native owner → AI agent → verified payment](docs/JUDGING.md#native-portaldot-owner--ai-agent--verified-payment). Every event the contract has emitted, decoded, is in [`evidence/onchain.json`](evidence/onchain.json) (refresh it with `node script/export-evidence.mjs`). `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go (October 24: 23 passed, 0 failed, from an earlier version of the script; November 2, fresh clone without a Foundry build: 22 passed, 0 failed, 5 left to do by hand: public repository, deployed-code comparison that needs `forge build`, demo video, pitch deck, DoraHacks form).
 
 | Block | What happened | Signed by | Tx | Cost |
 |---|---|---|---|---|
@@ -238,13 +238,13 @@ Stated plainly, so nobody has to find them:
 
 ## Before the final (November 6)
 
-- **Native wallet follow-up, gated.** Read-only browser inspection is implemented; native owner writes from the dashboard are not promised for the final. Six manual native writes are recorded (see above); a dashboard signing path would still need verified wallet-extension compatibility, error handling and separate authorization. The October 25 CLI observation is historical.
+- **Native wallet follow-up, gated.** Read-only browser inspection is implemented; native owner writes from the dashboard are not promised for the final. Eight manual native writes and one agent payment from the native-owned allowance are recorded (see above); a dashboard signing path would still need verified wallet-extension compatibility, error handling and separate authorization. The October 25 CLI observation is historical.
 - **Allowances in Portaldot Assets tokens.** Validate each intended Assets precompile against the [supported-asset assumptions](SECURITY.md#supported-assets) before claiming compatibility; accepting an ERC-20-shaped interface is insufficient.
 - **Security:** [internal review](docs/SECURITY-REVIEW-PHASE2A.md), [completed internal static analysis](docs/SECURITY-STATIC-ANALYSIS-PHASE2B3.md) and [operational policy](SECURITY.md) documented. Independent professional review remains outstanding.
 
 ## Roadmap after the Hacker House
 
-Cheaper requests on V3: clear a request's storage when it is approved, rejected or cancelled, so its deposit (~15 POT on the testnet today) goes back instead of staying locked. Security review and Portaldot mainnet launch, a JS/TS SDK for other Portaldot projects, per-recipient limits and spend categories, integrations with iSwap and Portaldot game projects, and approval notifications in Portaldot Wallet.
+Cheaper accounts on V3: a payment makes the balance word of an account permanently non-zero (`balance` and `spentInPeriod` share one storage word), so its deposit cannot be released after the first payment; a v2 layout that separates them would let the deposit return. This is a design note from the recorded behavior, not implemented. Cheaper requests on V3: clear a request's storage when it is approved, rejected or cancelled, so its deposit (~15 POT on the testnet today) goes back instead of staying locked. Security review and Portaldot mainnet launch, a JS/TS SDK for other Portaldot projects, per-recipient limits and spend categories, integrations with iSwap and Portaldot game projects, and approval notifications in Portaldot Wallet.
 
 ## Prior work disclosure
 
