@@ -224,6 +224,17 @@ Stated plainly, so nobody has to find them:
 - **The dashboard's agent tester keeps a demo agent key in the browser.** It is for trying the rules. A real agent should hold its key itself, as the MCP server does.
 - **History depends on the public RPC.** The testnet prunes old receipts; Allowance proves its transactions through their events (the October 26 snapshot in [`evidence/onchain.json`](evidence/onchain.json), and for later transactions the records in [docs/PROOF.md](docs/PROOF.md)), and the dashboard's activity list shows what the RPC still returns.
 
+## Production readiness: what is NOT done
+
+Demonstrated today: a deployed testnet contract, an owner dashboard, an MCP server used by a real AI assistant, automated tests, internal security analysis, and recorded native-owner/EVM-agent interoperability ([PROOF.md](docs/PROOF.md)). That is not production readiness. Production use stays **NO-GO** until the items below are built and validated; none of them is a completed feature.
+
+- **MCP crash recovery, idempotency, nonce safety and independently verified finality are not in the production server.** The [offline journal and recovery modules](docs/MCP-INTERFACE.md) are design and test code only. After a crash or an uncertain RPC answer, a payment's outcome must be checked by hand, and the server must not be trusted to retry safely.
+- **No independent security audit.** Internal review and static analysis only ([SECURITY.md](SECURITY.md)).
+- **Costs are not yet modeled for real use.** The testnet deposits above are measurements, not a cost model for frequent payments or many accounts, and some deposits stay locked under the current storage layout.
+- **No paying customer demand and no revenue have been demonstrated.** The business model below is a hypothesis. Whether AI-agent developers need this and would pay for it is untested.
+
+Planned work for after the hackathon is listed under [Roadmap](#roadmap-after-the-hacker-house).
+
 ## Business model
 
 **Open protocol, paid team layer.** No token.
@@ -234,7 +245,7 @@ Stated plainly, so nobody has to find them:
 | **Allowance for Teams** (proposed subscription) | Planned alerts, multi-person approvals, reports and hosted runners; not delivered features or proven revenue. Built around the contract, never in place of it. | Proposed team customers |
 | **Protocol fee** (mainnet, v2 contract) | A small, capped share of instant payments (for example 0.1%), visible on chain. It ships together with v2's deposit refunds for resolved requests. The testnet contract has no fee. | Accounts that use instant payments |
 
-**Growth path.** First, integrations with AI and game projects on the Portaldot testnet. Then a mainnet launch with the v2 contract. After that, game guild treasuries, subscriptions and team spending. Revenue grows with the number of agent payments on Portaldot, which is the same on-chain activity the ecosystem wants.
+**Growth path (a goal, not a result; no users or revenue yet).** First, integrations with AI and game projects on the Portaldot testnet. Then a mainnet launch with the v2 contract. After that, game guild treasuries, subscriptions and team spending. If it works, revenue would grow with the number of agent payments on Portaldot. That is an assumption to test, not a demonstrated outcome.
 
 ## Before the final (November 6)
 
@@ -245,6 +256,8 @@ Stated plainly, so nobody has to find them:
 ## Roadmap after the Hacker House
 
 Cheaper accounts on V3: a payment makes the balance word of an account permanently non-zero (`balance` and `spentInPeriod` share one storage word), so its deposit cannot be released after the first payment; a v2 layout that separates them would let the deposit return. This is a design note from the recorded behavior, not implemented. Cheaper requests on V3: clear a request's storage when it is approved, rejected or cancelled, so its deposit (~15 POT on the testnet today) goes back instead of staying locked. Security review and Portaldot mainnet launch, a JS/TS SDK for other Portaldot projects, per-recipient limits and spend categories, integrations with iSwap and Portaldot game projects, and approval notifications in Portaldot Wallet.
+
+Production-readiness work, none of it done yet: (1) a transaction cost model for frequent use and the v2 storage layout above; (2) wiring the journal and recovery design into the MCP server with crash-recovery, idempotency, nonce-safety and finality tests; (3) an independent professional security audit before any meaningful real funds; (4) customer discovery with AI-agent developers, early integration partners, a comparison with competing approaches and a test of willingness to pay.
 
 ## Prior work disclosure
 
