@@ -73,9 +73,23 @@ Owner: `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` · Agent: `0x9C0e1F786b38923
 
 Events emitted, per transaction: 102805: Funded, RulesUpdated, TrustUpdated, AccountOpened, Refueled; 102861: Paid; 102867: Paid; 102873: PaymentHeld; 102880: Paid, RequestResolved; 102887: FrozenSet; 102900: FrozenSet.
 
+## A native-owned allowance paid by an AI agent (2026-11-02)
+
+The full path, end to end: the owner is a native Portaldot (`5…`) account, the payer is the authorized agent through the MCP server.
+
+1. The native account opened allowance #1 (block 282485, below) and funded it with 0.1 POT (block 291982, below).
+2. Claude, using the MCP server configured for allowance #1 (`ALLOWANCE_ACCOUNT_ID=1`), read `allowance_status` (budget 0.1 POT, 0.1 POT per payment, 0.5 POT per day, any recipient), then `allowance_preview`, which answered "pays instantly" with 0.45 POT left in the period.
+3. `allowance_pay` sent 0.05 POT to the owner's address `0x7AcB562d90E299471d077A1b0De28520327cdfF6` with the memo "native owner test". The tool reported `paid`, confirmed in 3144 ms.
+
+| Block | Transaction | Result |
+|---|---|---|
+| [292133](https://scanner-testnet-v3.portaldot.dev/#/blocks/292133) | `0xe257c49b633924be013d5f54c48b3d39e97fbad4d73a5503b5c8e4981284d191` | EVM receipt status 1, from the agent `0x9C0e1F786b38923519dF2CeC05464f95ccD29009` to the Allowance contract, one `Paid` event (account 1, 0.05 POT, memo "native owner test") |
+
+Read back after the payment: allowance #1 balance 0.05 POT, `totalSpent` 0.05, one payment, not frozen. The owner address balance rose from 1.2010 to 1.2510 POT and the agent's gas balance fell from 6.7060 to 6.6737 POT (about 0.032 POT). Before this payment the MCP server on the test machine was configured for account 0, the older "Research agent" allowance; the account setting was changed to 1 and `allowance_status` confirmed account 1 before anything was paid.
+
 ## Signed writes from a native Portaldot account (2026-10-31 to 2026-11-02)
 
-Six transactions signed from an ordinary Substrate (`5…`) account, `5DyzK2FvF9mYvJGLzz3GaTuv2KqC56zyAQvrBL7RV36Ff2pA`, by hand in the Portaldot node console with the polkadot{.js} extension. The last five are Allowance owner actions: the first time this contract was used from a native account.
+Eight transactions signed from an ordinary Substrate (`5…`) account, `5DyzK2FvF9mYvJGLzz3GaTuv2KqC56zyAQvrBL7RV36Ff2pA`, by hand in the Portaldot node console with the polkadot{.js} extension. The last seven are Allowance owner actions: the first time this contract was used from a native account.
 
 | Block | What happened | Cost |
 |---|---|---|
@@ -85,6 +99,8 @@ Six transactions signed from an ordinary Substrate (`5…`) account, `5DyzK2FvF9
 | [291173](https://scanner-testnet-v3.portaldot.dev/#/blocks/291173) | `withdraw(1, 0.1 POT)` back to the owner address | 0.0249 POT fee; **3.8415 POT deposit refunded** |
 | [291215](https://scanner-testnet-v3.portaldot.dev/#/blocks/291215) | `setFrozen(1, true)`: the owner's emergency stop | 0.0217 POT fee + 3.8415 POT deposit held |
 | [291242](https://scanner-testnet-v3.portaldot.dev/#/blocks/291242) | `setFrozen(1, false)`: unfreeze | 0.0217 POT fee; **3.8415 POT deposit refunded** |
+| [291982](https://scanner-testnet-v3.portaldot.dev/#/blocks/291982) | `fund(1, 0.1 POT)` again, to give the agent a budget for the payment above | 0.0223 POT fee + 3.8415 POT deposit held |
+| [292174](https://scanner-testnet-v3.portaldot.dev/#/blocks/292174) | `withdraw(1, 0.05 POT)`: the remainder after the agent's payment | 0.0249 POT fee; **no deposit released** (see below) |
 
 ```
 255537  0x7ffec539400918583a1243aa1a9c2532fd9c885dd4af04c35cf27c3d66779700
@@ -93,6 +109,8 @@ Six transactions signed from an ordinary Substrate (`5…`) account, `5DyzK2FvF9
 291173  0x7171fd1dda5172725f9d923000975d4a8401c06edd05a4074f39661acde01b0f
 291215  0x6d9f4a6fc8fe451c887e30d672b812792d374baff4198380f1e7789ccb5330a7
 291242  0xca492d1d8544d1ea3569ae650e3594981c0d6f15c06f114e46ec567df6b17c83
+291982  0x4a59cb35f7968d5350e430048daaee83cb4ba1f218154e69b205cff743eb8cb4
+292174  0xea3c0e910445615f75ee559676af8abf470a05eaf14c01c028bfd7fc447180a5
 ```
 
 What was checked afterwards, read-only from the node:
@@ -103,11 +121,12 @@ What was checked afterwards, read-only from the node:
 - Read back from the contract with `reviveApi.call`: `accountCount` is 2 and the `0x7acb…` address owns allowance #1: agent `0x9C0e…D29009`, native POT, name "Native", per-payment 0.1 POT, per-period 0.5 POT, period 86400 seconds, budget 0, not frozen.
 - The call was prepared in the console from a dry run (weight limit 4,000,000,000 refTime and 300,000 proofSize, storage deposit limit 37 POT) and the console's encoded call hash matched the locally computed one: `0xc563bfc362c9b06ef3807085079b6954ba9a85e676d532482f589151c05acb46`.
 
-Results of the later four (read from the node after each block was finalized, and read back from the contract):
+Results of the later six (read from the node, and read back from the contract; blocks 291101 to 292174 were finalized when checked):
 
 - **Value units.** The console takes `value` in the node's 14-decimal units. `10000000000000` (0.1 POT) arrived in the contract as `msg.value` of `100000000000000000` (0.1 × 10^18), so `fund` accepted it and the allowance balance read exactly 0.1 POT. The same call with the value written in 18-decimal units failed in a dry run.
-- **Deposits are refundable.** Each new stored word held 3.8415 POT (`StorageDepositReserve`). Withdrawing the balance to zero and unfreezing both released exactly that amount back to the owner (`TransferOnHold`), so the deposit is held, not spent.
+- **Deposits are refundable when a stored word returns to zero.** Each new stored word held 3.8415 POT (`StorageDepositReserve`). Before any payment, withdrawing the balance to zero (block 291173) and unfreezing (block 291242) each released exactly that amount back to the owner (`TransferOnHold`), so the deposit is held, not spent.
+- **After a payment, the balance word is not released.** Withdrawing the last 0.05 POT (block 292174) brought the balance to 0 but released nothing: the block has a `balances.Transfer` of 0.05 POT and no `TransferOnHold`. In the contract's storage layout `balance` and `spentInPeriod` share one 32-byte word, and after a payment `spentInPeriod` is non-zero, so the word stays occupied and its 3.8415 POT deposit stays held. This explanation comes from the struct layout and the observed events; the storage word was not read directly.
 - **Owner emergency stop from a native account.** After block 291215 the contract reported `frozen true` for allowance #1, and after block 291242 `frozen false`.
 - The calls were prepared from dry runs (`reviveApi.call`) before they were signed.
 
-What this does not show: owner actions other than open, fund, withdraw and freeze from a native account (approve, reject, rotate, rules), or a payment by the agent against the native-funded balance. Closing an allowance is not a function of this contract.
+What this does not show: owner actions other than open, fund, withdraw and freeze from a native account (approve, reject, rotate, rules, trusted recipients), or approving a held payment from a native account. Whether the 34.5735 POT opening deposit, or the balance-word deposit after a payment, can be released was not shown, and closing an allowance is not a function of this contract. The agent's payment (section above) was signed by the agent's EVM key through the MCP server, not by the native account.
