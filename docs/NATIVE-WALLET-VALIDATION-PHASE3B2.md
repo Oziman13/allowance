@@ -2,7 +2,7 @@
 
 Date: 2026-10-28. **Internal validation, not an independent audit. No native signed-write implementation.**
 
-> **Update, 2 November 2026:** this report is the 28 October assessment and is kept as written. Since then six owner-side writes were signed by hand from a native account in the node console and are recorded in [PROOF.md](PROOF.md#signed-writes-from-a-native-portaldot-account-2026-10-31-to-2026-11-02). The NO-GO below still applies to signing from the dashboard or project code.
+> **Update, 2 November 2026:** this report is the 28 October assessment and is kept as written. Since then eight owner-side writes were signed by hand from a native account in the node console and are recorded in [PROOF.md](PROOF.md#signed-writes-from-a-native-portaldot-account-2026-10-31-to-2026-11-02). The NO-GO below still applies to signing from the dashboard or project code.
 
 **Recommendation: NO-GO for a native signed-write proof of concept until live access, a real authorized wallet, current runtime compatibility and execution requirements are verified.** Local read-only failure handling passes the checks below. That evidence does not establish live wallet or runtime compatibility.
 
