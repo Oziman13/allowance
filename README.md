@@ -16,7 +16,7 @@ Programmable spending rules for AI agents, bots and automated payments on **Port
 >
 > **Judges:** [the current two-minute route and judging evidence](docs/JUDGING.md). The [October 24 check-in](docs/CHECKIN.md), its [walkthrough/screenshots](docs/CHECKIN-2026-10-24.md) and pitch deck remain dated historical records.
 
-**Current scope:** compatible EVM wallets perform owner writes; the secondary native identity inspector is **read-only**, with no signing or mapping. Native signed writes remain [NO-GO pending live verification](docs/NATIVE-WALLET-VALIDATION-PHASE3B2.md). The browser demo uses local contract execution, while the October 23 Claude/MCP transactions are separately labeled historical testnet evidence.
+**Current scope:** compatible EVM wallets perform owner writes; the secondary native identity inspector is **read-only**, with no signing or mapping. Separately, six owner-side writes were signed by hand from a native `5…` account in the Portaldot node console and are [recorded on chain](docs/PROOF.md#signed-writes-from-a-native-portaldot-account-2026-10-31-to-2026-11-02); the dashboard does **not** support native signing. The browser demo uses local contract execution, while the October 23 Claude/MCP transactions are separately labeled historical testnet evidence.
 
 ## The problem
 
@@ -219,8 +219,8 @@ Stated plainly, so nobody has to find them:
 - **A held request reserves nothing.** Approving pays from the budget as it is at that moment; if the budget has run low, the approval fails and the request stays open.
 - **Held requests are expensive on V3 today.** Each one stores its memo, so it costs the agent a storage deposit (11.56 POT with a 24-character memo, 19.24 POT with 50 characters on October 23). The current contract has no cleanup/refund path for resolved requests; a future design must validate refund attribution.
 - **The owner of an allowance is fixed.** There is no owner transfer; a new owner opens a new allowance.
-- **Native owner actions are only partly verified.** Compatible EVM wallets remain the owner-write path. From a `5…` account two writes are recorded: `revive.mapAccount()` and a zero-value `openAccount` ([PROOF.md](docs/PROOF.md#signed-writes-from-a-native-portaldot-account-2026-10-31-and-2026-11-02)). Non-zero value units, funding, freezing and approving from a native account are not verified, and there is no native signing implementation in the dashboard.
-- **Opening an allowance is expensive on V3.** Opening one from a native account held a storage deposit of 34.5735 POT (about 3.84 POT per stored word), on top of the held-request deposit above. Whether that deposit can be refunded was not tested.
+- **Native owner actions are only partly verified, and only by hand.** Compatible EVM wallets remain the owner-write path, and the dashboard has no native signing. From a `5…` account, six writes were signed manually in the Portaldot node console and recorded ([PROOF.md](docs/PROOF.md#signed-writes-from-a-native-portaldot-account-2026-10-31-to-2026-11-02)): `revive.mapAccount()`, `openAccount`, a non-zero-value `fund`, `withdraw`, and `setFrozen` true and false. Not verified from a native account: `approve`, `reject`, `rotateAgent`, `setRules` and `setTrusted`. An agent payment drawn from the native-owned allowance has not been demonstrated yet.
+- **Opening an allowance is expensive on V3.** Opening one from a native account held a storage deposit of 34.5735 POT (about 3.84 POT per stored word), on top of the held-request deposit above. Smaller deposits were measured as refundable: after a native `fund`, `withdraw` released 3.8415 POT, and `setFrozen` true then false held and released 3.8415 POT. Whether the 34.5735 POT opening deposit can be refunded was not tested, and the contract has no function to close an account.
 - **The dashboard's agent tester keeps a demo agent key in the browser.** It is for trying the rules. A real agent should hold its key itself, as the MCP server does.
 - **History depends on the public RPC.** The testnet prunes old receipts; Allowance proves its transactions through their events ([`evidence/onchain.json`](evidence/onchain.json)), and the dashboard's activity list shows what the RPC still returns.
 
@@ -238,7 +238,7 @@ Stated plainly, so nobody has to find them:
 
 ## Before the final (November 6)
 
-- **Native wallet follow-up, gated.** Read-only browser inspection is implemented; native owner writes are not promised for the final. First verify current metadata, a real authorized wallet, mapping, units, fees and execution evidence under separate authorization. The October 25 CLI observation is historical, not current signed-write proof.
+- **Native wallet follow-up, gated.** Read-only browser inspection is implemented; native owner writes from the dashboard are not promised for the final. Six manual native writes are recorded (see above); a dashboard signing path would still need verified wallet-extension compatibility, error handling and separate authorization. The October 25 CLI observation is historical.
 - **Allowances in Portaldot Assets tokens.** Validate each intended Assets precompile against the [supported-asset assumptions](SECURITY.md#supported-assets) before claiming compatibility; accepting an ERC-20-shaped interface is insufficient.
 - **Security:** [internal review](docs/SECURITY-REVIEW-PHASE2A.md), [completed internal static analysis](docs/SECURITY-STATIC-ANALYSIS-PHASE2B3.md) and [operational policy](SECURITY.md) documented. Independent professional review remains outstanding.
 
