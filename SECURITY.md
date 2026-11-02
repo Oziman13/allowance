@@ -85,6 +85,10 @@ Contract `preview` is only a hold-reason classifier. MCP preview adds checks; ev
 - Keep held-request memos short and free of secrets: they are public and retain storage deposits. Track request IDs and distinguish held, approved, reverted and uncertain outcomes. Never treat a preview as settled payment.
 - Verify actual net token receipt where required, retain transaction references and monitor token policy changes. Do not automatically resubmit an uncertain payment or try to bypass a hold by splitting it.
 
+## Production readiness
+
+Production activation is **NO-GO**. The MCP server's durable journal, reconciliation and operator-recovery modules are offline design and test code, not connected to the production payment path. Crash recovery, transaction idempotency, nonce safety and independently verified finality are therefore **not** guaranteed; after a crash or uncertain RPC outcome, check the original transaction yourself. An independent professional audit has not been done and is required before any recommendation for meaningful real funds.
+
 ## Reporting a security issue
 
 Use this repository's GitHub **Security → Report a vulnerability** option if private reporting is available. If it is unavailable, open a minimal issue asking the [maintainer](https://github.com/Oziman13) for a private reporting channel without publishing exploit details, secrets or information about exposed funds. No dedicated private email, response-time commitment or bounty program is asserted here.
