@@ -105,7 +105,10 @@ def chain_checks():
         # Contract events stay queryable, and only a successful transaction emits them, so each
         # transaction in PROOF.md (except the deployment, proven by the code above) is matched to its events.
         dep = (net.get("allowanceDeployTx") or "").lower()
-        hashes = [h.lower() for h in dict.fromkeys(re.findall(r"\b(0x[0-9a-fA-F]{64})\b", read("docs/PROOF.md"))) if h.lower() != dep]
+        # The section on native Portaldot signing lists Substrate extrinsic hashes, which are not EVM
+        # transactions and never appear in EVM logs; they are checked on the node, not here.
+        proof = read("docs/PROOF.md").split("## Signed writes from a native Portaldot account")[0]
+        hashes = [h.lower() for h in dict.fromkeys(re.findall(r"\b(0x[0-9a-fA-F]{64})\b", proof)) if h.lower() != dep]
         logs = rpc(url, "eth_getLogs", [{"address": address, "fromBlock": hex(net.get("allowanceFromBlock", 0)), "toBlock": "latest"}])
         seen = {l["transactionHash"].lower() for l in logs}
         found = [h for h in hashes if h in seen]
