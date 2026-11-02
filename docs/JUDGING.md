@@ -85,8 +85,8 @@ The historical [October 23 record](PROOF.md#a-real-ai-assistant-on-chain-2026-10
 
 | Item | Plan |
 |---|---|
-| Native signed owner operations | The deployed application uses the EVM owner-write path. Native browser inspection is implemented **read-only**, with no signing, mapping or WASM/multi-chain execution claim. Live/runtime/real-wallet gates remain unverified; writes require separate authorization. |
-| Demo video (≤ 3 minutes) | Historical [2:21 narrated check-in demo](https://youtu.be/fxO8grGr4PY), not a current live session. A final recording should show delivered EVM/simulation behavior and clearly labeled read-only native inspection; native owner writes are not promised. |
+| Native signed owner operations | The deployed dashboard uses the EVM owner-write path and has **no native signing**; its native inspection is **read-only**. Separately, six writes were signed by hand from a native `5…` account in the Portaldot node console and are [recorded on chain](PROOF.md#signed-writes-from-a-native-portaldot-account-2026-10-31-to-2026-11-02): map, open, fund (non-zero value), withdraw, freeze, unfreeze, including the measured storage deposits and refunds. Not verified from a native account: approve, reject, rotate, rules and trusted recipients, and a payment by the agent from the native-owned allowance. |
+| Demo video (≤ 3 minutes) | Historical [2:21 narrated check-in demo](https://youtu.be/fxO8grGr4PY), not a current live session. A final recording should show delivered EVM/simulation behavior and may show the recorded native console writes, labeled as manual; the dashboard does not sign natively. |
 | Pitch deck | Historical [October 24 deck](Allowance-pitch-deck.pdf), 11 pages. Its older counts/plans remain dated; use this page for current scope. |
 | MCP server published on npm | Not verified as published; remains a separate release task. |
 | Block explorer links | Done: every transaction in [PROOF.md](PROOF.md) links to its block on the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/). |
