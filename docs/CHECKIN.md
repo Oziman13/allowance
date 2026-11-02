@@ -30,7 +30,7 @@ The code on chain is byte-for-byte this repository's build. 14 more transactions
 - **October 19, from the dashboard (7):** an account opened, two instant payments, a payment held for being over the cap, its approval, a freeze and an unfreeze.
 - **October 23, with a real AI assistant (7):** Claude, connected through the Allowance MCP server and holding only the agent key, paid 0.3 POT at once, had a 2 POT request held for the owner, was approved, and stopped paying when the owner froze it. A second held request from the dashboard, its approval and the unfreeze complete the run.
 
-`python3 script/check_submission.py` re-checks all of it against the public RPC, read-only. Last run, October 24: **23 passed, 0 failed**; the deployed code matches the build, and 14 of 14 proof transactions are found through the events they emitted.
+`python3 script/check_submission.py` re-checks all of it against the public RPC, read-only. Last run at the time of this check-in, October 24: **23 passed, 0 failed** (an earlier version of the script; a later run, November 2, in a fresh clone without a Foundry build, gave 22 passed, 0 failed and 5 items left for the builder; see [JUDGING.md](JUDGING.md)); the deployed code matches the build, and 14 of 14 proof transactions are found through the events they emitted.
 
 ## Progress
 

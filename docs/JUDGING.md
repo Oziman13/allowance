@@ -2,13 +2,13 @@
 
 This page maps the Hacker House criteria to source, tests, dated transaction records and the delivered demo. It distinguishes local behavior, historical project records, roadmap items and unverified live conditions; current access may prevent an independent chain/video check.
 
-**Current scope, 30 October 2026:** 58 Foundry tests, 118 MCP tests and 24 native read-only unit tests. Existing CI runs Foundry/MCP; native and frontend/browser checks are local validation, not extra CI jobs. See [Phase 4B changes and verification](FINAL-EXPERIENCE-IMPLEMENTATION-PHASE4B.md).
+**Current scope, 2 November 2026:** 58 Foundry tests, 118 MCP tests and 24 native read-only unit tests (the Foundry and MCP counts are from the project's last full runs and CI; on 2 November the 24 native unit tests were re-run and passed, the others were not re-run in the review environment). Existing CI runs Foundry/MCP; native and frontend/browser checks are local validation, not extra CI jobs. See [Phase 4B changes and verification](FINAL-EXPERIENCE-IMPLEMENTATION-PHASE4B.md).
 
-**Historical October 24 artifacts:** [CHECKIN.md](CHECKIN.md), its [walkthrough/screenshots](CHECKIN-2026-10-24.md), the pitch deck and the recorded **2:21** video retain their original dates and measurements. They are not current live-site or native signed-write proof.
+**Historical October 24 artifacts:** [CHECKIN.md](CHECKIN.md), its [walkthrough/screenshots](CHECKIN-2026-10-24.md), the pitch deck and the recorded **2:21** video retain their original dates and measurements. They are not current live-site or native-account proof; for that, see [Native Portaldot owner → AI agent → verified payment](#native-portaldot-owner--ai-agent--verified-payment) below.
 
 **Security scope:** This testnet deployment is not independently audited or recommended for production funds. See the [security policy](../SECURITY.md) and [Phase 2A internal review](SECURITY-REVIEW-PHASE2A.md).
 
-**Quick links:** [Live dashboard](https://oziman13.github.io/allowance/) (press *Try Interactive Demo* if you don't have test POT) · [Contract on Portaldot V3 testnet](../README.md#live-on-portaldot-v3-testnet) · [All transactions](PROOF.md) · [Architecture](ARCHITECTURE.md) · [CI runs](https://github.com/Oziman13/allowance/actions)
+**Quick links:** [Live dashboard](https://oziman13.github.io/allowance/) (press *Try Interactive Demo* if you don't have test POT) · [Contract on Portaldot V3 testnet](../README.md#live-on-portaldot-v3-testnet) · [All transactions](PROOF.md) · [Native owner → AI agent payment](#native-portaldot-owner--ai-agent--verified-payment) · [Architecture](ARCHITECTURE.md) · [CI runs](https://github.com/Oziman13/allowance/actions)
 
 ## Two-minute jury route
 
@@ -25,9 +25,30 @@ This is a guided **local browser simulation**, independent of public RPCs. Navig
 
 Windows are fixed contract periods, not rolling or calendar days. Native gas refuels share autonomous caps; initial seeds, wallet spending and actual fees/deposits have separate boundaries. Invalid/frozen/expired calls can fail instead of becoming held requests. Recipient restrictions and execution still require a current contract preview.
 
-The historical [October 23 record](PROOF.md#a-real-ai-assistant-on-chain-2026-10-23) and [event export](../evidence/onchain.json) identify the contract, account, recipient, amount and hashes. The recorded recipient was the documented owner address; API/compute service delivery was not independently verified. The reported MCP refusal after freeze produced **no new transaction**. Native inspection is an optional **read-only** technical follow-up; native signed owner operations remain [NO-GO pending live verification](NATIVE-WALLET-VALIDATION-PHASE3B2.md).
+The historical [October 23 record](PROOF.md#a-real-ai-assistant-on-chain-2026-10-23) and [event export](../evidence/onchain.json) identify the contract, account, recipient, amount and hashes. The recorded recipient was the documented owner address; API/compute service delivery was not independently verified. The reported MCP refusal after freeze produced **no new transaction**. The dashboard's native inspection is **read-only**. Manual native-account transactions are demonstrated (next section); native signing integrated into the application is not, and remains [NO-GO](NATIVE-WALLET-VALIDATION-PHASE3B2.md) for this submission.
 
 ---
+
+## Native Portaldot owner → AI agent → verified payment
+
+The newest evidence, recorded on 2 November 2026 in [PROOF.md](PROOF.md#a-native-owned-allowance-paid-by-an-ai-agent-2026-11-02). One chain, two kinds of account:
+
+| Step | What happened | Where to see it |
+|---|---|---|
+| Native owner | A native Portaldot (`5…`) account opened allowance #1 and funded it with 0.1 POT, signing **by hand** in the Portaldot node console (blocks 282485 and 291982). | [Signed writes from a native account](PROOF.md#signed-writes-from-a-native-portaldot-account-2026-10-31-to-2026-11-02) |
+| AI agent | Claude, through the MCP server with an **EVM key**, read the allowance, previewed ("pays instantly") and paid 0.05 POT. | [Agent payment](PROOF.md#a-native-owned-allowance-paid-by-an-ai-agent-2026-11-02) |
+| Contract enforcement | The payment settled under the recorded rules (0.1 POT per payment, 0.5 POT per day). Transaction `0xe257c49b633924be013d5f54c48b3d39e97fbad4d73a5503b5c8e4981284d191`, block 292133, receipt status 1, one `Paid` event. | `python3 script/check_submission.py` finds the transaction through that event |
+
+What this shows: a native Portaldot account can own and fund an Allowance account, and an agent with a separate EVM key can spend from it only inside the contract's rules. Portaldot's runtime converted between the 14-decimal native unit and the 18-decimal EVM unit in both directions.
+
+What it does not show:
+
+- The recipient was the owner's own address; this is a payment-flow test, not independently verified delivery of a third-party service.
+- The owner's native signing was manual in the node console. The dashboard has no native signing, and the project's native integration is read-only.
+- `approve`, `reject`, `rotateAgent`, `setRules` and `setTrusted` were not tried from a native account.
+- It is separate from the browser simulation above (local, wallet-free) and from the historical October 19 and 23 testnet records. Live execution on the testnet depends on current network availability.
+
+Storage deposits, as measured: each newly stored word held 3.8415 POT and was released when the word returned to zero (a withdrawal before any payment, and unfreezing). After the first payment, withdrawing the remainder released nothing, because `balance` and `spentInPeriod` share one storage word. That explanation follows from the contract's storage layout and the recorded events; the storage word was not inspected directly. A v2 layout that separates them is a roadmap idea, not implemented.
 
 ## Technical Feasibility (30%)
 
@@ -36,7 +57,7 @@ The historical [October 23 record](PROOF.md#a-real-ai-assistant-on-chain-2026-10
 | What the judges look for | Evidence |
 |---|---|
 | Deployed on Portaldot testnet | Recorded contract `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f`, chain 420420777, deployment block 102688. Bytecode matched the repository build at evidence capture; this is not a fresh live-availability attestation. |
-| Verifiable on-chain interactions | [15 recorded transactions](PROOF.md): deployment plus 14 event-bearing transactions from October 19/23. The latter include Claude/MCP-attributed agent steps, owner interventions and a separate dashboard request. The checked-in export is dated; current RPC/explorer access may be unavailable. Verification instructions and full hashes remain available in the repository. |
+| Verifiable on-chain interactions | [16 recorded EVM transactions](PROOF.md): deployment, 14 event-bearing transactions from October 19/23 and the agent payment of 2 November, plus eight manually signed native-account extrinsics from October 31 to 2 November. The latter include Claude/MCP-attributed agent steps, owner interventions and a separate dashboard request. The checked-in export is dated; current RPC/explorer access may be unavailable. Verification instructions and full hashes remain available in the repository. |
 | Core functions complete | Per-payment cap, per-period cap (any period of 1 hour or more), trusted recipients, expiry, freeze, key rotation, held requests with approve / approve-and-trust / reject / cancel, gas refuels from the same budget, native POT and ERC-20 budgets. [Contract](../src/Allowance.sol), [function table](../README.md#contract). |
 | Code completeness and quality | **58 Foundry tests:** 27 core, 19 Phase 2A, 10 token-compatibility and 2 stateful tests, including 1,000-run fuzz and invariants. **118 MCP tests** cover local-chain, simulated receipts and protocol behavior. These two suites run in CI. **24 native read-only unit tests**, display regressions and browser checks are local validation. Internal [static analysis](SECURITY-STATIC-ANALYSIS-PHASE2B3.md) includes documented findings and limitations; it is not an independent audit. |
 | System architecture | [ARCHITECTURE.md](ARCHITECTURE.md): component and sequence diagrams, account model, security properties. |
@@ -53,7 +74,7 @@ The historical [October 23 record](PROOF.md#a-real-ai-assistant-on-chain-2026-10
 | Application scenario | "Ask, don't fail": a payment outside the rules is held with the agent's memo and the reason, and the owner decides. The agent stays useful without being trusted with everything. |
 | Product model | One contract serves any number of owners and agents. Owners get a dashboard; agents get five MCP tools any assistant can use (Claude, Cursor, …). |
 | Use of Portaldot V3 EVM compatibility | Plain Solidity compiled with Foundry runs on V3's contract runtime (pallet-revive) unchanged. We measured what that costs and how to make it fit, and published the method ([guide](SOLIDITY-ON-PORTALDOT-V3.md)). |
-| Designed for Portaldot specifically | Native POT refuel withdrawals share autonomous caps; seeds and wallet fees/deposits have separate boundaries. Recorded October 19/23 instant payments cost about 0.03 POT by updating existing storage. These are historical testnet measurements, not fee guarantees. |
+| Designed for Portaldot specifically | Native POT refuel withdrawals share autonomous caps; seeds and wallet fees/deposits have separate boundaries. Recorded October 19/23 instant payments cost about 0.03 POT by updating existing storage. These are historical testnet measurements, not fee guarantees. A native `5…` account can own an allowance that an EVM-key agent spends from, with measured storage deposits and refunds ([record](#native-portaldot-owner--ai-agent--verified-payment)). |
 | Trying it is easy | The wallet-free browser EVM runs the real bytecode for the core native-POT lifecycle. A navigation-only guide follows your own confirmed payment/request, owner approval and freeze; recorded testnet proof stays accessible. This does not expose every contract feature or constitute a live Claude session. |
 
 ## Ecosystem Contribution (20%)
