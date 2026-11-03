@@ -12,7 +12,7 @@ Programmable spending rules for AI agents, bots and automated payments on **Port
 
 > Built for the [Portaldot Hacker House 2026](https://dorahacks.io/hackathon/portaldot-hacker-house-2026/detail), Track 4 (Ecosystem DApps).
 >
-> **Recorded Portaldot V3 testnet deployment** at `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` ([proof](#live-on-portaldot-v3-testnet)). **[Open the dashboard](https://oziman13.github.io/allowance/)** and press *Try Interactive Demo* for the wallet-free local flow. **[Recorded 2:21 check-in video](https://youtu.be/fxO8grGr4PY)** is a historical artifact, not a live session.
+> **Recorded Portaldot V3 testnet deployment** at `0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f` ([proof](#live-on-portaldot-v3-testnet)). **[Open the dashboard](https://oziman13.github.io/allowance/)** and press *Try Interactive Demo* for the wallet-free local flow. **[Demo video, 2:56](https://youtu.be/cwEDo_tk_7E)** (unlisted, synthetic narration) shows the recorded flows; it is not a live session. The earlier [2:21 check-in video](https://youtu.be/fxO8grGr4PY) is a historical artifact.
 >
 > **Judges:** [the current two-minute route and judging evidence](docs/JUDGING.md). The [October 24 check-in](docs/CHECKIN.md), its [walkthrough/screenshots](docs/CHECKIN-2026-10-24.md) and pitch deck remain dated historical records.
 
