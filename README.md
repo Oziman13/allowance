@@ -83,6 +83,21 @@ Agents and bots make many small payments, so the product creates the kind of rea
 - **Subscriptions and automated payments**: "at most Z per configured fixed window to this service without approval"
 - **Team spending**: a member spends freely up to a limit; anything larger goes to the treasury owner for approval
 
+## Architecture
+
+One shared contract on Portaldot V3 holds the rules and the budgets. Owners, dashboards and AI assistants reach it through different paths, and only the contract decides what is paid, held or blocked.
+
+```mermaid
+flowchart LR
+  EO["EVM owner<br/>(wallet signature)"] --> D["Owner dashboard<br/>(EVM writes)"] --> C
+  NO["Native 5... owner<br/>(node console, manual)"] --> C
+  AI["AI assistant"] --> M["MCP server<br/>(agent EVM key only)"] --> C
+  C["Allowance contract<br/>Portaldot V3, pallet-revive, chain 420420777<br/>on-chain policy checks"] --> R["Recipient"]
+  S["Browser simulation<br/>same bytecode, no public-chain tx"] -.-> D
+```
+
+The dashboard has no native signed writes; the native owner path above is manual (see [PROOF.md](docs/PROOF.md#signed-writes-from-a-native-portaldot-account-2026-10-31-to-2026-11-02)). More diagrams, owner and agent trust boundaries: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ## Contract
 
 `src/Allowance.sol`, one contract for any number of owners and accounts.
@@ -181,6 +196,8 @@ Recorded deployment on 2026-10-19 from the dashboard's *Deploy Allowance* button
 | Deployer (owner) | `0x1807dbE0e8d790e63c4B2a90b9A108AfA14F8547` |
 | Agent of account #0 | `0x9C0e1F786b38923519dF2CeC05464f95ccD29009` |
 
+Full deployment transaction hash: `0xb575397eea5c93908c43f13e4e9aff874f4777e0b4ab61164b36005ea0bcacd5` (block 102688).
+
 The core lifecycle, on chain. Block numbers link to the [Portaldot V3 testnet explorer](https://scanner-testnet-v3.portaldot.dev/) (it indexes the Substrate side, so search by block number). Full hashes are listed in [docs/PROOF.md](docs/PROOF.md), with a one-line way to check them against the public RPC. For the newest evidence, a native Portaldot account owning an allowance that an AI agent then pays from, see [Native owner → AI agent → verified payment](docs/JUDGING.md#native-portaldot-owner--ai-agent--verified-payment). [`evidence/onchain.json`](evidence/onchain.json) is a **historical snapshot**: the contract's decoded events up to block 206637 (21 events), captured on October 26, 2026. It is not fresh live verification and does not include the November 2 agent payment from the native-owned allowance (block 292133, `Paid` event), which is documented in [docs/PROOF.md](docs/PROOF.md#a-native-owned-allowance-paid-by-an-ai-agent-2026-11-02) and found by the submission check against the public RPC. Browser simulation results are local runs, not public-chain transactions. A new export would include later events (`node script/export-evidence.mjs`). `python3 script/check_submission.py` checks the deployment, the transactions and the submission rules in one go (October 24: 23 passed, 0 failed, from an earlier version of the script; November 2, fresh clone without a Foundry build: 22 passed, 0 failed, 5 left to do by hand: public repository, deployed-code comparison that needs `forge build`, demo video, pitch deck, DoraHacks form).
 
 | Block | What happened | Signed by | Tx | Cost |
@@ -197,6 +214,34 @@ The core lifecycle, on chain. Block numbers link to the [Portaldot V3 testnet ex
 **With a real AI assistant (Oct 23):** Claude, connected through the MCP server, paid 0.3 POT at once ([blocks 159822–160258](docs/PROOF.md#a-real-ai-assistant-on-chain-2026-10-23)), had a 2 POT request held for approval instead of splitting it, and stopped when the owner froze the agent.
 
 These October 19 costs were mostly storage deposits. In that recording, freeze cost 3.86 POT and unfreeze freed a deposit that covered the fee. Costs/refund behavior depend on runtime and state, not a fixed price guarantee. The recorded 5-POT-per-day policy means a fixed 24-hour window, not a calendar day. Details: [Getting started with Solidity on Portaldot V3](docs/SOLIDITY-ON-PORTALDOT-V3.md).
+
+## Verify it yourself (5 minutes, no key, no wallet)
+
+These read-only calls go to the public Portaldot V3 testnet node. They were run on 2026-11-04 and returned the values shown. The public node may prune old receipts; if one is missing, that is not proof of failure, and [docs/PROOF.md](docs/PROOF.md) lists a bounded `eth_getLogs` query instead.
+
+```bash
+RPC=https://test-evm-rpc-v3.portaldot.dev
+call() { curl -s -X POST $RPC -H 'content-type: application/json' -d "$1"; }
+
+# 1. Chain ID. Expected result: "0x190f1ca9" (= 420420777)
+call '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}'
+
+# 2. Deployment receipt. Expected: status "0x1", blockNumber "0x19120" (= 102688),
+#    contractAddress "0xdf8567f1fa9f6afbe1c8f99453544c35009ac07f"
+call '{"jsonrpc":"2.0","id":1,"method":"eth_getTransactionReceipt","params":["0xb575397eea5c93908c43f13e4e9aff874f4777e0b4ab61164b36005ea0bcacd5"]}'
+
+# 3. Contract code is on chain. Expected: a long hex string starting 0x6080604052 (about 9,757 bytes)
+call '{"jsonrpc":"2.0","id":1,"method":"eth_getCode","params":["0xdF8567f1fA9F6aFBe1c8f99453544C35009ac07f","latest"]}'
+
+# 4. Agent payment from the native-owned allowance (2026-11-02). Expected: status "0x1",
+#    blockNumber "0x47525" (= 292133), from the agent 0x9c0e1f78...9009, to the contract, and one log whose
+#    address is the contract and whose first topic is
+#    0x2a4f88a82cd61f3858f6f462f1fd14d2dd362d9a340ce378e0091251ccd22d12 = keccak256("Paid(uint256,address,uint256,string)").
+#    The log data holds the amount 0xb1a2bc2ec50000 (= 0.05 POT in 18-decimal units) and the memo "native owner test".
+call '{"jsonrpc":"2.0","id":1,"method":"eth_getTransactionReceipt","params":["0xe257c49b633924be013d5f54c48b3d39e97fbad4d73a5503b5c8e4981284d191"]}'
+```
+
+Check 4 proves the payment flow. The recipient was the owner's own address, so it does not show delivery of a commercial service. To confirm the deployed bytecode matches this repository, build it (`forge build && python3 build.py`) and compare, or run `python3 script/check_submission.py`.
 
 ## Status
 
